@@ -1,5 +1,5 @@
-import { SiteFooter } from "@/components/shared/Footer"
-import { SiteHeader } from "@/components/shared/Navbar"
+import { Footer } from "@/components/shared/Footer"
+import { Navbar } from "@/components/shared/Navbar"
 
 export default function PublicLayout({
   children,
@@ -8,9 +8,9 @@ export default function PublicLayout({
 }) {
   return (
     <div className="flex min-h-svh flex-col">
-      <SiteHeader />
+      <Navbar />
       <main className="flex-1">{children}</main>
-      <SiteFooter />
+      <Footer />
     </div>
   )
 }
