@@ -1,9 +1,6 @@
-import { Suspense } from "react"
-import Link from "next/link"
 import type { Metadata } from "next"
+import { Hero } from "./_components/home/Hero"
 
-import { buttonVariants } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
 export const metadata: Metadata = {
   title: "GearUp — Rent sports & outdoor gear instantly",
   description:
@@ -11,5 +8,9 @@ export const metadata: Metadata = {
 }
 
 export default async function HomePage() {
-  return <>Hero</>
+  return (
+    <>
+      <Hero />
+    </>
+  )
 }
