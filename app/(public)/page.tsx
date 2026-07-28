@@ -9,6 +9,7 @@ import { getGearList } from "./_actions/getGear"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
+import { HowItWorks } from "./_components/home/HowItWorks"
 
 export const metadata: Metadata = {
   title: "GearUp — Rent sports & outdoor gear instantly",
@@ -49,6 +50,8 @@ export default async function HomePage() {
           </Link>
         </div>
       </div>
+
+      <HowItWorks />
     </>
   )
 }
