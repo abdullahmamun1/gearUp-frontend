@@ -5,7 +5,7 @@ import { buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 
-export function Hero() {
+export function Hero({ gearCount }: { gearCount: number }) {
   return (
     <section className="relative overflow-hidden border-b">
       <div
@@ -16,7 +16,9 @@ export function Hero() {
       <div className="relative mx-auto max-w-6xl px-4 py-20 text-center sm:py-28">
         <p className="mb-4 inline-flex items-center gap-2 rounded-full border bg-card px-3 py-1 text-xs text-muted-foreground">
           <span className="size-1.5 rounded-full bg-primary" aria-hidden />
-          New gear added weekly
+          {gearCount > 0
+            ? `${gearCount} items ready to rent`
+            : "New gear added weekly"}
         </p>
 
         <h1 className="font-heading text-4xl font-bold tracking-tight text-balance sm:text-6xl">
