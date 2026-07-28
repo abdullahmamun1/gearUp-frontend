@@ -98,3 +98,16 @@ export interface SidebarItem {
   href: string
   icon: LucideIcon
 }
+
+export type GearQuery = {
+  searchTerm?: string
+  category?: string
+  brand?: string
+  minPrice?: string
+  maxPrice?: string
+  isAvailable?: string
+  sortBy?: string
+  sortOrder?: "asc" | "desc"
+  page?: string
+  limit?: string
+}
