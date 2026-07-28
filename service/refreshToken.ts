@@ -1,20 +1,14 @@
-"use server"
-
-import { cookies } from "next/headers"
 import type { ApiResponse } from "@/types"
 
-export async function getNewAccessToken(): Promise<
-  ApiResponse<{ accessToken: string }>
-> {
-  const cookieStore = await cookies()
-  const refreshToken = cookieStore.get("refreshToken")?.value
-
+export async function getNewAccessToken(
+  refreshToken: string
+): Promise<ApiResponse<{ accessToken: string } | null>> {
   if (!refreshToken) {
     return {
       success: false,
       statusCode: 401,
       message: "Refresh token not found.",
-      data: { accessToken: "" },
+      data: null,
     }
   }
 
@@ -27,13 +21,32 @@ export async function getNewAccessToken(): Promise<
         cache: "no-store",
       }
     )
-    return (await res.json()) as ApiResponse<{ accessToken: string }>
+
+    const body = (await res.json()) as Partial<
+      ApiResponse<{ accessToken: string }>
+    >
+
+    if (!res.ok || !body.data?.accessToken) {
+      return {
+        success: false,
+        statusCode: body.statusCode ?? res.status,
+        message: body.message ?? "Session expired. Please log in again.",
+        data: null,
+      }
+    }
+
+    return {
+      success: true,
+      statusCode: body.statusCode ?? res.status,
+      message: body.message ?? "",
+      data: body.data,
+    }
   } catch {
     return {
       success: false,
       statusCode: 503,
       message: "Could not reach the server.",
-      data: { accessToken: "" },
+      data: null,
     }
   }
 }

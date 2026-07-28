@@ -1,5 +1,6 @@
 import { cookies } from "next/headers"
 
+import { ACCESS_TOKEN_COOKIE } from "@/lib/cookies"
 import type { ApiResponse } from "@/types"
 
 const BASE_URL = process.env.BACKEND_API_URL
@@ -25,9 +26,9 @@ export async function apiFetch<T>(
 
   if (auth) {
     const cookieStore = await cookies()
-    const accessToken = cookieStore.get("accessToken")?.value
+    const accessToken = cookieStore.get(ACCESS_TOKEN_COOKIE)?.value
     if (accessToken) {
-      headers.Cookie = `accessToken=${accessToken}`
+      headers.Cookie = `${ACCESS_TOKEN_COOKIE}=${accessToken}`
     }
   }
 

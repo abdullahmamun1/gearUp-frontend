@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react"
 
 export type Role = "CUSTOMER" | "PROVIDER" | "ADMIN"
+export type RegisterRole = Exclude<Role, "ADMIN">
 export type UserStatus = "ACTIVE" | "SUSPENDED"
 export type PaymentStatus = "PENDING" | "COMPLETED" | "FAILED"
 export type PaymentGateway = "STRIPE"
@@ -20,15 +21,22 @@ export interface Meta {
   total: number
 }
 
-export interface User {
-  id: string
+export interface LoginPayload {
+  email: string
+  password: string
+}
+
+export interface RegisterPayload {
   name: string
   email: string
-  role: Role
-  status: UserStatus
+  password: string
   phone?: string
-  createdAt: string
-  updatedAt: string
+  role: RegisterRole
+}
+
+export interface AuthTokens {
+  accessToken: string
+  refreshToken: string
 }
 
 export interface JwtUser {
@@ -38,6 +46,16 @@ export interface JwtUser {
   role: Role
   iat: number
   exp: number
+}
+export interface User {
+  id: string
+  name: string
+  email: string
+  role: Role
+  status: UserStatus
+  phone?: string
+  createdAt: string
+  updatedAt: string
 }
 export interface Category {
   id: string
