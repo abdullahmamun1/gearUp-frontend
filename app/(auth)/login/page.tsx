@@ -1,16 +1,9 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import {
-  CalendarRange,
-  Lock,
-  Mail,
-  PackageCheck,
-  ShieldCheck,
-} from "lucide-react"
+import { CalendarRange, PackageCheck, ShieldCheck } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { LoginForm } from "../_components/LoginForm"
+import { safeRedirect } from "@/lib/utils"
 
 export const metadata: Metadata = {
   title: "Log in · GearUp",
@@ -36,7 +29,12 @@ const PERKS = [
   },
 ]
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ redirect?: string }>
+}) {
+  const { redirect } = await searchParams
   return (
     <section className="relative overflow-hidden">
       <div
@@ -94,59 +92,7 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <form className="mt-8 grid gap-5">
-            <div className="grid gap-2">
-              <Label htmlFor="email" className="text-sm">
-                Email
-              </Label>
-              <div className="relative">
-                <Mail
-                  className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
-                  aria-hidden
-                />
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  placeholder="you@example.com"
-                  className="h-10 pl-9 text-sm md:text-sm"
-                />
-              </div>
-            </div>
-
-            <div className="grid gap-2">
-              <div className="flex items-center justify-between gap-2">
-                <Label htmlFor="password" className="text-sm">
-                  Password
-                </Label>
-                <Link
-                  href="/forgot-password"
-                  className="text-xs text-muted-foreground hover:text-foreground hover:underline"
-                >
-                  Forgot password?
-                </Link>
-              </div>
-              <div className="relative">
-                <Lock
-                  className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
-                  aria-hidden
-                />
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  placeholder="••••••••"
-                  className="h-10 pl-9 text-sm md:text-sm"
-                />
-              </div>
-            </div>
-
-            <Button type="submit" size="lg" className="h-10 text-sm">
-              Log in
-            </Button>
-          </form>
+          <LoginForm redirectTo={safeRedirect(redirect)} />
 
           <p className="mt-6 text-center text-xs text-muted-foreground">
             By logging in you agree to our Terms and Privacy Policy.
