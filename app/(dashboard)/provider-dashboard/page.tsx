@@ -18,7 +18,6 @@ export default async function ProviderOverviewPage() {
   const session = await getSession()
   const [res, gearRes] = await Promise.all([
     getProviderOrders(),
-    // limit=1 — only the total is needed here, not the rows.
     getProviderGear({ limit: "1" }),
   ])
   const orders = res.data?.data ?? []
