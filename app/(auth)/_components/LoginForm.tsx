@@ -1,6 +1,5 @@
 "use client"
 
-import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Lock, Mail } from "lucide-react"
 import { useForm } from "react-hook-form"
@@ -11,9 +10,7 @@ import { Button } from "@/components/ui/button"
 import { loginSchema, type LoginInput } from "@/lib/schemas/auth"
 import { loginUser } from "@/service/auth"
 
-export function LoginForm({ redirectTo }: { redirectTo: string }) {
-  const router = useRouter()
-
+export function LoginForm({ redirectTo }: { redirectTo?: string }) {
   const {
     register,
     handleSubmit,
@@ -24,19 +21,12 @@ export function LoginForm({ redirectTo }: { redirectTo: string }) {
     defaultValues: { email: "", password: "" },
   })
 
+  // On success the action redirects, so nothing after this runs.
   async function onSubmit(values: LoginInput) {
-    const res = await loginUser(values)
+    const res = await loginUser(values, redirectTo)
 
-    if (!res.success) {
-      setError("root", { message: res.message })
-      toast.error(res.message)
-      return
-    }
-
-    toast.success("Logged in — welcome back.")
-    router.replace(redirectTo)
-    // The session cookie is new; refresh so server components re-render with it.
-    router.refresh()
+    setError("root", { message: res.message })
+    toast.error(res.message)
   }
 
   return (

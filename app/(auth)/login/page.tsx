@@ -3,7 +3,6 @@ import Link from "next/link"
 import { CalendarRange, PackageCheck, ShieldCheck } from "lucide-react"
 
 import { LoginForm } from "../_components/LoginForm"
-import { safeRedirect } from "@/lib/utils"
 
 export const metadata: Metadata = {
   title: "Log in · GearUp",
@@ -32,9 +31,9 @@ const PERKS = [
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ redirect?: string }>
+  searchParams: Promise<{ redirectTo?: string }>
 }) {
-  const { redirect } = await searchParams
+  const { redirectTo } = await searchParams
   return (
     <section className="relative overflow-hidden">
       <div
@@ -91,8 +90,7 @@ export default async function LoginPage({
               </Link>
             </p>
           </div>
-
-          <LoginForm redirectTo={safeRedirect(redirect)} />
+          <LoginForm redirectTo={redirectTo} />
 
           <p className="mt-6 text-center text-xs text-muted-foreground">
             By logging in you agree to our Terms and Privacy Policy.

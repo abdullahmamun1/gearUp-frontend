@@ -13,10 +13,14 @@ import type { Role, SidebarItem } from "@/types"
 
 export const SIDEBAR_ITEMS: Record<Role, SidebarItem[]> = {
   CUSTOMER: [
-    { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
-    { label: "My rentals", href: "/dashboard/orders", icon: PackageCheck },
-    { label: "Payments", href: "/dashboard/payments", icon: CreditCard },
-    { label: "Profile", href: "/dashboard/profile", icon: UserRound },
+    { label: "Overview", href: "/customer-dashboard", icon: LayoutDashboard },
+    {
+      label: "My rentals",
+      href: "/customer-dashboard/orders",
+      icon: PackageCheck,
+    },
+    { label: "Payments", href: "/customer-dashboard/payments", icon: CreditCard },
+    { label: "Profile", href: "/customer-dashboard/profile", icon: UserRound },
   ],
   PROVIDER: [
     { label: "Overview", href: "/provider-dashboard", icon: LayoutDashboard },

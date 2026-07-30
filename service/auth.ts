@@ -4,6 +4,9 @@ import { redirect } from "next/navigation"
 
 import { apiFetch } from "@/lib/api"
 import { clearAuthCookies, setAuthCookies } from "@/lib/cookies"
+import { verifyAccessToken } from "@/lib/jwt"
+import { DASHBOARD_HOME } from "@/lib/routes"
+import { safeRedirect } from "@/lib/utils"
 import type {
   ApiResponse,
   AuthTokens,
@@ -29,7 +32,8 @@ export async function registerUser(
 }
 
 export async function loginUser(
-  payload: LoginPayload
+  payload: LoginPayload,
+  redirectTo?: string
 ): Promise<ApiResponse<AuthTokens | null>> {
   const res = await apiFetch<AuthTokens>("/api/auth/login", {
     method: "POST",
@@ -42,7 +46,11 @@ export async function loginUser(
   }
 
   await setAuthCookies(res.data)
-  return res
+
+  const user = verifyAccessToken(res.data.accessToken)
+  const home = user ? DASHBOARD_HOME[user.role] : "/"
+
+  redirect(safeRedirect(redirectTo, home))
 }
 
 export async function logout() {

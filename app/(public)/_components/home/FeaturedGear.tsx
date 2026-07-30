@@ -1,11 +1,12 @@
 import Link from "next/link"
-import { ArrowRight, PackageOpen } from "lucide-react"
+import { ArrowRight } from "lucide-react"
 
 import { getFeaturedGear } from "@/app/(public)/_actions/getGear"
 import { GearCard } from "@/components/shared/GearCard"
 
 export async function FeaturedGear() {
   const res = await getFeaturedGear(8)
+  const items = res.data?.data ?? []
 
   return (
     <section className="mx-auto max-w-6xl px-4 pt-14">
@@ -29,18 +30,17 @@ export async function FeaturedGear() {
 
       <div className="mt-6">
         {!res.success ? (
-          <EmptyState
-            title="Couldn't load gear"
-            body={res.message || "Please try again in a moment."}
-          />
-        ) : res.data?.data?.length === 0 ? (
-          <EmptyState
-            title="No gear listed yet"
-            body="Check back soon — providers are adding kit all the time."
-          />
+          <p className="text-sm text-muted-foreground">
+            {res.message || "Couldn't load gear. Please try again."}
+          </p>
+        ) : items.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            No gear listed yet. Check back soon — providers are adding kit all
+            the time.
+          </p>
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {res.data?.data?.map((gear) => (
+            {items.map((gear) => (
               <GearCard key={gear.id} gear={gear} />
             ))}
           </div>
@@ -50,16 +50,3 @@ export async function FeaturedGear() {
   )
 }
 
-function EmptyState({ title, body }: { title: string; body: string }) {
-  return (
-    <div className="rounded-xl border border-dashed py-16 text-center">
-      <PackageOpen
-        className="mx-auto size-8 text-muted-foreground"
-        strokeWidth={1.5}
-        aria-hidden
-      />
-      <p className="mt-3 font-heading font-semibold">{title}</p>
-      <p className="mt-1 text-sm text-muted-foreground">{body}</p>
-    </div>
-  )
-}

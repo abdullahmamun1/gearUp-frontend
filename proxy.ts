@@ -1,4 +1,7 @@
-import { NextResponse, type NextRequest } from "next/server"
+import { NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
+import { cookies } from "next/headers"
+import type { JwtPayload } from "jsonwebtoken"
 
 import {
   ACCESS_TOKEN_COOKIE,
@@ -6,96 +9,121 @@ import {
   AUTH_COOKIE_OPTIONS,
   REFRESH_TOKEN_COOKIE,
 } from "@/lib/cookies"
-import { verifyAccessToken } from "@/lib/jwt"
-import { AUTH_ROUTES, DASHBOARD_HOME, dashboardOwner } from "@/lib/routes"
+import { jwtUtils } from "@/lib/jwt"
+import { DASHBOARD_HOME } from "@/lib/routes"
 import { getNewAccessToken } from "@/service/refreshToken"
-import type { JwtUser } from "@/types"
+import type { Role } from "@/types"
 
-type Resolved = {
-  user: JwtUser | null
-  freshToken?: string
-  rejected?: boolean
-}
+const AUTH_ROUTES = ["/login", "/register"]
+const PUBLIC_ROUTES = ["/", "/gear"]
 
 export async function proxy(request: NextRequest) {
-  const { pathname, search } = request.nextUrl
-  const owner = dashboardOwner(pathname)
-  const isAuthRoute = AUTH_ROUTES.includes(pathname)
+  const pathname = request.nextUrl.pathname
+  const cookieStore = await cookies()
 
-  if (!owner && !isAuthRoute) return NextResponse.next()
-
-  const { user, freshToken, rejected } = await resolveUser(request)
-
-  if (isAuthRoute) {
-    return user
-      ? persist(redirectTo(DASHBOARD_HOME[user.role], request), freshToken)
-      : proceed(request, freshToken)
-  }
-
-  if (!user) {
-    const login = new URL("/login", request.url)
-    login.searchParams.set("redirect", `${pathname}${search}`)
-    const response = NextResponse.redirect(login)
-    return rejected ? clear(response) : response
-  }
-
-  if (user.role !== owner) {
-    return persist(redirectTo(DASHBOARD_HOME[user.role], request), freshToken)
-  }
-
-  return proceed(request, freshToken)
-}
-
-function proceed(request: NextRequest, freshToken?: string) {
-  if (!freshToken) return NextResponse.next()
-
-  request.cookies.set(ACCESS_TOKEN_COOKIE, freshToken)
-
-  return persist(
-    NextResponse.next({ request: { headers: request.headers } }),
-    freshToken
-  )
-}
-
-async function resolveUser(request: NextRequest): Promise<Resolved> {
-  const accessToken = request.cookies.get(ACCESS_TOKEN_COOKIE)?.value
-  const user = accessToken ? verifyAccessToken(accessToken) : null
-  if (user) return { user }
-
+  let accessToken = request.cookies.get(ACCESS_TOKEN_COOKIE)?.value
   const refreshToken = request.cookies.get(REFRESH_TOKEN_COOKIE)?.value
-  if (!refreshToken) return { user: null, rejected: true }
+  let refreshed = false
 
-  const res = await getNewAccessToken(refreshToken)
-  if (!res.success || !res.data) {
-    return { user: null, rejected: res.statusCode < 500 }
+  let decodedAccessToken = accessToken
+    ? jwtUtils.verifyToken(accessToken, process.env.JWT_ACCESS_SECRET as string)
+    : null
+
+  const decodedRefreshToken = refreshToken
+    ? jwtUtils.verifyToken(
+        refreshToken,
+        process.env.JWT_REFRESH_SECRET as string
+      )
+    : null
+
+  if (!decodedAccessToken?.success && decodedRefreshToken?.success) {
+    // Access token is expired but the refresh token is valid — mint a new one.
+    const result = await getNewAccessToken(refreshToken as string)
+
+    if (result.success && result.data) {
+      const newAccessToken = result.data.accessToken
+
+      // Shared with the login path so the refreshed cookie keeps `secure` in
+      // production — spelling the options out here silently drops it.
+      cookieStore.set(ACCESS_TOKEN_COOKIE, newAccessToken, {
+        ...AUTH_COOKIE_OPTIONS,
+        maxAge: ACCESS_TOKEN_MAX_AGE,
+      })
+
+      accessToken = newAccessToken
+      decodedAccessToken = jwtUtils.verifyToken(
+        accessToken,
+        process.env.JWT_ACCESS_SECRET as string
+      )
+
+      // cookieStore.set only reaches the *browser*. Without this the current
+      // render still reads the expired token and renders logged-out.
+      request.cookies.set(ACCESS_TOKEN_COOKIE, newAccessToken)
+      refreshed = true
+    }
   }
 
-  const refreshed = verifyAccessToken(res.data.accessToken)
-  if (!refreshed) return { user: null }
+  let userRole: Role | null = null
 
-  return { user: refreshed, freshToken: res.data.accessToken }
-}
-
-function redirectTo(path: string, request: NextRequest) {
-  return NextResponse.redirect(new URL(path, request.url))
-}
-
-function persist(response: NextResponse, freshToken?: string) {
-  if (freshToken) {
-    response.cookies.set(ACCESS_TOKEN_COOKIE, freshToken, {
-      ...AUTH_COOKIE_OPTIONS,
-      maxAge: ACCESS_TOKEN_MAX_AGE,
-    })
+  if (accessToken && !decodedAccessToken?.success) {
+    cookieStore.delete(ACCESS_TOKEN_COOKIE)
   }
-  return response
-}
 
-function clear(response: NextResponse) {
-  response.cookies.delete(ACCESS_TOKEN_COOKIE)
-  response.cookies.delete(REFRESH_TOKEN_COOKIE)
-  return response
+  if (decodedAccessToken?.success && decodedAccessToken.data) {
+    userRole = (decodedAccessToken.data as JwtPayload).role as Role
+  }
+
+  // Gate on whether the token *verifies*, not on whether the cookie exists. An
+  // expired cookie is still a non-empty string, and gating on that locks the
+  // user out of /login — the one page they need to recover.
+  const isAuthenticated = Boolean(decodedAccessToken?.success)
+
+  // Logged in and heading for login/register — send them to their dashboard.
+  if (isAuthenticated && AUTH_ROUTES.includes(pathname)) {
+    const home = userRole ? DASHBOARD_HOME[userRole] : "/"
+    return NextResponse.redirect(new URL(home ?? "/", request.url))
+  }
+
+  const isPublicRoute = PUBLIC_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(route + "/")
+  )
+
+  const isAuthRoute = AUTH_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(route + "/")
+  )
+
+  // Authenticated pages protection
+  if (!isAuthenticated && !isPublicRoute && !isAuthRoute) {
+    const loginUrl = new URL("/login", request.url)
+    loginUrl.searchParams.set("redirectTo", pathname)
+    return NextResponse.redirect(loginUrl)
+  }
+
+  // Authorization: role based access control
+  if (
+    pathname.startsWith("/customer-dashboard") &&
+    userRole !== "CUSTOMER"
+  ) {
+    return NextResponse.redirect(new URL("/not-found", request.url))
+  } else if (
+    pathname.startsWith("/provider-dashboard") &&
+    userRole !== "PROVIDER"
+  ) {
+    return NextResponse.redirect(new URL("/not-found", request.url))
+  } else if (
+    pathname.startsWith("/admin-dashboard") &&
+    userRole !== "ADMIN"
+  ) {
+    return NextResponse.redirect(new URL("/not-found", request.url))
+  }
+
+  return refreshed
+    ? NextResponse.next({ request: { headers: request.headers } })
+    : NextResponse.next()
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: [
+    "/((?!api|_next/static|favicon.ico|_next/image|.*\\.png$).*)",
+  ],
 }
