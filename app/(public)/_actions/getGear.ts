@@ -25,6 +25,14 @@ export async function getGearList(query: GearQuery = {}) {
   )
 }
 
+export async function getGearById(id: string) {
+  return apiFetch<GearItem>(`/api/gear/${id}`, {
+    auth: false,
+    tags: ["gear", `gear:${id}`],
+    revalidate: 60 * 5,
+  })
+}
+
 export async function getFeaturedGear(limit = 8) {
   return getGearList({
     limit: String(limit),
