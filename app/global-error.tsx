@@ -31,7 +31,7 @@ export default function GlobalError({
             >
               Try again
             </button>
-            {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- hard navigation on purpose: the root layout is what failed, so a client-side <Link /> would re-render it and throw again */}
+            {/* eslint-disable-next-line @next/next/no-html-link-for-pages  */}
             <a
               href="/"
               className="inline-flex h-9 items-center rounded-md border px-4 text-sm font-medium"
