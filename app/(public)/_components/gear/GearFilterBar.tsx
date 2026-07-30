@@ -25,14 +25,17 @@ import {
 import type { Category } from "@/types"
 
 const ALL_CATEGORIES = "all"
+const ALL_BRANDS = "__all_brands__"
 const SEARCH_DEBOUNCE_MS = 500
 
 export function GearFilterBar({
   filters,
   categories,
+  brands,
 }: {
   filters: GearFilters
   categories: Category[]
+  brands: string[]
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -46,6 +49,16 @@ export function GearFilterBar({
       value: category.id,
       label: category.name,
     })),
+  ]
+
+  const brandNames =
+    filters.brand && !brands.includes(filters.brand)
+      ? [...brands, filters.brand].sort((a, b) => a.localeCompare(b))
+      : brands
+
+  const brandItems = [
+    { value: ALL_BRANDS, label: "All brands" },
+    ...brandNames.map((brand) => ({ value: brand, label: brand })),
   ]
 
   function hrefWith(overrides: Partial<GearFilters> = {}): string {
@@ -168,6 +181,31 @@ export function GearFilterBar({
           </Select>
         </Field>
 
+        {brandNames.length > 0 && (
+          <Field label="Brand">
+            <Select
+              items={brandItems}
+              value={filters.brand ?? ALL_BRANDS}
+              onValueChange={(value) =>
+                apply({
+                  brand: value === ALL_BRANDS ? undefined : String(value),
+                })
+              }
+            >
+              <SelectTrigger className="h-9 w-full text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {brandItems.map((item) => (
+                  <SelectItem key={item.value} value={item.value}>
+                    {item.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
+        )}
+
         <Field label="Min price / day">
           <Input
             value={minPrice}
@@ -187,22 +225,22 @@ export function GearFilterBar({
             className="h-9 text-sm"
           />
         </Field>
+      </div>
 
-        <div className="flex items-end gap-3">
-          <label className="flex flex-1 items-center gap-2 text-sm">
-            <Checkbox
-              checked={filters.availableOnly}
-              onCheckedChange={(checked) =>
-                apply({ availableOnly: Boolean(checked) })
-              }
-            />
-            Available only
-          </label>
+      <div className="flex items-center gap-3">
+        <label className="flex items-center gap-2 text-sm">
+          <Checkbox
+            checked={filters.availableOnly}
+            onCheckedChange={(checked) =>
+              apply({ availableOnly: Boolean(checked) })
+            }
+          />
+          Available only
+        </label>
 
-          <Button type="submit" size="lg" className="h-9 text-sm">
-            Apply
-          </Button>
-        </div>
+        <Button type="submit" size="lg" className="ml-auto h-9 text-sm">
+          Apply
+        </Button>
       </div>
 
       {hasActiveFilters(filters) && (

@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { Suspense } from "react"
 
+import { getBrands } from "../_actions/getBrands"
 import { getCategories } from "../_actions/getCategories"
 import { GearFilterBar } from "../_components/gear/GearFilterBar"
 import { GearResults } from "../_components/gear/GearResults"
@@ -23,7 +24,10 @@ export default async function GearPage({
   searchParams: Promise<RawSearchParams>
 }) {
   const filters = parseGearFilters(await searchParams)
-  const categoriesRes = await getCategories()
+  const [categoriesRes, brandsRes] = await Promise.all([
+    getCategories(),
+    getBrands(),
+  ])
 
   return (
     <section className="mx-auto max-w-6xl px-4 py-10 sm:py-14">
@@ -35,7 +39,11 @@ export default async function GearPage({
         what&apos;s in stock right now.
       </p>
 
-      <GearFilterBar filters={filters} categories={categoriesRes.data ?? []} />
+      <GearFilterBar
+        filters={filters}
+        categories={categoriesRes.data ?? []}
+        brands={brandsRes.data ?? []}
+      />
 
       <Suspense
         key={JSON.stringify(filters)}
