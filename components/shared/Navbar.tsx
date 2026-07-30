@@ -1,6 +1,8 @@
 import Link from "next/link"
 import { Menu, Mountain } from "lucide-react"
 
+import { DASHBOARD_HOME } from "@/app/(dashboard)/_config/sidebar"
+import { AccountMenu } from "@/components/shared/AccountMenu"
 import { ThemeToggle } from "@/components/shared/ThemeToggle"
 import { Button, buttonVariants } from "@/components/ui/button"
 import {
@@ -10,6 +12,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
+import { getSession } from "@/lib/session"
 import { cn } from "@/lib/utils"
 
 const NAV_LINKS = [
@@ -17,7 +20,20 @@ const NAV_LINKS = [
   { label: "How it works", href: "/#how-it-works" },
 ]
 
-export function Navbar() {
+export async function Navbar() {
+  const session = await getSession()
+  const dashboardHref = session ? DASHBOARD_HOME[session.role] : null
+
+  // Signed-in users reach Dashboard and Log out through AccountMenu, which is
+  // visible at every breakpoint — no need to repeat them in the sheet.
+  const mobileLinks = session
+    ? NAV_LINKS
+    : [
+        ...NAV_LINKS,
+        { label: "Log in", href: "/login" },
+        { label: "Sign up", href: "/register" },
+      ]
+
   return (
     <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-sm">
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-4">
@@ -44,24 +60,35 @@ export function Navbar() {
         <div className="ml-auto flex items-center gap-2">
           <ThemeToggle />
 
-          <Link
-            href="/login"
-            className={cn(
-              buttonVariants({ variant: "ghost", size: "lg" }),
-              "hidden sm:inline-flex"
-            )}
-          >
-            Log in
-          </Link>
-          <Link
-            href="/register"
-            className={cn(
-              buttonVariants({ size: "lg" }),
-              "hidden sm:inline-flex"
-            )}
-          >
-            Sign up
-          </Link>
+          {session && dashboardHref ? (
+            <AccountMenu
+              user={session}
+              links={[
+                { label: "Dashboard", href: dashboardHref, icon: "dashboard" },
+              ]}
+            />
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className={cn(
+                  buttonVariants({ variant: "ghost", size: "lg" }),
+                  "hidden sm:inline-flex"
+                )}
+              >
+                Log in
+              </Link>
+              <Link
+                href="/register"
+                className={cn(
+                  buttonVariants({ size: "lg" }),
+                  "hidden sm:inline-flex"
+                )}
+              >
+                Sign up
+              </Link>
+            </>
+          )}
 
           <Sheet>
             <SheetTrigger
@@ -81,11 +108,7 @@ export function Navbar() {
                 <SheetTitle>Menu</SheetTitle>
               </SheetHeader>
               <nav className="grid gap-1 px-4 text-sm">
-                {[
-                  ...NAV_LINKS,
-                  { label: "Log in", href: "/login" },
-                  { label: "Sign up", href: "/register" },
-                ].map((link) => (
+                {mobileLinks.map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}

@@ -1,3 +1,4 @@
+import { AccountMenu } from "@/components/shared/AccountMenu"
 import { ThemeToggle } from "@/components/shared/ThemeToggle"
 import { Separator } from "@/components/ui/separator"
 import {
@@ -8,7 +9,6 @@ import {
 import { requireSession } from "@/lib/session"
 
 import { DashboardSidebar } from "./_components/DashboardSidebar"
-import { UserMenu } from "./_components/UserMenu"
 
 export default async function DashboardLayout({
   children,
@@ -28,7 +28,10 @@ export default async function DashboardLayout({
 
           <div className="ml-auto flex items-center gap-2">
             <ThemeToggle />
-            <UserMenu user={session} />
+            <AccountMenu
+              user={session}
+              links={[{ label: "Back to site", href: "/", icon: "home" }]}
+            />
           </div>
         </header>
 
