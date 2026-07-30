@@ -21,10 +21,6 @@ export function toDateValue(date: Date) {
   return `${date.getFullYear()}-${month}-${day}`
 }
 
-/**
- * Mirrors ALLOWED_TRANSITIONS in provider.service.ts. CONFIRMED is absent on
- * purpose — the provider hands off there and waits for the customer to pay.
- */
 export const PROVIDER_NEXT_STATUS: Partial<
   Record<RentalStatus, { next: RentalStatus; label: string }>
 > = {

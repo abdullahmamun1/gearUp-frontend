@@ -208,7 +208,9 @@ function PaymentPanel({ order }: { order: RentalOrder }) {
   }
 
   if (order.status === "RETURNED") {
-    return <Notice>This rental is complete. Thanks for bringing it back.</Notice>
+    return (
+      <Notice>This rental is complete. Thanks for bringing it back.</Notice>
+    )
   }
 
   if (paid || order.status === "PAID" || order.status === "PICKED_UP") {
@@ -219,8 +221,6 @@ function PaymentPanel({ order }: { order: RentalOrder }) {
     )
   }
 
-  // The API refuses checkout on anything but CONFIRMED, so a button here would
-  // only ever produce a 400. Explain the wait instead.
   if (order.status === "PLACED") {
     return (
       <Notice>

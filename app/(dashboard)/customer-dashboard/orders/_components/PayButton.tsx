@@ -15,7 +15,6 @@ export function PayButton({
 }: {
   orderId: string
   amount: string
-  /** A PENDING payment already exists, so this reopens that session. */
   resume?: boolean
 }) {
   const [isPending, startTransition] = useTransition()
@@ -29,8 +28,6 @@ export function PayButton({
         return
       }
 
-      // Stripe is an external host, so this has to be a full navigation —
-      // router.push would try to resolve it as an app route.
       window.location.href = res.data.paymentUrl
     })
   }
