@@ -112,6 +112,12 @@ export interface Payment {
   rentalOrder?: RentalOrder
   customer?: Pick<User, "id" | "name" | "email">
 }
+export interface CheckoutSession {
+  /** Stripe-hosted checkout URL. Null only if Stripe returns a session without one. */
+  paymentUrl: string | null
+  payment: Payment
+}
+
 export interface Review {
   id: string
   rating: number

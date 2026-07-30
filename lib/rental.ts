@@ -1,3 +1,5 @@
+import type { RentalStatus } from "@/types"
+
 const MS_PER_DAY = 1000 * 60 * 60 * 24
 
 export function rentalDays(start: Date, end: Date) {
@@ -17,6 +19,18 @@ export function toDateValue(date: Date) {
   const month = String(date.getMonth() + 1).padStart(2, "0")
   const day = String(date.getDate()).padStart(2, "0")
   return `${date.getFullYear()}-${month}-${day}`
+}
+
+/**
+ * Mirrors ALLOWED_TRANSITIONS in provider.service.ts. CONFIRMED is absent on
+ * purpose — the provider hands off there and waits for the customer to pay.
+ */
+export const PROVIDER_NEXT_STATUS: Partial<
+  Record<RentalStatus, { next: RentalStatus; label: string }>
+> = {
+  PLACED: { next: "CONFIRMED", label: "Confirm order" },
+  PAID: { next: "PICKED_UP", label: "Mark picked up" },
+  PICKED_UP: { next: "RETURNED", label: "Mark returned" },
 }
 
 export function startOfToday() {
