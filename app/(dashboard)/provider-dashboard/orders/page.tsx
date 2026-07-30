@@ -58,9 +58,11 @@ export default async function ProviderOrdersPage() {
                 const action = PROVIDER_NEXT_STATUS[order.status]
 
                 return (
-                  <TableRow key={order.id}>
+                  <TableRow key={order.id} className="hover:bg-transparent">
                     <TableCell>
-                      <span className="font-medium">{order.id.slice(0, 8)}</span>
+                      <span className="font-medium">
+                        {order.id.slice(0, 8)}
+                      </span>
                       <p className="text-xs text-muted-foreground">
                         {formatDate(order.createdAt)}
                       </p>

@@ -81,8 +81,8 @@ export default async function OrderDetailPage({ params, searchParams }: Props) {
             aria-hidden
           />
           <span>
-            <span className="font-medium">Your rental is booked.</span> Pay to
-            confirm it — the provider prepares your gear once payment clears.
+            <span className="font-medium">Your rental is booked.</span> The
+            provider reviews it next — payment opens once they confirm.
           </span>
         </p>
       )}

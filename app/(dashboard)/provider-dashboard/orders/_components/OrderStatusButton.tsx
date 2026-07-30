@@ -42,7 +42,7 @@ export function OrderStatusButton({
       size="lg"
       onClick={advance}
       disabled={isPending}
-      className="relative z-10 h-8 text-xs"
+      className="h-8 text-xs hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
     >
       {isPending && <Loader2 className="size-3.5 animate-spin" aria-hidden />}
       {isPending ? "Saving…" : label}
