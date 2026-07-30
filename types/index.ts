@@ -72,7 +72,10 @@ export interface GearItem {
   name: string
   description?: string
   brand?: string
+  /** Cover image, used in cards and listings. */
   imageUrl?: string
+  /** Extra gallery shots, shown on the detail page after the cover. */
+  images?: string[]
   pricePerDay: string
   stock: number
   isAvailable: boolean

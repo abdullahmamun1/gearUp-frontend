@@ -47,7 +47,9 @@ export default async function GearDetailPage({ params }: Props) {
 
   const gear = res.data
   const outOfStock = !gear.isAvailable || gear.stock < 1
-  const images = gear.imageUrl ? [gear.imageUrl] : []
+  const images = [
+    ...new Set([gear.imageUrl, ...(gear.images ?? [])].filter(Boolean)),
+  ] as string[]
 
   return (
     <section className="mx-auto max-w-6xl px-4 py-10">

@@ -48,7 +48,7 @@ export function GearGallery({
       </div>
 
       {images.length > 1 && (
-        <ul className="flex gap-2 overflow-x-auto pb-1">
+        <ul className="flex gap-2.5 overflow-x-auto px-0.5 py-1">
           {images.map((image, index) => (
             <li key={image}>
               <button
@@ -57,10 +57,10 @@ export function GearGallery({
                 aria-label={`Show image ${index + 1} of ${images.length}`}
                 aria-current={index === active}
                 className={cn(
-                  "relative size-16 shrink-0 overflow-hidden rounded-lg border transition-opacity",
+                  "relative size-16 shrink-0 cursor-pointer overflow-hidden rounded-lg ring-1 transition-all outline-none focus-visible:ring-2 focus-visible:ring-ring",
                   index === active
-                    ? "ring-2 ring-primary ring-offset-2 ring-offset-background"
-                    : "opacity-70 hover:opacity-100"
+                    ? "ring-2 ring-primary"
+                    : "opacity-60 ring-border/80 hover:opacity-100 hover:ring-foreground/40"
                 )}
               >
                 <Image
