@@ -1,7 +1,6 @@
 import Link from "next/link"
 import { Menu, Mountain } from "lucide-react"
 
-import { DASHBOARD_HOME } from "@/app/(dashboard)/_config/sidebar"
 import { AccountMenu } from "@/components/shared/AccountMenu"
 import { ThemeToggle } from "@/components/shared/ThemeToggle"
 import { Button, buttonVariants } from "@/components/ui/button"
@@ -12,6 +11,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
+import { DASHBOARD_HOME } from "@/lib/routes"
 import { getSession } from "@/lib/session"
 import { cn } from "@/lib/utils"
 

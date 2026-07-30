@@ -36,12 +36,6 @@ export const SIDEBAR_ITEMS: Record<Role, SidebarItem[]> = {
   ],
 }
 
-export const DASHBOARD_HOME: Record<Role, string> = {
-  CUSTOMER: "/dashboard",
-  PROVIDER: "/provider-dashboard",
-  ADMIN: "/admin-dashboard",
-}
-
 export const ROLE_LABEL: Record<Role, string> = {
   CUSTOMER: "Customer",
   PROVIDER: "Provider",

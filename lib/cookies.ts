@@ -3,7 +3,7 @@ import { cookies } from "next/headers"
 export const ACCESS_TOKEN_COOKIE = "accessToken"
 export const REFRESH_TOKEN_COOKIE = "refreshToken"
 
-const ACCESS_TOKEN_MAX_AGE = 60 * 60 * 24
+export const ACCESS_TOKEN_MAX_AGE = 60 * 60 * 24
 const REFRESH_TOKEN_MAX_AGE = 60 * 60 * 24 * 7
 
 export const AUTH_COOKIE_OPTIONS = {
