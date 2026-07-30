@@ -83,6 +83,5 @@ async function normalize<T>(res: Response): Promise<ApiResponse<T>> {
     statusCode: body.statusCode ?? res.status,
     message: body.message ?? "",
     data: body.data as T,
-    meta: body.meta,
   }
 }

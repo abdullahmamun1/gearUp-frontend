@@ -33,14 +33,14 @@ export async function FeaturedGear() {
             title="Couldn't load gear"
             body={res.message || "Please try again in a moment."}
           />
-        ) : res.data.length === 0 ? (
+        ) : res.data?.data?.length === 0 ? (
           <EmptyState
             title="No gear listed yet"
             body="Check back soon — providers are adding kit all the time."
           />
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {res.data.map((gear) => (
+            {res.data?.data?.map((gear) => (
               <GearCard key={gear.id} gear={gear} />
             ))}
           </div>

@@ -1,7 +1,7 @@
 "use server"
 
 import { apiFetch } from "@/lib/api"
-import type { GearItem, GearQuery } from "@/types"
+import type { GearItem, GearQuery, Paginated } from "@/types"
 
 function toSearchParams(query: GearQuery) {
   const params = new URLSearchParams()
@@ -15,11 +15,14 @@ function toSearchParams(query: GearQuery) {
 
 export async function getGearList(query: GearQuery = {}) {
   const search = toSearchParams(query)
-  return apiFetch<GearItem[]>(`/api/gear${search ? `?${search}` : ""}`, {
-    auth: false,
-    tags: ["gear"],
-    revalidate: 60 * 5,
-  })
+  return apiFetch<Paginated<GearItem>>(
+    `/api/gear${search ? `?${search}` : ""}`,
+    {
+      auth: false,
+      tags: ["gear"],
+      revalidate: 60 * 5,
+    }
+  )
 }
 
 export async function getFeaturedGear(limit = 8) {

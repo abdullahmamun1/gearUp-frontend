@@ -21,7 +21,7 @@ export default async function HomePage() {
   const countRes = await getGearList({ limit: "1", isAvailable: "true" })
   return (
     <>
-      <Hero gearCount={countRes.meta?.total ?? 0} />
+      <Hero gearCount={countRes.data?.meta?.total ?? 0} />
 
       <Suspense fallback={<CategoryStripSkeleton />}>
         <CategoryStrip />
