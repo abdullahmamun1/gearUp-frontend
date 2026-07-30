@@ -1,14 +1,14 @@
 import type { Metadata } from "next"
-import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { ArrowLeft, Backpack, Package, Store } from "lucide-react"
+import { ArrowLeft, Mail, Package, Store } from "lucide-react"
 
 import { getGearById } from "../../_actions/getGear"
+import { GearGallery } from "../../_components/gear/GearGallery"
 import { RentCta } from "../../_components/gear/RentCta"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { formatPrice } from "@/lib/format"
+import { formatDate, formatPrice } from "@/lib/format"
 import type { GearItem } from "@/types"
 
 type Props = { params: Promise<{ id: string }> }
@@ -31,8 +31,6 @@ export default async function GearDetailPage({ params }: Props) {
   const { id } = await params
   const res = await getGearById(id)
 
-  // 404 = no such gear, 400 = the id in the URL isn't a valid id. Either way
-  // there's no page here. A 5xx is an outage and falls through to a message.
   if (!res.success && (res.statusCode === 404 || res.statusCode === 400)) {
     notFound()
   }
@@ -49,6 +47,7 @@ export default async function GearDetailPage({ params }: Props) {
 
   const gear = res.data
   const outOfStock = !gear.isAvailable || gear.stock < 1
+  const images = gear.imageUrl ? [gear.imageUrl] : []
 
   return (
     <section className="mx-auto max-w-6xl px-4 py-10">
@@ -60,10 +59,31 @@ export default async function GearDetailPage({ params }: Props) {
         Back to browse
       </Link>
 
-      <div className="mt-6 grid gap-10 lg:grid-cols-2">
-        <GearImage gear={gear} outOfStock={outOfStock} />
-
+      <div className="mt-6 grid gap-10 lg:grid-cols-[1.4fr_1fr]">
         <div>
+          <GearGallery
+            images={images}
+            name={gear.name}
+            outOfStock={outOfStock}
+          />
+
+          {gear.description && (
+            <>
+              <Separator className="my-8" />
+              <h2 className="font-heading text-sm font-semibold">
+                About this gear
+              </h2>
+              <p className="mt-2 text-sm leading-relaxed text-pretty text-muted-foreground">
+                {gear.description}
+              </p>
+            </>
+          )}
+
+          <Separator className="my-8" />
+          <Specifications gear={gear} outOfStock={outOfStock} />
+        </div>
+
+        <div className="lg:sticky lg:top-6 lg:self-start">
           {gear.category && (
             <Badge variant="secondary">{gear.category.name}</Badge>
           )}
@@ -95,67 +115,75 @@ export default async function GearDetailPage({ params }: Props) {
             <RentCta gear={gear} />
           </div>
 
-          {gear.description && (
-            <>
-              <Separator className="my-7" />
-              <h2 className="font-heading text-sm font-semibold">
-                About this gear
-              </h2>
-              <p className="mt-2 text-sm leading-relaxed text-pretty text-muted-foreground">
-                {gear.description}
-              </p>
-            </>
-          )}
-
-          {gear.provider && (
-            <>
-              <Separator className="my-7" />
-              <h2 className="font-heading text-sm font-semibold">Provider</h2>
-              <p className="mt-2 inline-flex items-center gap-2 text-sm text-muted-foreground">
-                <Store className="size-4" aria-hidden />
-                {gear.provider.name}
-              </p>
-            </>
-          )}
+          {gear.provider && <Provider provider={gear.provider} />}
         </div>
       </div>
     </section>
   )
 }
 
-function GearImage({
+function Specifications({
   gear,
   outOfStock,
 }: {
   gear: GearItem
   outOfStock: boolean
 }) {
-  return (
-    <div className="relative aspect-4/3 overflow-hidden rounded-xl border bg-muted">
-      {gear.imageUrl ? (
-        <Image
-          src={gear.imageUrl}
-          alt={gear.name}
-          fill
-          priority
-          sizes="(min-width: 1024px) 50vw, 100vw"
-          className="object-cover"
-        />
-      ) : (
-        <div className="absolute inset-0 grid place-items-center bg-linear-to-br from-primary/12 via-transparent to-primary/4">
-          <Backpack
-            className="size-14 text-primary/30"
-            strokeWidth={1.25}
-            aria-hidden
-          />
-        </div>
-      )}
+  const specs = [
+    { label: "Brand", value: gear.brand },
+    { label: "Category", value: gear.category?.name },
+    { label: "Price per day", value: formatPrice(gear.pricePerDay) },
+    { label: "Units in stock", value: String(gear.stock) },
+    { label: "Availability", value: outOfStock ? "Unavailable" : "Available" },
+    { label: "Listed", value: gear.createdAt && formatDate(gear.createdAt) },
+  ].filter((spec): spec is { label: string; value: string } =>
+    Boolean(spec.value)
+  )
 
-      {outOfStock && (
-        <div className="absolute inset-0 grid place-items-center bg-background/70">
-          <Badge variant="secondary">Unavailable</Badge>
+  return (
+    <>
+      <h2 className="font-heading text-sm font-semibold">Specifications</h2>
+      <dl className="mt-3 grid gap-x-8 sm:grid-cols-2">
+        {specs.map((spec) => (
+          <div
+            key={spec.label}
+            className="flex items-baseline justify-between gap-4 border-b py-2.5 text-sm"
+          >
+            <dt className="text-muted-foreground">{spec.label}</dt>
+            <dd className="text-right">{spec.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </>
+  )
+}
+
+function Provider({
+  provider,
+}: {
+  provider: NonNullable<GearItem["provider"]>
+}) {
+  return (
+    <div className="mt-6 rounded-xl border bg-card p-4">
+      <h2 className="font-heading text-sm font-semibold">Listed by</h2>
+      <div className="mt-3 flex items-center gap-3">
+        <span
+          className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/10 text-primary"
+          aria-hidden
+        >
+          <Store className="size-4" />
+        </span>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-medium">{provider.name}</p>
+          <a
+            href={`mailto:${provider.email}`}
+            className="inline-flex items-center gap-1.5 truncate text-xs text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <Mail className="size-3" aria-hidden />
+            {provider.email}
+          </a>
         </div>
-      )}
+      </div>
     </div>
   )
 }

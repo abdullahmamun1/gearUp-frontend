@@ -79,6 +79,7 @@ export interface GearItem {
   categoryId: string
   category?: Category
   provider?: Pick<User, "id" | "name" | "email">
+  createdAt?: string
 }
 export interface OrderItem {
   id: string
@@ -95,6 +96,7 @@ export interface RentalOrder {
   totalAmount: string
   customer?: Pick<User, "id" | "name" | "email">
   items?: OrderItem[]
+  payments?: Payment[]
   createdAt: string
 }
 export interface Payment {
