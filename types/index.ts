@@ -104,13 +104,17 @@ export interface RentalOrder {
 }
 export interface Payment {
   id: string
+  /** Stripe checkout session id — the handle for support requests. */
   transactionId: string
   amount: string
   gateway: PaymentGateway
   status: PaymentStatus
-  paidAt?: string
+  /** Null until the Stripe webhook confirms the charge. */
+  paidAt?: string | null
+  rentalOrderId?: string
   rentalOrder?: RentalOrder
   customer?: Pick<User, "id" | "name" | "email">
+  createdAt: string
 }
 export interface CheckoutSession {
   paymentUrl: string | null
