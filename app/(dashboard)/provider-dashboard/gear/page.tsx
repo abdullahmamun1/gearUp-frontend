@@ -1,14 +1,43 @@
 import type { Metadata } from "next"
+import { Suspense } from "react"
 
-import { ComingSoon, PageHeader } from "@/app/(dashboard)/_components/PageHeader"
+import { getCategories } from "@/app/(public)/_actions/getCategories"
+import { PageHeader } from "@/app/(dashboard)/_components/PageHeader"
+import { TableSkeleton } from "@/app/(dashboard)/_components/Skeletons"
+import {
+  parseProviderGearFilters,
+  PROVIDER_GEAR_PAGE_SIZE,
+  type RawSearchParams,
+} from "@/lib/providerGearQuery"
+
+import { ProviderGearFilterBar } from "./_components/ProviderGearFilterBar"
+import { ProviderGearTable } from "./_components/ProviderGearTable"
 
 export const metadata: Metadata = { title: "My gear · GearUp" }
 
-export default function Page() {
+export default async function ProviderGearPage({
+  searchParams,
+}: {
+  searchParams: Promise<RawSearchParams>
+}) {
+  const filters = parseProviderGearFilters(await searchParams)
+  const categoriesRes = await getCategories()
+
   return (
     <>
       <PageHeader title="My gear" description="The listings you rent out." />
-      <ComingSoon what="Gear management" />
+
+      <ProviderGearFilterBar
+        filters={filters}
+        categories={categoriesRes.data ?? []}
+      />
+
+      <Suspense
+        key={JSON.stringify(filters)}
+        fallback={<TableSkeleton columns={6} rows={PROVIDER_GEAR_PAGE_SIZE} />}
+      >
+        <ProviderGearTable filters={filters} />
+      </Suspense>
     </>
   )
 }

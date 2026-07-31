@@ -1,4 +1,13 @@
+import {
+  first,
+  matching,
+  POSITIVE_INT,
+  UUID,
+  type RawSearchParams,
+} from "@/lib/searchParams"
 import type { GearQuery } from "@/types"
+
+export type { RawSearchParams }
 
 export const GEAR_PAGE_SIZE = 12
 
@@ -24,22 +33,7 @@ export type GearFilters = {
   page: number
 }
 
-export type RawSearchParams = Record<string, string | string[] | undefined>
-
-const UUID =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 const DECIMAL = /^\d+(\.\d+)?$/
-const POSITIVE_INT = /^[1-9]\d*$/
-
-function first(value: string | string[] | undefined) {
-  const raw = Array.isArray(value) ? value[0] : value
-  const trimmed = raw?.trim()
-  return trimmed ? trimmed : undefined
-}
-
-function matching(value: string | undefined, pattern: RegExp) {
-  return value && pattern.test(value) ? value : undefined
-}
 
 export function parseGearFilters(raw: RawSearchParams): GearFilters {
   const sort = first(raw.sort)

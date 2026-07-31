@@ -2,26 +2,29 @@ import Link from "next/link"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
 import { buttonVariants } from "@/components/ui/button"
-import { buildGearHref, type GearFilters } from "@/lib/gearQuery"
 import { cn } from "@/lib/utils"
 
-export function GearPagination({
-  filters,
+export function Pagination({
+  page,
   totalPages,
+  hrefFor,
+  label,
+  className,
 }: {
-  filters: GearFilters
+  page: number
   totalPages: number
+  hrefFor: (page: number) => string
+  label: string
+  className?: string
 }) {
   if (totalPages <= 1) return null
 
-  const { page } = filters
-
   return (
     <nav
-      aria-label="Gear pagination"
-      className="mt-10 flex items-center justify-center gap-3"
+      aria-label={label}
+      className={cn("mt-10 flex items-center justify-center gap-3", className)}
     >
-      <PageLink filters={filters} page={page - 1} disabled={page <= 1}>
+      <PageLink href={hrefFor(page - 1)} disabled={page <= 1}>
         <ChevronLeft className="size-4" aria-hidden />
         Previous
       </PageLink>
@@ -30,7 +33,7 @@ export function GearPagination({
         Page {page} of {totalPages}
       </p>
 
-      <PageLink filters={filters} page={page + 1} disabled={page >= totalPages}>
+      <PageLink href={hrefFor(page + 1)} disabled={page >= totalPages}>
         Next
         <ChevronRight className="size-4" aria-hidden />
       </PageLink>
@@ -39,13 +42,11 @@ export function GearPagination({
 }
 
 function PageLink({
-  filters,
-  page,
+  href,
   disabled,
   children,
 }: {
-  filters: GearFilters
-  page: number
+  href: string
   disabled: boolean
   children: React.ReactNode
 }) {
@@ -66,7 +67,7 @@ function PageLink({
   }
 
   return (
-    <Link href={buildGearHref({ ...filters, page })} className={className}>
+    <Link href={href} className={className}>
       {children}
     </Link>
   )

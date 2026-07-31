@@ -1,15 +1,21 @@
 import { getGearList } from "@/app/(public)/_actions/getGear"
 import { GearCard } from "@/components/shared/GearCard"
-import { hasActiveFilters, toGearQuery, type GearFilters } from "@/lib/gearQuery"
-
-import { GearPagination } from "./GearPagination"
+import { Pagination } from "@/components/shared/Pagination"
+import {
+  buildGearHref,
+  hasActiveFilters,
+  toGearQuery,
+  type GearFilters,
+} from "@/lib/gearQuery"
 
 export async function GearResults({ filters }: { filters: GearFilters }) {
   const res = await getGearList(toGearQuery(filters))
 
   if (!res.success) {
     return (
-      <Message>{res.message || "Couldn't load gear. Please try again."}</Message>
+      <Message>
+        {res.message || "Couldn't load gear. Please try again."}
+      </Message>
     )
   }
 
@@ -39,7 +45,12 @@ export async function GearResults({ filters }: { filters: GearFilters }) {
         ))}
       </div>
 
-      <GearPagination filters={filters} totalPages={meta?.totalPages ?? 1} />
+      <Pagination
+        page={filters.page}
+        totalPages={meta?.totalPages ?? 1}
+        hrefFor={(page) => buildGearHref({ ...filters, page })}
+        label="Gear pagination"
+      />
     </>
   )
 }
