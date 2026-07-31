@@ -2,11 +2,12 @@
 
 import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { ImagePlus, Loader2, Plus, X } from "lucide-react"
+import { ImagePlus, Loader2, Pencil, Plus, X } from "lucide-react"
 import { Controller, useFieldArray, useForm } from "react-hook-form"
 import { toast } from "sonner"
 
 import { createGear } from "@/app/(dashboard)/_actions/createGear"
+import { updateGear } from "@/app/(dashboard)/_actions/updateGear"
 import { TextField } from "@/components/shared/TextField"
 import { Button } from "@/components/ui/button"
 import {
@@ -32,34 +33,59 @@ import {
   emptyGearForm,
   gearFormSchema,
   MAX_GALLERY_IMAGES,
+  toGearFormValues,
   toGearPayload,
+  toGearUpdatePayload,
   type GearFormInput,
 } from "@/lib/schemas/gear"
-import type { Category } from "@/types"
+import type { Category, GearItem } from "@/types"
 
-export function GearFormDialog({ categories }: { categories: Category[] }) {
+export function GearFormDialog({
+  categories,
+  gear,
+}: {
+  categories: Category[]
+  gear?: GearItem
+}) {
   const [open, setOpen] = useState(false)
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button size="lg" className="h-9 text-sm">
-            <Plus className="size-4" aria-hidden />
-            Add gear
-          </Button>
+          gear ? (
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={`Edit ${gear.name}`}
+              className="size-8 text-muted-foreground hover:text-foreground"
+            >
+              <Pencil className="size-4" aria-hidden />
+            </Button>
+          ) : (
+            <Button size="lg" className="h-9 text-sm">
+              <Plus className="size-4" aria-hidden />
+              Add gear
+            </Button>
+          )
         }
       />
       <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Add gear</DialogTitle>
+          <DialogTitle>{gear ? "Edit listing" : "Add gear"}</DialogTitle>
           <DialogDescription>
-            List a new item. It goes live as soon as you save.
+            {gear
+              ? "Changes go live as soon as you save. Clearing an optional field removes it."
+              : "List a new item. It goes live as soon as you save."}
           </DialogDescription>
         </DialogHeader>
 
         {open && (
-          <GearForm categories={categories} onDone={() => setOpen(false)} />
+          <GearForm
+            categories={categories}
+            gear={gear}
+            onDone={() => setOpen(false)}
+          />
         )}
       </DialogContent>
     </Dialog>
@@ -68,9 +94,11 @@ export function GearFormDialog({ categories }: { categories: Category[] }) {
 
 function GearForm({
   categories,
+  gear,
   onDone,
 }: {
   categories: Category[]
+  gear?: GearItem
   onDone: () => void
 }) {
   const {
@@ -81,24 +109,36 @@ function GearForm({
     formState: { errors, isSubmitting },
   } = useForm<GearFormInput>({
     resolver: zodResolver(gearFormSchema),
-    defaultValues: emptyGearForm,
+    defaultValues: gear ? toGearFormValues(gear) : emptyGearForm,
   })
 
   const { fields, append, remove } = useFieldArray({ control, name: "images" })
 
   async function onSubmit(values: GearFormInput) {
-    const res = await createGear(toGearPayload(values))
+    const res = gear
+      ? await updateGear(gear.id, toGearUpdatePayload(values))
+      : await createGear(toGearPayload(values))
 
     if (!res.success) {
+      // The API returns 400 "Category not found" for a stale category list.
       if (/category/i.test(res.message)) {
         setError("categoryId", { message: res.message })
       }
       setError("root", { message: res.message })
-      toast.error(res.message || "Couldn't create this listing.")
+      toast.error(
+        res.message ||
+          (gear
+            ? "Couldn't save your changes."
+            : "Couldn't create this listing.")
+      )
       return
     }
 
-    toast.success(`"${values.name.trim()}" is now listed.`)
+    toast.success(
+      gear
+        ? `"${values.name.trim()}" updated.`
+        : `"${values.name.trim()}" is now listed.`
+    )
     onDone()
   }
 
@@ -228,6 +268,7 @@ function GearForm({
         }
         icon={ImagePlus}
         placeholder="https://res.cloudinary.com/…"
+        hint={gear ? "Clear this field to remove the cover image." : undefined}
         error={errors.imageUrl?.message}
         {...register("imageUrl")}
       />
@@ -305,7 +346,7 @@ function GearForm({
           {isSubmitting && (
             <Loader2 className="size-3.5 animate-spin" aria-hidden />
           )}
-          {isSubmitting ? "Saving…" : "Create listing"}
+          {isSubmitting ? "Saving…" : gear ? "Save changes" : "Create listing"}
         </Button>
       </DialogFooter>
     </form>

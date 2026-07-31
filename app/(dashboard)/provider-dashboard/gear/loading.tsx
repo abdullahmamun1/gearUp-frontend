@@ -14,7 +14,7 @@ export default function Loading() {
         </div>
         <Skeleton className="h-9 sm:w-52" />
       </div>
-      <TableSkeleton columns={6} rows={5} />
+      <TableSkeleton columns={7} rows={5} />
     </>
   )
 }

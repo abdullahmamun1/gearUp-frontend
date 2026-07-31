@@ -1,5 +1,7 @@
 import { z } from "zod"
 
+import type { GearItem } from "@/types"
+
 export const MAX_GALLERY_IMAGES = 8
 
 const DECIMAL = /^\d+(\.\d+)?$/
@@ -65,6 +67,10 @@ export type GearPayload = {
   images?: string[]
 }
 
+export type GearUpdatePayload = Required<Omit<GearPayload, "images">> & {
+  images: string[]
+}
+
 export const emptyGearForm: GearFormInput = {
   name: "",
   categoryId: "",
@@ -74,6 +80,34 @@ export const emptyGearForm: GearFormInput = {
   description: "",
   imageUrl: "",
   images: [],
+}
+
+export function toGearFormValues(gear: GearItem): GearFormInput {
+  return {
+    name: gear.name,
+    categoryId: gear.categoryId,
+    pricePerDay: String(Number(gear.pricePerDay)),
+    stock: String(gear.stock),
+    brand: gear.brand ?? "",
+    description: gear.description ?? "",
+    imageUrl: gear.imageUrl ?? "",
+    images: (gear.images ?? []).map((url) => ({ url })),
+  }
+}
+
+export function toGearUpdatePayload(values: GearFormInput): GearUpdatePayload {
+  return {
+    name: values.name.trim(),
+    categoryId: values.categoryId,
+    pricePerDay: Number(values.pricePerDay),
+    stock: Number(values.stock),
+    brand: values.brand?.trim() ?? "",
+    description: values.description?.trim() ?? "",
+    imageUrl: values.imageUrl?.trim() ?? "",
+    images: (values.images ?? [])
+      .map((image) => image.url.trim())
+      .filter(Boolean),
+  }
 }
 
 export function toGearPayload(values: GearFormInput): GearPayload {

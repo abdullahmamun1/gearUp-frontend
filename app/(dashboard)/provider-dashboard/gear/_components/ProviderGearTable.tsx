@@ -20,12 +20,16 @@ import {
   toProviderGearQuery,
   type ProviderGearFilters,
 } from "@/lib/providerGearQuery"
-import type { GearItem } from "@/types"
+import type { Category, GearItem } from "@/types"
+
+import { GearFormDialog } from "./GearFormDialog"
 
 export async function ProviderGearTable({
   filters,
+  categories,
 }: {
   filters: ProviderGearFilters
+  categories: Category[]
 }) {
   const res = await getProviderGear(toProviderGearQuery(filters))
 
@@ -67,6 +71,7 @@ export async function ProviderGearTable({
               <TableHead className="text-right">Stock</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Added</TableHead>
+              <TableHead className="text-right">Edit</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -104,6 +109,9 @@ export async function ProviderGearTable({
                 </TableCell>
                 <TableCell className="whitespace-nowrap text-muted-foreground">
                   {item.createdAt ? formatDate(item.createdAt) : "—"}
+                </TableCell>
+                <TableCell className="text-right">
+                  <GearFormDialog categories={categories} gear={item} />
                 </TableCell>
               </TableRow>
             ))}
@@ -145,11 +153,6 @@ function Thumbnail({ item }: { item: GearItem }) {
   )
 }
 
-/**
- * The switch wins over stock: restocking an unavailable listing still won't
- * make it rentable, so that's the state worth surfacing first. Wording matches
- * the overlay shoppers see on the public card.
- */
 function ListingStatus({ item }: { item: GearItem }) {
   if (!item.isAvailable) return <Badge variant="secondary">Unavailable</Badge>
   if (item.stock < 1) return <Badge variant="outline">Out of stock</Badge>

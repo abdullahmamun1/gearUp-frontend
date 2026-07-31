@@ -37,9 +37,9 @@ export default async function ProviderGearPage({
 
       <Suspense
         key={JSON.stringify(filters)}
-        fallback={<TableSkeleton columns={6} rows={PROVIDER_GEAR_PAGE_SIZE} />}
+        fallback={<TableSkeleton columns={7} rows={PROVIDER_GEAR_PAGE_SIZE} />}
       >
-        <ProviderGearTable filters={filters} />
+        <ProviderGearTable filters={filters} categories={categories} />
       </Suspense>
     </>
   )
