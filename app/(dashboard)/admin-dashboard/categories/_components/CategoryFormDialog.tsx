@@ -2,11 +2,12 @@
 
 import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Loader2, Plus } from "lucide-react"
+import { Loader2, Pencil, Plus } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 
 import { createCategory } from "@/app/(dashboard)/_actions/createCategory"
+import { updateCategory } from "@/app/(dashboard)/_actions/updateCategory"
 import { TextField } from "@/components/shared/TextField"
 import { Button } from "@/components/ui/button"
 import {
@@ -24,37 +25,62 @@ import {
   categoryFormSchema,
   emptyCategoryForm,
   toCategoryPayload,
+  toCategoryUpdatePayload,
+  toCategoryValues,
   type CategoryFormInput,
 } from "@/lib/schemas/category"
+import type { Category } from "@/types"
 
-export function CategoryFormDialog() {
+export function CategoryFormDialog({ category }: { category?: Category }) {
   const [open, setOpen] = useState(false)
+  const editing = Boolean(category)
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button size="lg" className="h-9 text-sm">
-            <Plus className="size-4" aria-hidden />
-            New category
-          </Button>
+          editing ? (
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={`Edit ${category?.name}`}
+              className="size-8 text-muted-foreground hover:text-foreground"
+            >
+              <Pencil className="size-4" aria-hidden />
+            </Button>
+          ) : (
+            <Button size="lg" className="h-9 text-sm">
+              <Plus className="size-4" aria-hidden />
+              New category
+            </Button>
+          )
         }
       />
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>New category</DialogTitle>
+          <DialogTitle>
+            {editing ? "Edit category" : "New category"}
+          </DialogTitle>
           <DialogDescription>
             Providers pick from these when listing gear.
           </DialogDescription>
         </DialogHeader>
 
-        {open && <CategoryForm onDone={() => setOpen(false)} />}
+        {open && (
+          <CategoryForm category={category} onDone={() => setOpen(false)} />
+        )}
       </DialogContent>
     </Dialog>
   )
 }
 
-function CategoryForm({ onDone }: { onDone: () => void }) {
+function CategoryForm({
+  category,
+  onDone,
+}: {
+  category?: Category
+  onDone: () => void
+}) {
   const {
     register,
     handleSubmit,
@@ -62,24 +88,33 @@ function CategoryForm({ onDone }: { onDone: () => void }) {
     formState: { errors, isSubmitting },
   } = useForm<CategoryFormInput>({
     resolver: zodResolver(categoryFormSchema),
-    defaultValues: emptyCategoryForm,
+    defaultValues: category ? toCategoryValues(category) : emptyCategoryForm,
   })
 
   async function onSubmit(values: CategoryFormInput) {
-    const res = await createCategory(toCategoryPayload(values))
+    const res = category
+      ? await updateCategory(category.id, toCategoryUpdatePayload(values))
+      : await createCategory(toCategoryPayload(values))
 
     if (!res.success) {
       const duplicate = /duplicate/i.test(res.message)
+      const fallback = category
+        ? "Couldn't save this category."
+        : "Couldn't create this category."
       const message = duplicate
         ? "A category with that name already exists."
-        : res.message || "Couldn't create this category."
+        : res.message || fallback
 
       setError(duplicate ? "name" : "root", { message })
       toast.error(message)
       return
     }
 
-    toast.success(`"${values.name.trim()}" added.`)
+    toast.success(
+      category
+        ? `"${values.name.trim()}" updated.`
+        : `"${values.name.trim()}" added.`
+    )
     onDone()
   }
 
@@ -115,10 +150,16 @@ function CategoryForm({ onDone }: { onDone: () => void }) {
           className="text-sm"
           {...register("description")}
         />
-        {errors.description && (
+        {errors.description ? (
           <p className="text-xs text-destructive">
             {errors.description.message}
           </p>
+        ) : (
+          category && (
+            <p className="text-xs text-muted-foreground">
+              Clear this field to remove the description.
+            </p>
+          )
         )}
       </div>
 
@@ -142,7 +183,11 @@ function CategoryForm({ onDone }: { onDone: () => void }) {
           {isSubmitting && (
             <Loader2 className="size-3.5 animate-spin" aria-hidden />
           )}
-          {isSubmitting ? "Saving…" : "Create category"}
+          {isSubmitting
+            ? "Saving…"
+            : category
+              ? "Save changes"
+              : "Create category"}
         </Button>
       </DialogFooter>
     </form>

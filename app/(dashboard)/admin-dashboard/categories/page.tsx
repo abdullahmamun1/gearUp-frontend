@@ -18,7 +18,7 @@ export default function AdminCategoriesPage() {
         action={<CategoryFormDialog />}
       />
 
-      <Suspense fallback={<TableSkeleton columns={3} rows={6} />}>
+      <Suspense fallback={<TableSkeleton columns={4} rows={6} />}>
         <CategoriesTable />
       </Suspense>
     </>

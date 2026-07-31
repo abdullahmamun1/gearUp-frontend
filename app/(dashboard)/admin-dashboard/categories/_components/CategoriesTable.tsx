@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/table"
 
 import { AdminMessage } from "../../_components/AdminMessage"
+import { CategoryFormDialog } from "./CategoryFormDialog"
+import { DeleteCategoryDialog } from "./DeleteCategoryDialog"
 
 export async function CategoriesTable() {
   const res = await getCategories()
@@ -48,6 +50,7 @@ export async function CategoriesTable() {
               <TableHead>Name</TableHead>
               <TableHead>Description</TableHead>
               <TableHead className="text-right">Listings</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -71,6 +74,12 @@ export async function CategoriesTable() {
                     ) : (
                       <span className="text-muted-foreground">0</span>
                     )}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex justify-end gap-1">
+                      <CategoryFormDialog category={category} />
+                      <DeleteCategoryDialog category={category} />
+                    </div>
                   </TableCell>
                 </TableRow>
               )

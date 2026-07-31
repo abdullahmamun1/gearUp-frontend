@@ -4,7 +4,7 @@ export default function Loading() {
   return (
     <>
       <PageHeaderSkeleton action />
-      <TableSkeleton columns={3} rows={6} />
+      <TableSkeleton columns={4} rows={6} />
     </>
   )
 }

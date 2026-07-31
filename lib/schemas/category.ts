@@ -1,5 +1,7 @@
 import { z } from "zod"
 
+import type { Category } from "@/types"
+
 export const categoryFormSchema = z.object({
   name: z
     .string()
@@ -30,5 +32,21 @@ export function toCategoryPayload(values: CategoryFormInput): CategoryPayload {
   return {
     name: values.name.trim(),
     ...(description ? { description } : {}),
+  }
+}
+
+export function toCategoryValues(category: Category): CategoryFormInput {
+  return {
+    name: category.name,
+    description: category.description ?? "",
+  }
+}
+
+export function toCategoryUpdatePayload(
+  values: CategoryFormInput
+): Required<CategoryPayload> {
+  return {
+    name: values.name.trim(),
+    description: values.description?.trim() ?? "",
   }
 }
