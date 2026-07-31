@@ -10,6 +10,7 @@ import {
   type RawSearchParams,
 } from "@/lib/providerGearQuery"
 
+import { GearFormDialog } from "./_components/GearFormDialog"
 import { ProviderGearFilterBar } from "./_components/ProviderGearFilterBar"
 import { ProviderGearTable } from "./_components/ProviderGearTable"
 
@@ -22,15 +23,17 @@ export default async function ProviderGearPage({
 }) {
   const filters = parseProviderGearFilters(await searchParams)
   const categoriesRes = await getCategories()
+  const categories = categoriesRes.data ?? []
 
   return (
     <>
-      <PageHeader title="My gear" description="The listings you rent out." />
-
-      <ProviderGearFilterBar
-        filters={filters}
-        categories={categoriesRes.data ?? []}
+      <PageHeader
+        title="My gear"
+        description="The listings you rent out."
+        action={<GearFormDialog categories={categories} />}
       />
+
+      <ProviderGearFilterBar filters={filters} categories={categories} />
 
       <Suspense
         key={JSON.stringify(filters)}
