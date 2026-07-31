@@ -42,7 +42,7 @@ export function AvailabilityToggle({ gear }: { gear: GearItem }) {
         checked={available}
         onCheckedChange={toggle}
         disabled={isPending}
-        className="bg-destructive dark:bg-destructive data-checked:bg-success dark:data-checked:bg-success"
+        tone="status"
         aria-label={
           available
             ? `Mark ${gear.name} unavailable`

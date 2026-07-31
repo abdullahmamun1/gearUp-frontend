@@ -1,6 +1,6 @@
 import { getAdminUsers } from "@/app/(dashboard)/_actions/getAdminTables"
 import { Pagination } from "@/components/shared/Pagination"
-import { RoleBadge, UserStatusBadge } from "@/components/shared/UserBadges"
+import { RoleBadge } from "@/components/shared/UserBadges"
 import {
   Table,
   TableBody,
@@ -15,15 +15,20 @@ import {
   type AdminUsersFilters,
 } from "@/lib/adminQuery"
 import { formatDate } from "@/lib/format"
+import { getSession } from "@/lib/session"
 
 import { AdminMessage } from "../../_components/AdminMessage"
+import { UserStatusToggle } from "./UserStatusToggle"
 
 export async function AdminUsersTable({
   filters,
 }: {
   filters: AdminUsersFilters
 }) {
-  const res = await getAdminUsers(filters)
+  const [res, session] = await Promise.all([
+    getAdminUsers(filters),
+    getSession(),
+  ])
 
   if (!res.success) {
     return (
@@ -72,7 +77,10 @@ export async function AdminUsersTable({
                   <RoleBadge role={user.role} />
                 </TableCell>
                 <TableCell>
-                  <UserStatusBadge status={user.status} />
+                  <UserStatusToggle
+                    user={user}
+                    isSelf={user.id === session?.id}
+                  />
                 </TableCell>
                 <TableCell className="whitespace-nowrap text-muted-foreground">
                   {formatDate(user.createdAt)}
