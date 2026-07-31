@@ -31,9 +31,9 @@ const PERKS = [
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ redirectTo?: string }>
+  searchParams: Promise<{ redirectTo?: string; reason?: string }>
 }) {
-  const { redirectTo } = await searchParams
+  const { redirectTo, reason } = await searchParams
   return (
     <section className="relative overflow-hidden">
       <div
@@ -90,6 +90,16 @@ export default async function LoginPage({
               </Link>
             </p>
           </div>
+          {reason === "suspended" ? (
+            <p
+              role="alert"
+              className="mt-6 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive"
+            >
+              Your account has been suspended, so you&apos;ve been signed out.
+              Please contact support if you think this is a mistake.
+            </p>
+          ) : null}
+
           <LoginForm redirectTo={redirectTo} />
 
           <p className="mt-6 text-center text-xs text-muted-foreground">

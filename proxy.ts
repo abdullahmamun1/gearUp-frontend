@@ -11,6 +11,7 @@ import {
 } from "@/lib/cookies"
 import { jwtUtils } from "@/lib/jwt"
 import { DASHBOARD_HOME, roleForPath } from "@/lib/routes"
+import { getCurrentUser } from "@/service/currentUser"
 import { getNewAccessToken } from "@/service/refreshToken"
 import type { Role } from "@/types"
 
@@ -35,26 +36,32 @@ export async function proxy(request: NextRequest) {
       )
     : null
 
+  function applyAccessToken(token: string) {
+    cookieStore.set(ACCESS_TOKEN_COOKIE, token, {
+      ...AUTH_COOKIE_OPTIONS,
+      maxAge: ACCESS_TOKEN_MAX_AGE,
+    })
+    request.cookies.set(ACCESS_TOKEN_COOKIE, token)
+    accessToken = token
+    decodedAccessToken = jwtUtils.verifyToken(
+      token,
+      process.env.JWT_ACCESS_SECRET as string
+    )
+    refreshed = true
+  }
+
+  function signOut(reason?: string) {
+    cookieStore.delete(ACCESS_TOKEN_COOKIE)
+    cookieStore.delete(REFRESH_TOKEN_COOKIE)
+    const loginUrl = new URL("/login", request.url)
+    if (reason) loginUrl.searchParams.set("reason", reason)
+    return NextResponse.redirect(loginUrl)
+  }
+
   if (!decodedAccessToken?.success && decodedRefreshToken?.success) {
-    // Access token is expired but the refresh token is valid — mint a new one.
     const result = await getNewAccessToken(refreshToken as string)
-
     if (result.success && result.data) {
-      const newAccessToken = result.data.accessToken
-
-      cookieStore.set(ACCESS_TOKEN_COOKIE, newAccessToken, {
-        ...AUTH_COOKIE_OPTIONS,
-        maxAge: ACCESS_TOKEN_MAX_AGE,
-      })
-
-      accessToken = newAccessToken
-      decodedAccessToken = jwtUtils.verifyToken(
-        accessToken,
-        process.env.JWT_ACCESS_SECRET as string
-      )
-
-      request.cookies.set(ACCESS_TOKEN_COOKIE, newAccessToken)
-      refreshed = true
+      applyAccessToken(result.data.accessToken)
     }
   }
 
@@ -85,8 +92,25 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
-  if (requiredRole && userRole !== requiredRole) {
-    return NextResponse.redirect(new URL("/not-found", request.url))
+  if (requiredRole) {
+    const current = await getCurrentUser(accessToken as string)
+
+    if (current.statusCode === 403) return signOut("suspended")
+    if (current.statusCode === 401) return signOut()
+
+    if (current.data && current.data.role !== userRole) {
+      if (decodedRefreshToken?.success) {
+        const result = await getNewAccessToken(refreshToken as string)
+        if (result.success && result.data) {
+          applyAccessToken(result.data.accessToken)
+        }
+      }
+      userRole = current.data.role
+    }
+
+    if (userRole !== requiredRole) {
+      return NextResponse.redirect(new URL("/not-found", request.url))
+    }
   }
 
   return refreshed
