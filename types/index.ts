@@ -83,6 +83,7 @@ export interface GearItem {
   category?: Category
   provider?: Pick<User, "id" | "name" | "email">
   createdAt?: string
+  _count?: { orderItems: number; reviews: number }
 }
 export interface OrderItem {
   id: string

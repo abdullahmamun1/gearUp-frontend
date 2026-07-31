@@ -22,6 +22,7 @@ import {
 } from "@/lib/providerGearQuery"
 import type { Category, GearItem } from "@/types"
 
+import { DeleteGearDialog } from "./DeleteGearDialog"
 import { GearFormDialog } from "./GearFormDialog"
 
 export async function ProviderGearTable({
@@ -71,7 +72,7 @@ export async function ProviderGearTable({
               <TableHead className="text-right">Stock</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Added</TableHead>
-              <TableHead className="text-right">Edit</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -110,8 +111,11 @@ export async function ProviderGearTable({
                 <TableCell className="whitespace-nowrap text-muted-foreground">
                   {item.createdAt ? formatDate(item.createdAt) : "—"}
                 </TableCell>
-                <TableCell className="text-right">
-                  <GearFormDialog categories={categories} gear={item} />
+                <TableCell>
+                  <div className="flex justify-end gap-1">
+                    <GearFormDialog categories={categories} gear={item} />
+                    <DeleteGearDialog gear={item} />
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
