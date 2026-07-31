@@ -71,6 +71,8 @@ export type GearUpdatePayload = Required<Omit<GearPayload, "images">> & {
   images: string[]
 }
 
+export type GearPatch = Partial<GearUpdatePayload> & { isAvailable?: boolean }
+
 export const emptyGearForm: GearFormInput = {
   name: "",
   categoryId: "",

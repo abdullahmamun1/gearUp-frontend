@@ -2,8 +2,9 @@ import Image from "next/image"
 import Link from "next/link"
 import { Backpack } from "lucide-react"
 
-import { getProviderGear } from "@/app/(dashboard)/_actions/getProviderGear"
+import { getAdminGear } from "@/app/(dashboard)/_actions/getAdminTables"
 import { Pagination } from "@/components/shared/Pagination"
+import { Badge } from "@/components/ui/badge"
 import {
   Table,
   TableBody,
@@ -12,33 +13,28 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { formatDate, formatPrice } from "@/lib/format"
 import {
-  buildProviderGearHref,
-  hasActiveProviderGearFilters,
-  toProviderGearQuery,
-  type ProviderGearFilters,
-} from "@/lib/providerGearQuery"
-import type { Category, GearItem } from "@/types"
+  ADMIN_GEAR_PATH,
+  buildAdminHref,
+  type AdminGearFilters,
+} from "@/lib/adminQuery"
+import { formatPrice } from "@/lib/format"
+import type { GearItem } from "@/types"
 
-import { AvailabilityToggle } from "./AvailabilityToggle"
-import { DeleteGearDialog } from "./DeleteGearDialog"
-import { GearFormDialog } from "./GearFormDialog"
+import { AdminMessage } from "../../_components/AdminMessage"
 
-export async function ProviderGearTable({
+export async function AdminGearTable({
   filters,
-  categories,
 }: {
-  filters: ProviderGearFilters
-  categories: Category[]
+  filters: AdminGearFilters
 }) {
-  const res = await getProviderGear(toProviderGearQuery(filters))
+  const res = await getAdminGear(filters)
 
   if (!res.success) {
     return (
-      <Message>
-        {res.message || "Couldn't load your listings. Please try again."}
-      </Message>
+      <AdminMessage>
+        {res.message || "Couldn't load listings. Please try again."}
+      </AdminMessage>
     )
   }
 
@@ -47,13 +43,7 @@ export async function ProviderGearTable({
   const total = meta?.total ?? gear.length
 
   if (gear.length === 0) {
-    return (
-      <Message>
-        {hasActiveProviderGearFilters(filters)
-          ? "No listings match those filters. Try clearing one."
-          : "You haven't listed any gear yet."}
-      </Message>
-    )
+    return <AdminMessage>No gear has been listed yet.</AdminMessage>
   }
 
   return (
@@ -68,11 +58,10 @@ export async function ProviderGearTable({
             <TableRow>
               <TableHead>Item</TableHead>
               <TableHead>Category</TableHead>
+              <TableHead>Provider</TableHead>
               <TableHead className="text-right">Price / day</TableHead>
               <TableHead className="text-right">Stock</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Added</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -99,6 +88,14 @@ export async function ProviderGearTable({
                 <TableCell className="text-muted-foreground">
                   {item.category?.name ?? "—"}
                 </TableCell>
+                <TableCell>
+                  {item.provider?.name ?? "—"}
+                  {item.provider?.email && (
+                    <p className="text-xs text-muted-foreground">
+                      {item.provider.email}
+                    </p>
+                  )}
+                </TableCell>
                 <TableCell className="text-right tabular-nums">
                   {formatPrice(item.pricePerDay)}
                 </TableCell>
@@ -106,16 +103,7 @@ export async function ProviderGearTable({
                   {item.stock}
                 </TableCell>
                 <TableCell>
-                  <AvailabilityToggle gear={item} />
-                </TableCell>
-                <TableCell className="whitespace-nowrap text-muted-foreground">
-                  {item.createdAt ? formatDate(item.createdAt) : "—"}
-                </TableCell>
-                <TableCell>
-                  <div className="flex justify-end gap-1">
-                    <GearFormDialog categories={categories} gear={item} />
-                    <DeleteGearDialog gear={item} />
-                  </div>
+                  <ListingStatus item={item} />
                 </TableCell>
               </TableRow>
             ))}
@@ -126,8 +114,8 @@ export async function ProviderGearTable({
       <Pagination
         page={filters.page}
         totalPages={meta?.totalPages ?? 1}
-        hrefFor={(page) => buildProviderGearHref({ ...filters, page })}
-        label="Listings pagination"
+        hrefFor={(page) => buildAdminHref(ADMIN_GEAR_PATH, { page })}
+        label="Gear pagination"
       />
     </>
   )
@@ -157,10 +145,12 @@ function Thumbnail({ item }: { item: GearItem }) {
   )
 }
 
-function Message({ children }: { children: React.ReactNode }) {
+function ListingStatus({ item }: { item: GearItem }) {
+  if (!item.isAvailable) return <Badge variant="secondary">Unavailable</Badge>
+  if (item.stock < 1) return <Badge variant="outline">Out of stock</Badge>
   return (
-    <div className="grid place-items-center rounded-xl border border-dashed p-12 text-center">
-      <p className="text-sm text-muted-foreground">{children}</p>
-    </div>
+    <Badge variant="outline" className="border-success/40 text-success">
+      Available
+    </Badge>
   )
 }
