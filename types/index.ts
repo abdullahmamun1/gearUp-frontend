@@ -65,7 +65,9 @@ export interface User {
 export interface Category {
   id: string
   name: string
-  description?: string
+  description?: string | null
+  createdAt?: string
+  _count?: { gearItems: number }
 }
 export interface GearItem {
   id: string
