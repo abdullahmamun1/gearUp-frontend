@@ -1,4 +1,5 @@
 import {
+  buildHref,
   first,
   matching,
   POSITIVE_INT,
@@ -22,7 +23,7 @@ export const PROVIDER_GEAR_SORT_OPTIONS = [
 export type ProviderGearSort =
   (typeof PROVIDER_GEAR_SORT_OPTIONS)[number]["value"]
 
-export const DEFAULT_PROVIDER_GEAR_SORT: ProviderGearSort =
+const DEFAULT_PROVIDER_GEAR_SORT: ProviderGearSort =
   PROVIDER_GEAR_SORT_OPTIONS[0].value
 
 export const AVAILABILITY_OPTIONS = [
@@ -81,18 +82,15 @@ export function toProviderGearQuery(filters: ProviderGearFilters) {
 }
 
 export function buildProviderGearHref(filters: ProviderGearFilters) {
-  const params = new URLSearchParams()
-
-  if (filters.searchTerm) params.set("searchTerm", filters.searchTerm)
-  if (filters.category) params.set("category", filters.category)
-  if (filters.availability !== "all")
-    params.set("isAvailable", filters.availability)
-  if (filters.sort !== DEFAULT_PROVIDER_GEAR_SORT)
-    params.set("sort", filters.sort)
-  if (filters.page > 1) params.set("page", String(filters.page))
-
-  const query = params.toString()
-  return query ? `${PROVIDER_GEAR_PATH}?${query}` : PROVIDER_GEAR_PATH
+  return buildHref(PROVIDER_GEAR_PATH, {
+    searchTerm: filters.searchTerm,
+    category: filters.category,
+    isAvailable:
+      filters.availability === "all" ? undefined : filters.availability,
+    sort:
+      filters.sort === DEFAULT_PROVIDER_GEAR_SORT ? undefined : filters.sort,
+    page: filters.page,
+  })
 }
 
 export function hasActiveProviderGearFilters(filters: ProviderGearFilters) {

@@ -16,10 +16,6 @@ import {
 import { logout } from "@/service/auth"
 import type { JwtUser } from "@/types"
 
-/**
- * Icon components can't cross the server/client boundary as props, so callers
- * name an icon and we resolve it on this side.
- */
 const ICONS = { dashboard: LayoutDashboard, home: Home } as const
 
 export type AccountMenuLink = {
@@ -57,9 +53,6 @@ export function AccountMenu({
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end" className="w-56">
-        {/* Not DropdownMenuLabel: base-ui's Menu.GroupLabel throws without a
-            Menu.Group ancestor, and this heading labels the account, not a
-            group of items. */}
         <div className="grid gap-0.5 px-2 py-1.5">
           <span className="text-sm font-medium">{user.name}</span>
           <span className="truncate text-xs font-normal text-muted-foreground">
@@ -73,7 +66,10 @@ export function AccountMenu({
           const Icon = ICONS[link.icon]
 
           return (
-            <DropdownMenuItem key={link.href} render={<Link href={link.href} />}>
+            <DropdownMenuItem
+              key={link.href}
+              render={<Link href={link.href} />}
+            >
               <Icon aria-hidden />
               {link.label}
             </DropdownMenuItem>

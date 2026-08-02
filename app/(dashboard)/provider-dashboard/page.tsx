@@ -10,6 +10,8 @@ import { getProviderGear } from "../_actions/getProviderGear"
 import { getProviderOrders } from "../_actions/getProviderOrders"
 import { PageHeader, StatCard } from "../_components/PageHeader"
 
+import { EmptyState } from "@/components/shared/EmptyState"
+
 export const metadata: Metadata = { title: "Provider overview · GearUp" }
 
 const NEEDS_ACTION: RentalStatus[] = ["PLACED", "PAID", "PICKED_UP"]
@@ -64,11 +66,9 @@ export default async function ProviderOverviewPage() {
       </div>
 
       {orders.length === 0 && res.success && (
-        <div className="mt-6 grid place-items-center rounded-xl border border-dashed p-12 text-center">
-          <p className="text-sm text-muted-foreground">
-            No orders yet. They appear here as customers book your gear.
-          </p>
-        </div>
+        <EmptyState className="mt-6">
+          No orders yet. They appear here as customers book your gear.
+        </EmptyState>
       )}
     </>
   )

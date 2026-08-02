@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useQueryClient } from "@tanstack/react-query"
 import { Loader2, Pencil, Plus } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
@@ -21,6 +22,7 @@ import {
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { categoriesKeys } from "@/lib/queries/adminTables"
 import {
   categoryFormSchema,
   emptyCategoryForm,
@@ -91,6 +93,8 @@ function CategoryForm({
     defaultValues: category ? toCategoryValues(category) : emptyCategoryForm,
   })
 
+  const queryClient = useQueryClient()
+
   async function onSubmit(values: CategoryFormInput) {
     const res = category
       ? await updateCategory(category.id, toCategoryUpdatePayload(values))
@@ -109,6 +113,8 @@ function CategoryForm({
       toast.error(message)
       return
     }
+
+    queryClient.invalidateQueries({ queryKey: categoriesKeys.all })
 
     toast.success(
       category

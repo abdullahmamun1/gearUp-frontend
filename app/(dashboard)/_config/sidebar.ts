@@ -12,8 +12,6 @@ import {
 import { DASHBOARD_HOME } from "@/lib/routes"
 import type { Role, SidebarItem } from "@/types"
 
-// Bases come from DASHBOARD_HOME so renaming a dashboard is a one-line change
-// there — the proxy gate and this nav both follow.
 const { CUSTOMER, PROVIDER, ADMIN } = DASHBOARD_HOME
 
 export const SIDEBAR_ITEMS: Record<Role, SidebarItem[]> = {

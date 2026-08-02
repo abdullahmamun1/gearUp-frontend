@@ -1,6 +1,7 @@
 import { Geist_Mono, Raleway, Space_Grotesk } from "next/font/google"
 
 import "./globals.css"
+import { QueryProvider } from "@/components/providers/QueryProvider"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
 import { cn } from "@/lib/utils"
@@ -36,8 +37,10 @@ export default function RootLayout({
     >
       <body>
         <ThemeProvider>
-          {children}
-          <Toaster position="top-right" richColors />
+          <QueryProvider>
+            {children}
+            <Toaster position="top-right" richColors />
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>

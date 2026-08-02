@@ -1,11 +1,13 @@
 "use client"
 
 import { useState, useTransition } from "react"
+import { useQueryClient } from "@tanstack/react-query"
 import { Loader2, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 
 import { deleteCategory } from "@/app/(dashboard)/_actions/deleteCategory"
 import { Button } from "@/components/ui/button"
+import { categoriesKeys } from "@/lib/queries/adminTables"
 import {
   Dialog,
   DialogContent,
@@ -22,6 +24,8 @@ export function DeleteCategoryDialog({ category }: { category: Category }) {
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
 
+  const queryClient = useQueryClient()
+
   const listings = category._count?.gearItems ?? 0
 
   const blocked = listings > 0
@@ -37,6 +41,7 @@ export function DeleteCategoryDialog({ category }: { category: Category }) {
         toast.error(message)
         return
       }
+      queryClient.invalidateQueries({ queryKey: categoriesKeys.all })
       setOpen(false)
       toast.success(`"${category.name}" deleted.`)
     })

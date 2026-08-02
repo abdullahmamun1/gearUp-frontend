@@ -39,13 +39,3 @@ export function StatCard({
     </div>
   )
 }
-
-export function ComingSoon({ what }: { what: string }) {
-  return (
-    <div className="grid place-items-center rounded-xl border border-dashed p-12 text-center">
-      <p className="text-sm text-muted-foreground">
-        {what} lands in a later step.
-      </p>
-    </div>
-  )
-}

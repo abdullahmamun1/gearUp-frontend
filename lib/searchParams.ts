@@ -13,3 +13,25 @@ export function first(value: string | string[] | undefined) {
 export function matching(value: string | undefined, pattern: RegExp) {
   return value && pattern.test(value) ? value : undefined
 }
+
+export type QueryParams = Record<string, string | number | undefined>
+
+export function toQueryString(params: QueryParams) {
+  const search = new URLSearchParams()
+
+  for (const [key, value] of Object.entries(params)) {
+    if (value === undefined || value === "") continue
+    search.set(key, String(value))
+  }
+
+  return search.toString()
+}
+
+export function buildHref(basePath: string, params: QueryParams) {
+  const query = toQueryString({
+    ...params,
+    page: Number(params.page) <= 1 ? undefined : params.page,
+  })
+
+  return query ? `${basePath}?${query}` : basePath
+}

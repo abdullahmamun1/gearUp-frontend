@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
+import { Suspense } from "react"
 import { ArrowLeft, Mail, Package, Store } from "lucide-react"
 
 import { getGearById } from "../../_actions/getGear"
@@ -8,10 +9,22 @@ import { GearGallery } from "../../_components/gear/GearGallery"
 import { RentCta } from "../../_components/gear/RentCta"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import { Skeleton } from "@/components/ui/skeleton"
 import { formatDate, formatPrice } from "@/lib/format"
+import {
+  AVAILABILITY_LABEL,
+  gearAvailability,
+  isRentable,
+} from "@/lib/gearAvailability"
+import { POSITIVE_INT, first, matching } from "@/lib/searchParams"
 import type { GearItem } from "@/types"
 
-type Props = { params: Promise<{ id: string }> }
+import { GearReviews } from "./_components/GearReviews"
+
+type Props = {
+  params: Promise<{ id: string }>
+  searchParams: Promise<{ reviewPage?: string | string[] }>
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params
@@ -27,8 +40,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default async function GearDetailPage({ params }: Props) {
+export default async function GearDetailPage({ params, searchParams }: Props) {
   const { id } = await params
+  const reviewPage = Number(
+    matching(first((await searchParams).reviewPage), POSITIVE_INT) ?? "1"
+  )
   const res = await getGearById(id)
 
   if (!res.success && (res.statusCode === 404 || res.statusCode === 400)) {
@@ -46,7 +62,7 @@ export default async function GearDetailPage({ params }: Props) {
   }
 
   const gear = res.data
-  const outOfStock = !gear.isAvailable || gear.stock < 1
+  const outOfStock = !isRentable(gear)
   const images = [
     ...new Set([gear.imageUrl, ...(gear.images ?? [])].filter(Boolean)),
   ] as string[]
@@ -82,7 +98,15 @@ export default async function GearDetailPage({ params }: Props) {
           )}
 
           <Separator className="my-8" />
-          <Specifications gear={gear} outOfStock={outOfStock} />
+          <Specifications gear={gear} />
+
+          <Separator className="my-8" />
+          <section id="reviews" className="scroll-mt-20">
+            <h2 className="font-heading text-sm font-semibold">Reviews</h2>
+            <Suspense key={reviewPage} fallback={<ReviewsSkeleton />}>
+              <GearReviews gearId={gear.id} page={reviewPage} />
+            </Suspense>
+          </section>
         </div>
 
         <div className="lg:sticky lg:top-6 lg:self-start">
@@ -124,19 +148,30 @@ export default async function GearDetailPage({ params }: Props) {
   )
 }
 
-function Specifications({
-  gear,
-  outOfStock,
-}: {
-  gear: GearItem
-  outOfStock: boolean
-}) {
+function ReviewsSkeleton() {
+  return (
+    <div className="mt-3 grid gap-5">
+      <Skeleton className="h-10 w-36" />
+      {[0, 1].map((row) => (
+        <div key={row} className="grid gap-2">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-4 w-full" />
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function Specifications({ gear }: { gear: GearItem }) {
   const specs = [
     { label: "Brand", value: gear.brand },
     { label: "Category", value: gear.category?.name },
     { label: "Price per day", value: formatPrice(gear.pricePerDay) },
     { label: "Units in stock", value: String(gear.stock) },
-    { label: "Availability", value: outOfStock ? "Unavailable" : "Available" },
+    {
+      label: "Availability",
+      value: AVAILABILITY_LABEL[gearAvailability(gear)],
+    },
     { label: "Listed", value: gear.createdAt && formatDate(gear.createdAt) },
   ].filter((spec): spec is { label: string; value: string } =>
     Boolean(spec.value)

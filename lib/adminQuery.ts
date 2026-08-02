@@ -2,6 +2,8 @@ import {
   first,
   matching,
   POSITIVE_INT,
+  toQueryString,
+  type QueryParams,
   type RawSearchParams,
 } from "@/lib/searchParams"
 import type { RentalStatus, Role, UserStatus } from "@/types"
@@ -68,29 +70,6 @@ export function parseAdminRentalsFilters(
   }
 }
 
-export function buildAdminHref(
-  basePath: string,
-  params: Record<string, string | number | undefined>
-) {
-  const search = new URLSearchParams()
-
-  for (const [key, value] of Object.entries(params)) {
-    if (value === undefined || value === "") continue
-    if (key === "page" && Number(value) <= 1) continue
-    search.set(key, String(value))
-  }
-
-  const query = search.toString()
-  return query ? `${basePath}?${query}` : basePath
-}
-
-export function toAdminQuery(
-  filters: Record<string, string | number | undefined>
-) {
-  const params = new URLSearchParams()
-  for (const [key, value] of Object.entries(filters)) {
-    if (value !== undefined && value !== "") params.set(key, String(value))
-  }
-  params.set("limit", String(ADMIN_PAGE_SIZE))
-  return params.toString()
+export function toAdminQuery(filters: QueryParams) {
+  return toQueryString({ ...filters, limit: ADMIN_PAGE_SIZE })
 }

@@ -8,6 +8,8 @@ import type { RentalStatus } from "@/types"
 import { getMyRentals } from "../_actions/getMyRentals"
 import { PageHeader, StatCard } from "../_components/PageHeader"
 
+import { EmptyState } from "@/components/shared/EmptyState"
+
 export const metadata: Metadata = { title: "Overview · GearUp" }
 
 const ACTIVE: RentalStatus[] = ["PLACED", "CONFIRMED", "PAID", "PICKED_UP"]
@@ -50,17 +52,19 @@ export default async function CustomerOverviewPage() {
       </div>
 
       {orders.length === 0 && res.success && (
-        <div className="mt-6 grid place-items-center rounded-xl border border-dashed p-12 text-center">
-          <p className="text-sm text-muted-foreground">
-            You haven&apos;t rented anything yet.
-          </p>
-          <Link
-            href="/gear"
-            className={cn(buttonVariants({ variant: "outline" }), "mt-4")}
-          >
-            Find your first rental
-          </Link>
-        </div>
+        <EmptyState
+          className="mt-6"
+          action={
+            <Link
+              href="/gear"
+              className={cn(buttonVariants({ variant: "outline" }), "mt-4")}
+            >
+              Find your first rental
+            </Link>
+          }
+        >
+          You haven&apos;t rented anything yet.
+        </EmptyState>
       )}
     </>
   )

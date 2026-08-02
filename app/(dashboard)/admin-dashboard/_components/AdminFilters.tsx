@@ -4,16 +4,10 @@ import { useRouter } from "next/navigation"
 import { useTransition } from "react"
 import { X } from "lucide-react"
 
+import { FilterField } from "@/components/shared/FilterField"
+import { SelectField, type SelectOption } from "@/components/shared/SelectField"
 import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { buildAdminHref } from "@/lib/adminQuery"
+import { buildHref } from "@/lib/searchParams"
 
 const ALL = "all"
 
@@ -21,7 +15,7 @@ export type FilterSpec = {
   name: string
   label: string
   value?: string
-  options: { value: string; label: string }[]
+  options: SelectOption[]
 }
 
 export function AdminFilters({
@@ -41,51 +35,27 @@ export function AdminFilters({
 
   function apply(name: string, value: string | undefined) {
     startTransition(() =>
-      router.push(
-        buildAdminHref(basePath, { ...current, [name]: value, page: 1 })
-      )
+      router.push(buildHref(basePath, { ...current, [name]: value, page: 1 }))
     )
   }
 
   return (
     <div className="mb-6 flex flex-wrap items-end gap-3 rounded-xl border bg-card p-4">
-      {specs.map((spec) => {
-        const items = [
-          {
-            value: ALL,
-            label: spec.options.length
-              ? `All ${spec.label.toLowerCase()}`
-              : "All",
-          },
-          ...spec.options,
-        ]
-
-        return (
-          <div key={spec.name} className="grid gap-1.5">
-            <Label className="text-xs text-muted-foreground">
-              {spec.label}
-            </Label>
-            <Select
-              items={items}
-              value={spec.value ?? ALL}
-              onValueChange={(value) =>
-                apply(spec.name, value === ALL ? undefined : String(value))
-              }
-            >
-              <SelectTrigger className="h-9 w-44 text-sm">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {items.map((item) => (
-                  <SelectItem key={item.value} value={item.value}>
-                    {item.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )
-      })}
+      {specs.map((spec) => (
+        <FilterField key={spec.name} label={spec.label}>
+          <SelectField
+            options={[
+              { value: ALL, label: `All ${spec.label.toLowerCase()}` },
+              ...spec.options,
+            ]}
+            value={spec.value ?? ALL}
+            onValueChange={(value) =>
+              apply(spec.name, value === ALL ? undefined : value)
+            }
+            className="h-9 w-44 text-sm"
+          />
+        </FilterField>
+      ))}
 
       {hasActive && (
         <Button

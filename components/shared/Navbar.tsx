@@ -24,8 +24,6 @@ export async function Navbar() {
   const session = await getSession()
   const dashboardHref = session ? DASHBOARD_HOME[session.role] : null
 
-  // Signed-in users reach Dashboard and Log out through AccountMenu, which is
-  // visible at every breakpoint — no need to repeat them in the sheet.
   const mobileLinks = session
     ? NAV_LINKS
     : [

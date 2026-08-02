@@ -2,11 +2,13 @@
 
 import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
+import { useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
 
 import { cancelRental } from "@/app/(dashboard)/_actions/cancelRental"
 import { Button } from "@/components/ui/button"
+import { myRentalsKeys } from "@/lib/queries/customer"
 import {
   Dialog,
   DialogClose,
@@ -22,6 +24,7 @@ export function CancelOrderButton({ orderId }: { orderId: string }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [open, setOpen] = useState(false)
+  const queryClient = useQueryClient()
 
   function confirm() {
     startTransition(async () => {
@@ -32,6 +35,7 @@ export function CancelOrderButton({ orderId }: { orderId: string }) {
         return
       }
 
+      queryClient.invalidateQueries({ queryKey: myRentalsKeys.all })
       setOpen(false)
       toast.success("Order cancelled. The units are back in stock.")
       router.refresh()

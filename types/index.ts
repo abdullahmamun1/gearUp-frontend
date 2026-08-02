@@ -85,6 +85,8 @@ export interface GearItem {
   category?: Category
   provider?: Pick<User, "id" | "name" | "email">
   createdAt?: string
+  /** List endpoint only — aggregated across every review, not a page of them. */
+  rating?: { average: number | null; count: number }
   _count?: { orderItems: number; reviews: number }
 }
 export interface OrderItem {
@@ -103,6 +105,8 @@ export interface RentalOrder {
   customer?: Pick<User, "id" | "name" | "email">
   items?: OrderItem[]
   payments?: Payment[]
+  /** At most one — the schema keys reviews to the order, not the gear item. */
+  review?: Review | null
   createdAt: string
 }
 export interface Payment {
@@ -127,10 +131,17 @@ export interface CheckoutSession {
 export interface Review {
   id: string
   rating: number
-  comment?: string
+  comment?: string | null
   customer?: Pick<User, "id" | "name" | "email">
   rentalOrder?: RentalOrder
+  rentalOrderId?: string
   gearItem?: GearItem
+  gearItemId?: string
+  createdAt?: string
+}
+
+export interface ReviewList extends Paginated<Review> {
+  summary: { average: number | null; total: number }
 }
 
 export interface SidebarItem {

@@ -2,19 +2,14 @@
 
 import { useRouter } from "next/navigation"
 import { useEffect, useState, useTransition } from "react"
-import { Loader2, Search, X } from "lucide-react"
+import { X } from "lucide-react"
 
+import { FilterField } from "@/components/shared/FilterField"
+import { SearchInput } from "@/components/shared/SearchInput"
+import { SelectField } from "@/components/shared/SelectField"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import {
   buildGearHref,
   DEFAULT_SORT,
@@ -114,99 +109,53 @@ export function GearFilterBar({
       className="mt-6 grid gap-4 rounded-xl border bg-card p-4"
     >
       <div className="flex flex-col gap-3 sm:flex-row">
-        <div className="relative flex-1">
-          <Search
-            className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
-            aria-hidden
-          />
-          <Input
-            value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
-            placeholder="Search tents, kayaks, bikes…"
-            aria-label="Search gear"
-            className="h-9 pr-9 pl-9 text-sm"
-          />
-          {isPending && (
-            <Loader2
-              className="absolute top-1/2 right-3 size-4 -translate-y-1/2 animate-spin text-muted-foreground"
-              aria-hidden
-            />
-          )}
-        </div>
+        <SearchInput
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Search tents, kayaks, bikes…"
+          label="Search gear"
+          isPending={isPending}
+        />
 
-        <Select
-          items={SORT_OPTIONS}
+        <SelectField
+          options={SORT_OPTIONS}
           value={filters.sort}
           onValueChange={(value) =>
-            apply({ sort: (value as GearFilters["sort"]) ?? DEFAULT_SORT })
+            apply({ sort: (value as GearFilters["sort"]) || DEFAULT_SORT })
           }
-        >
-          <SelectTrigger
-            className="h-9 w-full text-sm sm:w-52"
-            aria-label="Sort results"
-          >
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {SORT_OPTIONS.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          aria-label="Sort results"
+          className="h-9 w-full text-sm sm:w-52"
+        />
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Field label="Category">
-          <Select
-            items={categoryItems}
+        <FilterField label="Category">
+          <SelectField
+            options={categoryItems}
             value={filters.category ?? ALL_CATEGORIES}
             onValueChange={(value) =>
               apply({
-                category: value === ALL_CATEGORIES ? undefined : String(value),
+                category: value === ALL_CATEGORIES ? undefined : value,
               })
             }
-          >
-            <SelectTrigger className="h-9 w-full text-sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {categoryItems.map((item) => (
-                <SelectItem key={item.value} value={item.value}>
-                  {item.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Field>
+            className="h-9 w-full text-sm"
+          />
+        </FilterField>
 
         {brandNames.length > 0 && (
-          <Field label="Brand">
-            <Select
-              items={brandItems}
+          <FilterField label="Brand">
+            <SelectField
+              options={brandItems}
               value={filters.brand ?? ALL_BRANDS}
               onValueChange={(value) =>
-                apply({
-                  brand: value === ALL_BRANDS ? undefined : String(value),
-                })
+                apply({ brand: value === ALL_BRANDS ? undefined : value })
               }
-            >
-              <SelectTrigger className="h-9 w-full text-sm">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {brandItems.map((item) => (
-                  <SelectItem key={item.value} value={item.value}>
-                    {item.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Field>
+              className="h-9 w-full text-sm"
+            />
+          </FilterField>
         )}
 
-        <Field label="Min price / day">
+        <FilterField label="Min price / day">
           <Input
             value={minPrice}
             onChange={(event) => setMinPrice(event.target.value)}
@@ -214,9 +163,9 @@ export function GearFilterBar({
             placeholder="0"
             className="h-9 text-sm"
           />
-        </Field>
+        </FilterField>
 
-        <Field label="Max price / day">
+        <FilterField label="Max price / day">
           <Input
             value={maxPrice}
             onChange={(event) => setMaxPrice(event.target.value)}
@@ -224,7 +173,7 @@ export function GearFilterBar({
             placeholder="Any"
             className="h-9 text-sm"
           />
-        </Field>
+        </FilterField>
       </div>
 
       <div className="flex items-center gap-3">
@@ -259,20 +208,5 @@ export function GearFilterBar({
         </div>
       )}
     </form>
-  )
-}
-
-function Field({
-  label,
-  children,
-}: {
-  label: string
-  children: React.ReactNode
-}) {
-  return (
-    <div className="grid gap-1.5">
-      <Label className="text-xs text-muted-foreground">{label}</Label>
-      {children}
-    </div>
   )
 }

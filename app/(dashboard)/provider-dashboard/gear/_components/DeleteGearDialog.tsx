@@ -1,10 +1,12 @@
 "use client"
 
 import { useState, useTransition } from "react"
+import { useQueryClient } from "@tanstack/react-query"
 import { Loader2, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 
 import { deleteGear } from "@/app/(dashboard)/_actions/deleteGear"
+import { providerGearKeys } from "@/lib/queries/providerGear"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -21,6 +23,7 @@ export function DeleteGearDialog({ gear }: { gear: GearItem }) {
   const [open, setOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  const queryClient = useQueryClient()
 
   const orderCount = gear._count?.orderItems ?? 0
 
@@ -34,6 +37,7 @@ export function DeleteGearDialog({ gear }: { gear: GearItem }) {
         toast.error(res.message || "Couldn't delete this listing.")
         return
       }
+      queryClient.invalidateQueries({ queryKey: providerGearKeys.all })
       setOpen(false)
       toast.success(`"${gear.name}" deleted.`)
     })

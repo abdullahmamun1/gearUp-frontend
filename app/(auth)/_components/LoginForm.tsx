@@ -21,7 +21,6 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
     defaultValues: { email: "", password: "" },
   })
 
-  // On success the action redirects, so nothing after this runs.
   async function onSubmit(values: LoginInput) {
     const res = await loginUser(values, redirectTo)
 

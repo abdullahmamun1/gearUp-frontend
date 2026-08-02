@@ -7,12 +7,14 @@ import { ArrowLeft, Backpack, CalendarDays, CheckCircle2 } from "lucide-react"
 import { getRentalById } from "@/app/(dashboard)/_actions/getRentalById"
 import { PageHeader } from "@/app/(dashboard)/_components/PageHeader"
 import { RentalStatusBadge } from "@/components/shared/RentalStatusBadge"
+import { Stars } from "@/components/shared/Stars"
 import { Separator } from "@/components/ui/separator"
 import { formatDate, formatPrice } from "@/lib/format"
 import { rentalDays } from "@/lib/rental"
 import type { OrderItem, RentalOrder } from "@/types"
 import { CancelOrderButton } from "../_components/CancelOrderButton"
 import { PayButton } from "../_components/PayButton"
+import { ReviewDialog } from "../_components/ReviewDialog"
 
 export const metadata: Metadata = { title: "Rental details · GearUp" }
 
@@ -142,6 +144,7 @@ export default async function OrderDetailPage({ params, searchParams }: Props) {
           </div>
 
           <PaymentPanel order={order} />
+          <ReviewPanel order={order} items={items} />
         </div>
       </div>
     </>
@@ -246,6 +249,51 @@ function PaymentPanel({ order }: { order: RentalOrder }) {
       <p className="mt-2 text-center text-xs text-muted-foreground">
         You&apos;ll be taken to Stripe to pay securely.
       </p>
+    </div>
+  )
+}
+
+function ReviewPanel({
+  order,
+  items,
+}: {
+  order: RentalOrder
+  items: OrderItem[]
+}) {
+  if (order.status !== "RETURNED") return null
+
+  const reviewable = items.filter((item) => item.gearItem)
+
+  return (
+    <div className="mt-6 rounded-xl border bg-card p-4">
+      <h2 className="font-heading text-sm font-semibold">Your review</h2>
+
+      {order.review ? (
+        <>
+          <div className="mt-3 flex items-center gap-2">
+            <Stars rating={order.review.rating} />
+            <span className="text-sm text-muted-foreground">
+              {order.review.rating} / 5
+            </span>
+          </div>
+          {order.review.comment && (
+            <p className="mt-2 text-sm leading-relaxed text-pretty text-muted-foreground">
+              {order.review.comment}
+            </p>
+          )}
+        </>
+      ) : reviewable.length === 0 ? (
+        <p className="mt-1.5 text-sm text-muted-foreground">
+          This order has no gear left to review.
+        </p>
+      ) : (
+        <>
+          <p className="mt-1.5 text-sm text-muted-foreground">
+            How did this rental go? Your review appears on the gear page.
+          </p>
+          <ReviewDialog orderId={order.id} items={reviewable} />
+        </>
+      )}
     </div>
   )
 }

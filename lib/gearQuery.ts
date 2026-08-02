@@ -1,4 +1,5 @@
 import {
+  buildHref,
   first,
   matching,
   POSITIVE_INT,
@@ -71,19 +72,16 @@ export function toGearQuery(filters: GearFilters): GearQuery {
 }
 
 export function buildGearHref(filters: GearFilters) {
-  const params = new URLSearchParams()
-
-  if (filters.searchTerm) params.set("searchTerm", filters.searchTerm)
-  if (filters.category) params.set("category", filters.category)
-  if (filters.brand) params.set("brand", filters.brand)
-  if (filters.minPrice) params.set("minPrice", filters.minPrice)
-  if (filters.maxPrice) params.set("maxPrice", filters.maxPrice)
-  if (filters.availableOnly) params.set("isAvailable", "true")
-  if (filters.sort !== DEFAULT_SORT) params.set("sort", filters.sort)
-  if (filters.page > 1) params.set("page", String(filters.page))
-
-  const query = params.toString()
-  return query ? `/gear?${query}` : "/gear"
+  return buildHref("/gear", {
+    searchTerm: filters.searchTerm,
+    category: filters.category,
+    brand: filters.brand,
+    minPrice: filters.minPrice,
+    maxPrice: filters.maxPrice,
+    isAvailable: filters.availableOnly ? "true" : undefined,
+    sort: filters.sort === DEFAULT_SORT ? undefined : filters.sort,
+    page: filters.page,
+  })
 }
 
 export function hasActiveFilters(filters: GearFilters) {

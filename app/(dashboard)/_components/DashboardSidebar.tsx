@@ -4,6 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Mountain } from "lucide-react"
 
+import { useRequiredSession } from "@/components/providers/SessionProvider"
 import {
   Sidebar,
   SidebarContent,
@@ -16,12 +17,12 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import type { Role } from "@/types"
 
 import { ROLE_LABEL, SIDEBAR_ITEMS } from "../_config/sidebar"
 
-export function DashboardSidebar({ role }: { role: Role }) {
+export function DashboardSidebar() {
   const pathname = usePathname()
+  const { role } = useRequiredSession()
   const items = SIDEBAR_ITEMS[role]
 
   return (

@@ -2,12 +2,14 @@
 
 import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useQueryClient } from "@tanstack/react-query"
 import { ImagePlus, Loader2, Pencil, Plus, X } from "lucide-react"
 import { Controller, useFieldArray, useForm } from "react-hook-form"
 import { toast } from "sonner"
 
 import { createGear } from "@/app/(dashboard)/_actions/createGear"
 import { updateGear } from "@/app/(dashboard)/_actions/updateGear"
+import { SelectField } from "@/components/shared/SelectField"
 import { TextField } from "@/components/shared/TextField"
 import { Button } from "@/components/ui/button"
 import {
@@ -21,14 +23,8 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { providerGearKeys } from "@/lib/queries/providerGear"
 import {
   emptyGearForm,
   gearFormSchema,
@@ -113,6 +109,7 @@ function GearForm({
   })
 
   const { fields, append, remove } = useFieldArray({ control, name: "images" })
+  const queryClient = useQueryClient()
 
   async function onSubmit(values: GearFormInput) {
     const res = gear
@@ -133,6 +130,8 @@ function GearForm({
       )
       return
     }
+
+    queryClient.invalidateQueries({ queryKey: providerGearKeys.all })
 
     toast.success(
       gear
@@ -169,29 +168,18 @@ function GearForm({
           control={control}
           name="categoryId"
           render={({ field }) => (
-            <Select
-              items={categories.map((category) => ({
+            <SelectField
+              options={categories.map((category) => ({
                 value: category.id,
                 label: category.name,
               }))}
-              value={field.value || null}
-              onValueChange={(value) => field.onChange(value ?? "")}
-            >
-              <SelectTrigger
-                id="gear-category"
-                aria-invalid={errors.categoryId ? true : undefined}
-                className="h-10 w-full text-sm"
-              >
-                <SelectValue placeholder="Choose a category" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((category) => (
-                  <SelectItem key={category.id} value={category.id}>
-                    {category.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              value={field.value}
+              onValueChange={field.onChange}
+              id="gear-category"
+              placeholder="Choose a category"
+              invalid={Boolean(errors.categoryId)}
+              className="h-10 w-full text-sm"
+            />
           )}
         />
         {errors.categoryId && (

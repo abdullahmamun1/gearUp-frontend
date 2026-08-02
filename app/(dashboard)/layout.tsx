@@ -1,3 +1,4 @@
+import { SessionProvider } from "@/components/providers/SessionProvider"
 import { AccountMenu } from "@/components/shared/AccountMenu"
 import { ThemeToggle } from "@/components/shared/ThemeToggle"
 import { Separator } from "@/components/ui/separator"
@@ -18,25 +19,27 @@ export default async function DashboardLayout({
   const session = await requireSession()
 
   return (
-    <SidebarProvider>
-      <DashboardSidebar role={session.role} />
+    <SessionProvider value={session}>
+      <SidebarProvider>
+        <DashboardSidebar />
 
-      <SidebarInset>
-        <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-2 border-b bg-background/80 px-4 backdrop-blur-sm">
-          <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mr-2 h-4" />
+        <SidebarInset>
+          <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-2 border-b bg-background/80 px-4 backdrop-blur-sm">
+            <SidebarTrigger className="-ml-1" />
+            <Separator orientation="vertical" className="mr-2 h-4" />
 
-          <div className="ml-auto flex items-center gap-2">
-            <ThemeToggle />
-            <AccountMenu
-              user={session}
-              links={[{ label: "Back to site", href: "/", icon: "home" }]}
-            />
-          </div>
-        </header>
+            <div className="ml-auto flex items-center gap-2">
+              <ThemeToggle />
+              <AccountMenu
+                user={session}
+                links={[{ label: "Back to site", href: "/", icon: "home" }]}
+              />
+            </div>
+          </header>
 
-        <main className="flex-1 p-4 sm:p-6">{children}</main>
-      </SidebarInset>
-    </SidebarProvider>
+          <main className="flex-1 p-4 sm:p-6">{children}</main>
+        </SidebarInset>
+      </SidebarProvider>
+    </SessionProvider>
   )
 }

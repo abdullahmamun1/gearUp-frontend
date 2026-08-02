@@ -9,6 +9,7 @@ import type { GearItem } from "@/types"
 
 export function GearCard({ gear }: { gear: GearItem }) {
   const outOfStock = !gear.isAvailable || gear.stock < 1
+  const rating = gear.rating
 
   return (
     <Link
@@ -60,7 +61,7 @@ export function GearCard({ gear }: { gear: GearItem }) {
           </p>
         )}
 
-        <div className="mt-auto flex items-end justify-between pt-3">
+        <div className="mt-auto flex items-end justify-between gap-3 pt-3">
           <p className="font-semibold">
             {formatPrice(gear.pricePerDay)}
             <span className="text-xs font-normal text-muted-foreground">
@@ -68,11 +69,16 @@ export function GearCard({ gear }: { gear: GearItem }) {
               / day
             </span>
           </p>
-          {gear.provider && (
-            <p className="line-clamp-1 text-xs text-muted-foreground">
-              by {gear.provider.name}
-            </p>
-          )}
+          <div className="grid justify-items-end gap-0.5 text-right">
+            {rating && rating.count > 0 && rating.average !== null && (
+              <GearRating value={rating.average} count={rating.count} />
+            )}
+            {gear.provider && (
+              <p className="line-clamp-1 text-xs text-muted-foreground">
+                by {gear.provider.name}
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </Link>
@@ -91,11 +97,21 @@ function GearImageFallback() {
   )
 }
 
-export function GearRating({ value }: { value: number }) {
+function GearRating({ value, count }: { value: number; count?: number }) {
   return (
-    <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+    <span
+      className="inline-flex items-center gap-1 text-xs text-muted-foreground"
+      aria-label={
+        count === undefined
+          ? `Rated ${value.toFixed(1)} out of 5`
+          : `Rated ${value.toFixed(1)} out of 5 from ${count} ${count === 1 ? "review" : "reviews"}`
+      }
+    >
       <Star className="size-3.5 fill-current text-amber-500" aria-hidden />
-      {value.toFixed(1)}
+      <span aria-hidden>
+        {value.toFixed(1)}
+        {count !== undefined && ` (${count})`}
+      </span>
     </span>
   )
 }
