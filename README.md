@@ -9,10 +9,10 @@ role-protected dashboards.
 
 ## Live
 
-|             |                       |
-| ----------- | --------------------- |
-| Frontend    | _add your Vercel URL_ |
-| Backend API | _add your API URL_    |
+|             |                                         |
+| ----------- | --------------------------------------- |
+| Frontend    | https://gear-up-frontend-chi.vercel.app |
+| Backend API | https://gear-up-backend-two.vercel.app  |
 
 ---
 
