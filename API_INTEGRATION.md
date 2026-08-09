@@ -48,7 +48,7 @@ public, unauthenticated reads are cached; every authenticated read stays
 
 ## Endpoints
 
-31 endpoints. The frontend calls 30 — `POST /api/payments/confirm` is Stripe's
+32 endpoints. The frontend calls 31 — `POST /api/payments/confirm` is Stripe's
 webhook and is only ever called by Stripe.
 
 ### Auth — `/api/auth`
@@ -59,10 +59,16 @@ webhook and is only ever called by Stripe.
 | `POST /login`         | public                  | `loginUser` — [service/auth.ts](./service/auth.ts)                         | `LoginForm`            |
 | `POST /refresh-token` | public (refresh cookie) | `getNewAccessToken` — [service/refreshToken.ts](./service/refreshToken.ts) | [proxy.ts](./proxy.ts) |
 | `GET /me`             | any role                | `getCurrentUser` — [service/currentUser.ts](./service/currentUser.ts)      | [proxy.ts](./proxy.ts) |
+| `PATCH /me`           | any role                | `updateProfile` — [\_actions/updateProfile.ts](<./app/(dashboard)/_actions/updateProfile.ts>) | `ProfileForm`          |
 
 `loginUser` writes both cookies via `setAuthCookies`, decodes the access token to
 pick a landing page, then `redirect()`s. The token never reaches the browser as
 JS-readable state.
+
+`PATCH /me` accepts `name` and `phone` only — a partial body, but not an empty
+one. Anything else in the payload is stripped by Zod before it reaches Prisma,
+so `role`, `status` and `email` cannot be edited by the account that owns them.
+An empty-string `phone` is the documented way to clear the number.
 
 The two `service/` modules use a raw `fetch` rather than `apiFetch`, because
 they run inside the proxy and must send a _specific_ token rather than the one in
@@ -258,6 +264,7 @@ All writes are `"use server"` actions. Client components wrap them in
 | `PayButton`            | `createPayment`                     | redirects to Stripe             |
 | `RentPanel`            | `createRental`                      | redirects to the new order      |
 | `ReviewDialog`         | `createReview`                      | server revalidation             |
+| `ProfileForm`          | `updateProfile`                     | re-mints the access token       |
 
 ### Two caches, both need telling
 
@@ -281,6 +288,18 @@ while the card behind it kept a stale average for five minutes.
 
 `updateUserStatus` has no tag to purge — admin listings are never cached — so it
 only needs `refresh()`.
+
+### `updateProfile` has a third cache: the token itself
+
+The user's name is a **claim inside the access token**, and `getSession()` reads
+the navbar and account menu straight out of that token rather than from the
+database. Renaming yourself would therefore leave the old name in the header
+until the token expired — `refresh()` can't fix that, because nothing is stale
+on the server.
+
+So the action calls `POST /api/auth/refresh-token` after a successful write. That
+endpoint rebuilds the JWT payload from the row it just updated, so the new token
+carries the new name, and `setAuthCookies` swaps it in.
 
 ---
 

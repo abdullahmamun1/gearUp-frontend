@@ -6,6 +6,12 @@ export const DASHBOARD_HOME: Record<Role, string> = {
   ADMIN: "/admin-dashboard",
 }
 
+export const PROFILE_HOME: Record<Role, string> = {
+  CUSTOMER: `${DASHBOARD_HOME.CUSTOMER}/profile`,
+  PROVIDER: `${DASHBOARD_HOME.PROVIDER}/profile`,
+  ADMIN: `${DASHBOARD_HOME.ADMIN}/profile`,
+}
+
 export function roleForPath(pathname: string): Role | null {
   for (const [role, home] of Object.entries(DASHBOARD_HOME) as [
     Role,

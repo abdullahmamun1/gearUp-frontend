@@ -11,7 +11,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
-import { DASHBOARD_HOME } from "@/lib/routes"
+import { DASHBOARD_HOME, PROFILE_HOME } from "@/lib/routes"
 import { getSession } from "@/lib/session"
 import { cn } from "@/lib/utils"
 
@@ -65,6 +65,11 @@ export async function Navbar() {
               user={session}
               links={[
                 { label: "Dashboard", href: dashboardHref, icon: "dashboard" },
+                {
+                  label: "Profile",
+                  href: PROFILE_HOME[session.role],
+                  icon: "profile",
+                },
               ]}
             />
           ) : (

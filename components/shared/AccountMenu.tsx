@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useTransition } from "react"
-import { Home, LayoutDashboard, LogOut } from "lucide-react"
+import { Home, LayoutDashboard, LogOut, UserRound } from "lucide-react"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -16,7 +16,11 @@ import {
 import { logout } from "@/service/auth"
 import type { JwtUser } from "@/types"
 
-const ICONS = { dashboard: LayoutDashboard, home: Home } as const
+const ICONS = {
+  dashboard: LayoutDashboard,
+  home: Home,
+  profile: UserRound,
+} as const
 
 export type AccountMenuLink = {
   label: string

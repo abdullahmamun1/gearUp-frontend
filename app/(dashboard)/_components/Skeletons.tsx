@@ -32,6 +32,28 @@ export function StatCardsSkeleton({
   )
 }
 
+export function ProfileSkeleton() {
+  return (
+    <>
+      <PageHeaderSkeleton />
+      <div className="grid max-w-lg gap-6">
+        <div className="grid gap-px overflow-hidden rounded-xl border bg-border">
+          {Array.from({ length: 6 }, (_, i) => (
+            <div
+              key={i}
+              className="flex items-center justify-between gap-4 bg-card px-4 py-3"
+            >
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-4 w-36" />
+            </div>
+          ))}
+        </div>
+        <Skeleton className="h-9 w-28" />
+      </div>
+    </>
+  )
+}
+
 export function TableSkeleton({
   rows = 5,
   columns = 6,

@@ -7,6 +7,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
+import { PROFILE_HOME } from "@/lib/routes"
 import { requireSession } from "@/lib/session"
 
 import { DashboardSidebar } from "./_components/DashboardSidebar"
@@ -32,7 +33,14 @@ export default async function DashboardLayout({
               <ThemeToggle />
               <AccountMenu
                 user={session}
-                links={[{ label: "Back to site", href: "/", icon: "home" }]}
+                links={[
+                  {
+                    label: "Profile",
+                    href: PROFILE_HOME[session.role],
+                    icon: "profile",
+                  },
+                  { label: "Back to site", href: "/", icon: "home" },
+                ]}
               />
             </div>
           </header>

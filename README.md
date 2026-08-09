@@ -65,6 +65,13 @@ any of these. Password is `Password123` for all three.
 - Read-only moderation views for every listing and every rental order
 - Category CRUD, with a delete that refuses while listings still reference it
 
+### Every role
+
+- Profile page showing the account as the server sees it, with an edit form for
+  name and phone. Email, role and status are deliberately not editable — the
+  API validates the payload down to those two fields, so it can't be talked
+  into more from the client.
+
 ---
 
 ## Tech
