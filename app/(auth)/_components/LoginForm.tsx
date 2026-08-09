@@ -7,6 +7,7 @@ import { toast } from "sonner"
 
 import { TextField } from "@/components/shared/TextField"
 import { Button } from "@/components/ui/button"
+import { DEMO_ACCOUNTS, type DemoAccount } from "@/lib/demoAccounts"
 import { loginSchema, type LoginInput } from "@/lib/schemas/auth"
 import { loginUser } from "@/service/auth"
 
@@ -15,6 +16,8 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
     register,
     handleSubmit,
     setError,
+    clearErrors,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -26,6 +29,12 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
 
     setError("root", { message: res.message })
     toast.error(res.message)
+  }
+
+  function fillDemo(account: DemoAccount) {
+    clearErrors()
+    setValue("email", account.email, { shouldValidate: true })
+    setValue("password", account.password, { shouldValidate: true })
   }
 
   return (
@@ -42,6 +51,25 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
           {errors.root.message}
         </p>
       ) : null}
+
+      <div className="grid gap-2">
+        <p className="text-xs text-muted-foreground">Try a demo account</p>
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+          {DEMO_ACCOUNTS.map((account) => (
+            <Button
+              key={account.email}
+              type="button"
+              variant="outline"
+              size="lg"
+              onClick={() => fillDemo(account)}
+              disabled={isSubmitting}
+              className="h-9 text-xs"
+            >
+              {account.label}
+            </Button>
+          ))}
+        </div>
+      </div>
 
       <TextField
         id="email"

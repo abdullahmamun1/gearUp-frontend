@@ -14,6 +14,17 @@ role-protected dashboards.
 | Frontend    | https://gear-up-frontend-chi.vercel.app |
 | Backend API | https://gear-up-backend-two.vercel.app  |
 
+### Demo accounts
+
+The login page has a **Try a demo account** row — one click fills the form for
+any of these. Password is `Password123` for all three.
+
+| Role     | Email                  |
+| -------- | ---------------------- |
+| Customer | `customer1@gearup.com` |
+| Provider | `provider2@gearup.com` |
+| Admin    | `admin@gearup.com`     |
+
 ---
 
 ## What it does
