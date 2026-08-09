@@ -18,6 +18,8 @@ import { cn } from "@/lib/utils"
 const NAV_LINKS = [
   { label: "Browse gear", href: "/gear" },
   { label: "How it works", href: "/#how-it-works" },
+  { label: "About", href: "/about" },
+  { label: "Contact", href: "/contact" },
 ]
 
 export async function Navbar() {

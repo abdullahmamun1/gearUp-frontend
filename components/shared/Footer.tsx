@@ -11,10 +11,16 @@ const EXPLORE_LINKS = [
   { label: "Log in", href: "/login" },
 ]
 
+const COMPANY_LINKS = [
+  { label: "About", href: "/about" },
+  { label: "Contact", href: "/contact" },
+  { label: "Privacy & Terms", href: "/privacy" },
+]
+
 export function Footer() {
   return (
     <footer className="mt-20 border-t">
-      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <p className="flex items-center gap-2 font-heading font-bold">
             <Mountain className="size-4 text-primary" aria-hidden />
@@ -50,6 +56,19 @@ export function Footer() {
           <h2 className="font-heading text-sm font-semibold">Explore</h2>
           <ul className="mt-4 grid gap-2.5 text-sm text-muted-foreground">
             {EXPLORE_LINKS.map((link) => (
+              <li key={link.href}>
+                <Link href={link.href} className="hover:text-foreground">
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div>
+          <h2 className="font-heading text-sm font-semibold">Company</h2>
+          <ul className="mt-4 grid gap-2.5 text-sm text-muted-foreground">
+            {COMPANY_LINKS.map((link) => (
               <li key={link.href}>
                 <Link href={link.href} className="hover:text-foreground">
                   {link.label}
