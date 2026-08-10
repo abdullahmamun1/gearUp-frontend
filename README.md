@@ -31,6 +31,8 @@ any of these. Password is `Password123` for all three.
 
 ### Public
 
+- Home page in eight sections — category grid, featured gear, how it works, a
+  review slider, an FAQ accordion and a newsletter sign-up
 - Responsive gear grid with `next/image`, price per day, category and
   availability
 - Filter by search term, category, brand, price range and availability —
@@ -198,6 +200,17 @@ request that rendered the page.
 same way: a field error, a toast, or an inline panel. Opaque backend messages
 are translated at the call site, so Prisma's `"Duplicate Key Error"` reaches
 the user as _"A category with that name already exists."_
+
+### Two forms that don't reach a database
+
+**The contact form and the newsletter sign-up validate but don't persist.** The
+API has no `ContactMessage` or `Subscriber` model, so both server actions
+re-validate the payload with the same Zod schema the client used and return
+success — nothing is stored and no email is sent. Everything else on the site
+talks to the real API.
+
+The contact page carries a real email address and phone number precisely
+because of this, so there is always a route that genuinely reaches a person.
 
 ---
 

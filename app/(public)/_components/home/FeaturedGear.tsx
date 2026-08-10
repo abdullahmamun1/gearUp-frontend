@@ -9,7 +9,7 @@ export async function FeaturedGear() {
   const items = res.data?.data ?? []
 
   return (
-    <section className="mx-auto max-w-6xl px-4 pt-14">
+    <section className="mx-auto max-w-6xl px-4 my-15">
       <div className="flex items-end justify-between gap-4">
         <div>
           <h2 className="font-heading text-2xl font-bold sm:text-3xl">

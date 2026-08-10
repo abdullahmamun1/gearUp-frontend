@@ -106,6 +106,14 @@ detail page shows an aggregate without a second request.
 per gear item. That's why `ReviewDialog` asks which item the review is about when
 an order has more than one.
 
+**The home page's review slider has no endpoint of its own.** There is no
+cross-gear review listing, so `getTestimonials()` fans out: the gear list
+already reports `rating.count` per item, so it filters to items that actually
+have reviews, caps that at 6, and fetches those pages in parallel. Today that is
+**2 requests**; the ceiling is 7, and every one of them is cached. If review
+volume ever makes that fan-out the wrong shape, the fix is a
+`GET /api/reviews?limit=N` on the backend and a one-line swap here.
+
 ### Rentals — `/api/rentals`
 
 | Endpoint                 | Guard                       | Frontend module                                                               | Used by                                             |
