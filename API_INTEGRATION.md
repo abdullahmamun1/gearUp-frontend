@@ -168,6 +168,15 @@ Every route here is `auth(ADMIN)` at the router level.
 The admin dashboard's stat cards call the three listings in parallel with
 `limit=1` and read only `meta.total` — see `getAdminCounts`.
 
+**The two overview charts add no endpoints.** `getRentalsByStatus` in
+[getAdminCharts.ts](<./app/(dashboard)/_actions/getAdminCharts.ts>) fires
+`GET /rentals?status=…&limit=1` once per status and keeps only `meta.total`, so
+six counts cost six headers and no order bodies. `getGearByCategory` calls the
+public `getCategories()` — `_count.gearItems` is already on every row — which
+means it rides the same hour-long `categories` cache tag the category CRUD
+already invalidates, and a new category shows up in the chart the moment one is
+created.
+
 `DELETE /category/:id` refuses with a 400 while any listing references the
 category. `DeleteCategoryDialog` reads `_count.gearItems` and disables the
 button up front, so the guard is explained before it fires rather than after.

@@ -54,6 +54,17 @@ export function ProfileSkeleton() {
   )
 }
 
+export function ChartCardSkeleton() {
+  return (
+    <div className="rounded-xl border bg-card p-4">
+      <Skeleton className="h-4 w-40" />
+      <Skeleton className="mt-2 h-3 w-56" />
+      <Skeleton className="mt-4 h-50 w-full" />
+      <Skeleton className="mt-2 h-3 w-24" />
+    </div>
+  )
+}
+
 export function TableSkeleton({
   rows = 5,
   columns = 6,

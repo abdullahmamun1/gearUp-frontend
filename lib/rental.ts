@@ -29,6 +29,15 @@ export const PROVIDER_NEXT_STATUS: Partial<
   PICKED_UP: { next: "RETURNED", label: "Mark returned" },
 }
 
+export const RENTAL_STATUS_SHORT_LABEL: Record<RentalStatus, string> = {
+  PLACED: "Placed",
+  CONFIRMED: "Confirmed",
+  PAID: "Paid",
+  PICKED_UP: "Picked up",
+  RETURNED: "Returned",
+  CANCELLED: "Cancelled",
+}
+
 export function startOfToday() {
   const now = new Date()
   now.setHours(0, 0, 0, 0)

@@ -60,7 +60,9 @@ any of these. Password is `Password123` for all three.
 
 ### Admin
 
-- Platform totals for users, listings and rentals
+- Platform totals for users, listings and rentals, plus two live bar charts —
+  orders by status and listings by category — drawn from the same API the
+  tables read, with a table view of the numbers under each one
 - User table with role and status filters, and suspend / activate switches
 - Read-only moderation views for every listing and every rental order
 - Category CRUD, with a delete that refuses while listings still reference it
@@ -83,6 +85,7 @@ any of these. Password is `Password123` for all three.
 | **Tailwind CSS v4** · **Base UI**                                       | shadcn-style components in `components/ui`    |
 | **TanStack Query v5**                                                   | Client cache for every dashboard table        |
 | **React Hook Form + Zod v4**                                            | All form state and validation                 |
+| **Recharts 3**                                                          | The two admin overview charts                 |
 | **Stripe.js**                                                           | Checkout redirect flow                        |
 | `jsonwebtoken` · `next-themes` · `date-fns` · `sonner` · `lucide-react` |                                               |
 
