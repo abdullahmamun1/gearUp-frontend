@@ -1,5 +1,7 @@
 import { CalendarRange, PackageCheck, Search } from "lucide-react"
 
+import { Section } from "./Section"
+
 const STEPS = [
   {
     icon: Search,
@@ -20,29 +22,26 @@ const STEPS = [
 
 export function HowItWorks() {
   return (
-    <section id="how-it-works" className="scroll-mt-20 my-14 border-t bg-muted/30">
-      <div className="mx-auto max-w-6xl  px-4 py-16">
-        <h2 className="text-center font-heading text-2xl font-bold sm:text-3xl">
-          How it works
-        </h2>
-
-        <ol className="mt-10 grid gap-8 sm:grid-cols-3">
-          {STEPS.map((step, index) => (
-            <li key={step.title} className="text-center">
-              <div className="mx-auto grid size-12 place-items-center rounded-full bg-primary/10">
-                <step.icon className="size-5 text-primary" aria-hidden />
-              </div>
-              <h3 className="mt-4 font-heading font-semibold">
-                <span className="text-muted-foreground">{index + 1}. </span>
-                {step.title}
-              </h3>
-              <p className="mt-1.5 text-sm text-muted-foreground">
-                {step.body}
-              </p>
-            </li>
-          ))}
-        </ol>
-      </div>
-    </section>
+    <Section
+      id="how-it-works"
+      eyebrow="Three steps"
+      title="How it works"
+      description="From browsing to the trailhead, with nothing in between."
+    >
+      <ol className="grid gap-8 sm:grid-cols-3">
+        {STEPS.map((step, index) => (
+          <li key={step.title} className="group relative text-center">
+            <div className="mx-auto grid size-12 place-items-center rounded-full bg-primary/10 transition-transform group-hover:scale-110">
+              <step.icon className="size-5 text-primary" aria-hidden />
+            </div>
+            <h3 className="mt-4 font-heading font-semibold">
+              <span className="text-muted-foreground">{index + 1}. </span>
+              {step.title}
+            </h3>
+            <p className="mt-1.5 text-sm text-muted-foreground">{step.body}</p>
+          </li>
+        ))}
+      </ol>
+    </Section>
   )
 }

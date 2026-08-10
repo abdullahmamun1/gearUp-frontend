@@ -34,7 +34,8 @@ any of these. Password is `Password123` for all three.
 - Home page in eight sections — category grid, featured gear, how it works, a
   review slider, an FAQ accordion and a newsletter sign-up
 - Responsive gear grid with `next/image`, price per day, category and
-  availability
+  availability, each card ending in a **View details** button — the only
+  clickable target on the card
 - Filter by search term, category, brand, price range and availability —
   **all held in the URL**, so every filtered view is shareable and
   server-rendered

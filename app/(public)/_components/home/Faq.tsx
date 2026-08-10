@@ -7,6 +7,8 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 
+import { Section } from "./Section"
+
 const FAQS = [
   {
     q: "How does renting work?",
@@ -36,23 +38,21 @@ const FAQS = [
 
 export function Faq() {
   return (
-    <section className="mx-auto max-w-6xl px-4 pt-14">
-      <h2 className="font-heading text-2xl font-bold sm:text-3xl">
-        Frequently asked questions
-      </h2>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Still stuck? The{" "}
-        <Link href="/contact" className="text-primary hover:underline">
-          contact page
-        </Link>{" "}
-        has a real email and phone number.
-      </p>
-
-      <Accordion
-        keepMounted
-        hiddenUntilFound
-        className="mt-6 max-w-full border-t"
-      >
+    <Section
+      tone="muted"
+      eyebrow="Before you book"
+      title="Frequently asked questions"
+      description={
+        <>
+          Still stuck? The{" "}
+          <Link href="/contact" className="text-primary hover:underline">
+            contact page
+          </Link>{" "}
+          has a real email and phone number.
+        </>
+      }
+    >
+      <Accordion keepMounted hiddenUntilFound className="max-w-full border-t">
         {FAQS.map((faq) => (
           <AccordionItem key={faq.q}>
             <AccordionTrigger>{faq.q}</AccordionTrigger>
@@ -60,6 +60,6 @@ export function Faq() {
           </AccordionItem>
         ))}
       </Accordion>
-    </section>
+    </Section>
   )
 }

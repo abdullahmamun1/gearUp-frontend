@@ -1,12 +1,11 @@
 import { Skeleton } from "@/components/ui/skeleton"
 
+import { SectionSkeleton } from "./SectionSkeleton"
+
 export function TestimonialsSkeleton() {
   return (
-    <section className="mx-auto max-w-6xl px-4 pt-14">
-      <Skeleton className="h-8 w-52" />
-      <Skeleton className="mt-2 h-4 w-80" />
-
-      <div className="mt-6 flex gap-5 overflow-hidden">
+    <SectionSkeleton tone="muted">
+      <div className="flex gap-5 overflow-hidden">
         {Array.from({ length: 3 }, (_, i) => (
           <div
             key={i}
@@ -21,6 +20,6 @@ export function TestimonialsSkeleton() {
           </div>
         ))}
       </div>
-    </section>
+    </SectionSkeleton>
   )
 }

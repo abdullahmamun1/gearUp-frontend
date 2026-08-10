@@ -1,9 +1,5 @@
 import type { Metadata } from "next"
 import { Suspense } from "react"
-import Link from "next/link"
-
-import { buttonVariants } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
 
 import { getGearList } from "./_actions/getGear"
 import { CategoryGrid } from "./_components/home/CategoryGrid"
@@ -14,6 +10,7 @@ import { FeaturedGearSkeleton } from "./_components/home/FeaturedGearSkeleton"
 import { Hero } from "./_components/home/Hero"
 import { HowItWorks } from "./_components/home/HowItWorks"
 import { Newsletter } from "./_components/home/Newsletter"
+import { ProviderCta } from "./_components/home/ProviderCta"
 import { Testimonials } from "./_components/home/Testimonials"
 import { TestimonialsSkeleton } from "./_components/home/TestimonialsSkeleton"
 
@@ -44,25 +41,7 @@ export default async function HomePage() {
         <Testimonials />
       </Suspense>
 
-      <section className="mx-auto max-w-6xl px-4 pt-14">
-        <div className="rounded-2xl border bg-card px-6 py-12 text-center">
-          <h2 className="font-heading text-2xl font-bold sm:text-3xl">
-            Got gear sitting in the garage?
-          </h2>
-          <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-            List it on GearUp and earn from it between your own adventures.
-          </p>
-          <Link
-            href="/register"
-            className={cn(
-              buttonVariants({ size: "lg" }),
-              "mt-6 h-11 px-5 text-sm"
-            )}
-          >
-            Become a provider
-          </Link>
-        </div>
-      </section>
+      <ProviderCta />
 
       <Faq />
 

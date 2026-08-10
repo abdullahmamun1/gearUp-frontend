@@ -3,6 +3,8 @@ import Link from "next/link"
 import { getCategories } from "@/app/(public)/_actions/getCategories"
 import { categoryIcon } from "@/lib/categoryIcons"
 
+import { Section } from "./Section"
+
 export async function CategoryGrid() {
   const res = await getCategories()
 
@@ -11,15 +13,12 @@ export async function CategoryGrid() {
   }
 
   return (
-    <section className="mx-auto max-w-6xl px-4 pt-14">
-      <h2 className="font-heading text-2xl font-bold sm:text-3xl">
-        Browse by category
-      </h2>
-      <p className="mt-1 text-sm text-muted-foreground">
-        {res.data.length} kinds of kit, all rented by the day.
-      </p>
-
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <Section
+      eyebrow="Start here"
+      title="Browse by category"
+      description={`${res.data.length} kinds of kit, all rented by the day.`}
+    >
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {res.data.map((category) => {
           const Icon = categoryIcon(category.name)
           const count = category._count?.gearItems ?? 0
@@ -31,7 +30,7 @@ export async function CategoryGrid() {
               className="group flex h-full flex-col rounded-xl border bg-card p-5 transition-colors hover:border-primary/40 hover:bg-primary/5"
             >
               <span
-                className="grid size-10 place-items-center rounded-full bg-primary/10 text-primary"
+                className="grid size-10 place-items-center rounded-full bg-primary/10 text-primary transition-transform group-hover:scale-110"
                 aria-hidden
               >
                 <Icon className="size-5" />
@@ -54,6 +53,6 @@ export async function CategoryGrid() {
           )
         })}
       </div>
-    </section>
+    </Section>
   )
 }

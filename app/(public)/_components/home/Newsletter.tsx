@@ -45,9 +45,12 @@ export function Newsletter() {
   }
 
   return (
-    <section className="mx-auto max-w-6xl px-4 py-14">
-      <div className="rounded-2xl border bg-primary/5 px-6 py-12 text-center">
-        <h2 className="font-heading text-2xl font-bold sm:text-3xl">
+    <section className="mx-auto max-w-6xl px-4 py-16 sm:py-20">
+      <div className="reveal rounded-2xl border bg-primary/5 px-6 py-12 text-center">
+        <p className="text-xs font-semibold tracking-wider text-primary uppercase">
+          Stay in the loop
+        </p>
+        <h2 className="mt-1.5 font-heading text-2xl font-bold sm:text-3xl">
           New gear, straight to your inbox
         </h2>
         <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">

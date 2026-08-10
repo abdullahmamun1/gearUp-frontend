@@ -1,8 +1,9 @@
 import Image from "next/image"
 import Link from "next/link"
-import { Backpack, Star } from "lucide-react"
+import { ArrowRight, Backpack, Star } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
+import { buttonVariants } from "@/components/ui/button"
 import { formatPrice } from "@/lib/format"
 import { cn } from "@/lib/utils"
 import type { GearItem } from "@/types"
@@ -12,13 +13,7 @@ export function GearCard({ gear }: { gear: GearItem }) {
   const rating = gear.rating
 
   return (
-    <Link
-      href={`/gear/${gear.id}`}
-      className={cn(
-        "group flex flex-col overflow-hidden rounded-xl border bg-card focus-visible:ring-ring/60",
-        "transition-shadow hover:shadow-lg focus-visible:ring-2 focus-visible:outline-none"
-      )}
-    >
+    <div className="group flex flex-col overflow-hidden rounded-xl border bg-card transition-shadow hover:shadow-lg">
       <div className="relative aspect-4/3 overflow-hidden bg-muted">
         {gear.imageUrl ? (
           <Image
@@ -80,8 +75,25 @@ export function GearCard({ gear }: { gear: GearItem }) {
             )}
           </div>
         </div>
+
+        <Link
+          href={`/gear/${gear.id}`}
+          aria-label={`View details for ${gear.name}`}
+          className={cn(
+            buttonVariants({ variant: "outline", size: "lg" }),
+            "mt-4 h-9 w-full gap-1.5 text-sm transition-colors",
+            "group-hover:border-primary/30 group-hover:text-primary",
+            "hover:border-primary hover:bg-primary/10 hover:text-primary"
+          )}
+        >
+          View details
+          <ArrowRight
+            className="size-3.5 transition-transform group-hover:translate-x-0.5"
+            aria-hidden
+          />
+        </Link>
       </div>
-    </Link>
+    </div>
   )
 }
 

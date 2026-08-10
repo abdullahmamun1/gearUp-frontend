@@ -1,5 +1,6 @@
 import { getTestimonials } from "@/app/(public)/_actions/getReviews"
 
+import { Section } from "./Section"
 import { TestimonialSlider } from "./TestimonialSlider"
 
 export async function Testimonials() {
@@ -10,15 +11,13 @@ export async function Testimonials() {
   }
 
   return (
-    <section className="mx-auto max-w-6xl px-4 ">
-      <h2 className="font-heading text-2xl font-bold sm:text-3xl">
-        What renters say
-      </h2>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Left by people after they returned the gear — nothing else counts.
-      </p>
-
-      <TestimonialSlider reviews={reviews} className="mt-6" />
-    </section>
+    <Section
+      tone="muted"
+      eyebrow="From renters"
+      title="What renters say"
+      description="Left by people after they returned the gear — nothing else counts."
+    >
+      <TestimonialSlider reviews={reviews} />
+    </Section>
   )
 }
