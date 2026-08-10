@@ -21,6 +21,15 @@ export function toDateValue(date: Date) {
   return `${date.getFullYear()}-${month}-${day}`
 }
 
+export const RENTAL_STATUSES: RentalStatus[] = [
+  "PLACED",
+  "CONFIRMED",
+  "PAID",
+  "PICKED_UP",
+  "RETURNED",
+  "CANCELLED",
+]
+
 export const PROVIDER_NEXT_STATUS: Partial<
   Record<RentalStatus, { next: RentalStatus; label: string }>
 > = {

@@ -191,6 +191,38 @@ button up front, so the guard is explained before it fires rather than after.
 
 ---
 
+## Table filtering
+
+Filtering and pagination added on **every** dashboard table. Four endpoints
+gained query filters to make that real:
+
+| Endpoint                | Filters                                    |
+| ----------------------- | ------------------------------------------ |
+| `GET /admin/users`      | `role`, `status`                           |
+| `GET /admin/gear`       | **`searchTerm`, `category`, `isAvailable`** |
+| `GET /admin/rentals`    | `status`                                   |
+| `GET /provider/gear`    | `searchTerm`, `category`, `isAvailable`, `sortBy`, `sortOrder` |
+| `GET /provider/orders`  | **`status`**                               |
+| `GET /rentals`          | `status`                                   |
+| `GET /payments`         | **`status`**                               |
+
+Bold entries are new. Each is validated at the router — an unknown status or a
+malformed category id comes back as a 400, not a silently unfiltered list. The
+frontend parsers (`lib/adminQuery.ts`, `lib/dashboardQuery.ts`) drop unknown
+values before building the query, so a hand-typed `?status=BOGUS` renders the
+unfiltered table rather than an error.
+
+**Filters live in the URL, never in component state.** That is what lets the
+server render the filtered page, makes a filtered view shareable, and lets
+`Pagination` build page links that carry the current filters —
+`buildHref(path, { ...filters, page })`.
+
+**`GET /api/categories` is the one table that filters client-side.** It returns
+a plain array with no `meta`, and public category dropdowns depend on that
+shape, so `CategoriesList` filters and slices the six rows it already has.
+
+---
+
 ## Who owns which data
 
 |                                                              | Owner                                     |

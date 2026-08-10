@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 import type { RentalStatus } from "@/types"
 
 import { getProviderGear } from "../_actions/getProviderGear"
-import { getProviderOrders } from "../_actions/getProviderOrders"
+import { getProviderOrderCounts } from "../_actions/getProviderOrders"
 import { PageHeader, StatCard } from "../_components/PageHeader"
 
 import { EmptyState } from "@/components/shared/EmptyState"
@@ -18,14 +18,13 @@ const NEEDS_ACTION: RentalStatus[] = ["PLACED", "PAID", "PICKED_UP"]
 
 export default async function ProviderOverviewPage() {
   const session = await getSession()
-  const [res, gearRes] = await Promise.all([
-    getProviderOrders(),
+  const [counts, gearRes] = await Promise.all([
+    getProviderOrderCounts(),
     getProviderGear({ limit: "1" }),
   ])
-  const orders = res.data?.data ?? []
 
   const count = (statuses: RentalStatus[]) =>
-    orders.filter((order) => statuses.includes(order.status)).length
+    statuses.reduce((sum, status) => sum + counts.byStatus[status], 0)
 
   return (
     <>
@@ -42,9 +41,9 @@ export default async function ProviderOverviewPage() {
         }
       />
 
-      {!res.success && (
+      {counts.failed && (
         <p className="mb-6 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {res.message}
+          {counts.message}
         </p>
       )}
 
@@ -53,10 +52,7 @@ export default async function ProviderOverviewPage() {
           label="Gear listed"
           value={gearRes.data?.meta?.total ?? "—"}
         />
-        <StatCard
-          label="Total orders"
-          value={res.data?.meta?.total ?? orders.length}
-        />
+        <StatCard label="Total orders" value={counts.total} />
         <StatCard
           label="Needs action"
           value={count(NEEDS_ACTION)}
@@ -65,7 +61,7 @@ export default async function ProviderOverviewPage() {
         <StatCard label="Returned" value={count(["RETURNED"])} />
       </div>
 
-      {orders.length === 0 && res.success && (
+      {counts.total === 0 && !counts.failed && (
         <EmptyState className="mt-6">
           No orders yet. They appear here as customers book your gear.
         </EmptyState>

@@ -11,7 +11,7 @@ import {
   type RawSearchParams,
 } from "@/lib/adminQuery"
 
-import { AdminFilters } from "../_components/AdminFilters"
+import { TableFilters } from "@/app/(dashboard)/_components/TableFilters"
 import { AdminRentalsTable } from "./_components/AdminRentalsTable"
 
 export const metadata: Metadata = { title: "Rentals · GearUp" }
@@ -33,7 +33,7 @@ export default async function AdminRentalsPage({
         description="Every rental order on the platform."
       />
 
-      <AdminFilters
+      <TableFilters
         basePath={ADMIN_RENTALS_PATH}
         specs={[
           {

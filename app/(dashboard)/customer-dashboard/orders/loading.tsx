@@ -1,10 +1,15 @@
-import { PageHeaderSkeleton, TableSkeleton } from "../../_components/Skeletons"
+import {
+  FilterBarSkeleton,
+  PageHeaderSkeleton,
+  TableSkeleton,
+} from "../../_components/Skeletons"
 
 export default function Loading() {
   return (
     <>
-      <PageHeaderSkeleton />
-      <TableSkeleton columns={6} rows={5} />
+      <PageHeaderSkeleton action />
+      <FilterBarSkeleton />
+      <TableSkeleton columns={5} rows={5} />
     </>
   )
 }

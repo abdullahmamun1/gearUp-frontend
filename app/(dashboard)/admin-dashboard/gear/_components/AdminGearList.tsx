@@ -39,7 +39,7 @@ export function AdminGearList({
   const meta = data?.meta
 
   if (gear.length === 0) {
-    return <EmptyState>No gear has been listed yet.</EmptyState>
+    return <EmptyState>No listings match those filters.</EmptyState>
   }
 
   return (
@@ -85,7 +85,7 @@ export function AdminGearList({
       <Pagination
         page={filters.page}
         totalPages={meta?.totalPages ?? 1}
-        hrefFor={(page) => buildHref(ADMIN_GEAR_PATH, { page })}
+        hrefFor={(page) => buildHref(ADMIN_GEAR_PATH, { ...filters, page })}
         label="Gear pagination"
       />
     </>

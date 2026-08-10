@@ -5,7 +5,7 @@ import { buttonVariants } from "@/components/ui/button"
 import { getSession } from "@/lib/session"
 import { cn } from "@/lib/utils"
 import type { RentalStatus } from "@/types"
-import { getMyRentals } from "../_actions/getMyRentals"
+import { getMyRentalCounts } from "../_actions/getMyRentals"
 import { PageHeader, StatCard } from "../_components/PageHeader"
 
 import { EmptyState } from "@/components/shared/EmptyState"
@@ -16,11 +16,10 @@ const ACTIVE: RentalStatus[] = ["PLACED", "CONFIRMED", "PAID", "PICKED_UP"]
 
 export default async function CustomerOverviewPage() {
   const session = await getSession()
-  const res = await getMyRentals()
-  const orders = res.data?.data ?? []
+  const counts = await getMyRentalCounts()
 
   const count = (statuses: RentalStatus[]) =>
-    orders.filter((order) => statuses.includes(order.status)).length
+    statuses.reduce((sum, status) => sum + counts.byStatus[status], 0)
 
   return (
     <>
@@ -34,14 +33,14 @@ export default async function CustomerOverviewPage() {
         }
       />
 
-      {!res.success && (
+      {counts.failed && (
         <p className="mb-6 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {res.message}
+          {counts.message}
         </p>
       )}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Total rentals" value={res.data?.meta?.total ?? 0} />
+        <StatCard label="Total rentals" value={counts.total} />
         <StatCard
           label="Active"
           value={count(ACTIVE)}
@@ -51,7 +50,7 @@ export default async function CustomerOverviewPage() {
         <StatCard label="Cancelled" value={count(["CANCELLED"])} />
       </div>
 
-      {orders.length === 0 && res.success && (
+      {counts.total === 0 && !counts.failed && (
         <EmptyState
           className="mt-6"
           action={

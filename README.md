@@ -66,6 +66,8 @@ any of these. Password is `Password123` for all three.
   orders by status and listings by category — drawn from the same API the
   tables read, with a table view of the numbers under each one
 - User table with role and status filters, and suspend / activate switches
+- Every dashboard table across all three roles filters and paginates, with the
+  filters held in the URL so a filtered view is shareable
 - Read-only moderation views for every listing and every rental order
 - Category CRUD, with a delete that refuses while listings still reference it
 

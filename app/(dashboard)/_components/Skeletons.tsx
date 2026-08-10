@@ -65,6 +65,23 @@ export function ChartCardSkeleton() {
   )
 }
 
+export function FilterBarSkeleton({
+  fields = 1,
+  search = false,
+}: {
+  fields?: number
+  search?: boolean
+}) {
+  return (
+    <div className="mb-6 flex flex-wrap items-end gap-3 rounded-xl border bg-card p-4">
+      {search && <Skeleton className="h-14 min-w-56 flex-1" />}
+      {Array.from({ length: fields }, (_, i) => (
+        <Skeleton key={i} className="h-14 w-44" />
+      ))}
+    </div>
+  )
+}
+
 export function TableSkeleton({
   rows = 5,
   columns = 6,

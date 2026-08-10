@@ -1,15 +1,17 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { useTransition } from "react"
+import { useEffect, useState, useTransition } from "react"
 import { X } from "lucide-react"
 
 import { FilterField } from "@/components/shared/FilterField"
+import { SearchInput } from "@/components/shared/SearchInput"
 import { SelectField, type SelectOption } from "@/components/shared/SelectField"
 import { Button } from "@/components/ui/button"
 import { buildHref } from "@/lib/searchParams"
 
 const ALL = "all"
+const SEARCH_DEBOUNCE_MS = 500
 
 export type FilterSpec = {
   name: string
@@ -18,20 +20,32 @@ export type FilterSpec = {
   options: SelectOption[]
 }
 
-export function AdminFilters({
+export type SearchSpec = {
+  name: string
+  label: string
+  placeholder: string
+  value?: string
+}
+
+export function TableFilters({
   basePath,
-  specs,
+  specs = [],
+  search,
 }: {
   basePath: string
-  specs: FilterSpec[]
+  specs?: FilterSpec[]
+  search?: SearchSpec
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
+  const [term, setTerm] = useState(search?.value ?? "")
 
-  const current = Object.fromEntries(
+  const current: Record<string, string | undefined> = Object.fromEntries(
     specs.map((spec) => [spec.name, spec.value])
   )
-  const hasActive = specs.some((spec) => spec.value)
+  if (search) current[search.name] = search.value
+
+  const hasActive = specs.some((spec) => spec.value) || Boolean(search?.value)
 
   function apply(name: string, value: string | undefined) {
     startTransition(() =>
@@ -39,8 +53,48 @@ export function AdminFilters({
     )
   }
 
+  const activeTerm = search?.value ?? ""
+  useEffect(() => {
+    if (!search) return
+
+    const typed = term.trim()
+    if (typed === activeTerm) return
+
+    const timer = setTimeout(() => {
+      startTransition(() =>
+        router.replace(
+          buildHref(basePath, {
+            ...current,
+            [search.name]: typed || undefined,
+            page: 1,
+          })
+        )
+      )
+    }, SEARCH_DEBOUNCE_MS)
+
+    return () => clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [term, activeTerm])
+
+  function clearAll() {
+    setTerm("")
+    startTransition(() => router.push(basePath))
+  }
+
   return (
     <div className="mb-6 flex flex-wrap items-end gap-3 rounded-xl border bg-card p-4">
+      {search && (
+        <FilterField label={search.label} className="min-w-56 flex-1">
+          <SearchInput
+            value={term}
+            onChange={setTerm}
+            placeholder={search.placeholder}
+            label={search.label}
+            isPending={isPending}
+          />
+        </FilterField>
+      )}
+
       {specs.map((spec) => (
         <FilterField key={spec.name} label={spec.label}>
           <SelectField
@@ -62,7 +116,7 @@ export function AdminFilters({
           type="button"
           variant="ghost"
           size="lg"
-          onClick={() => startTransition(() => router.push(basePath))}
+          onClick={clearAll}
           disabled={isPending}
           className="h-9 gap-1.5 text-xs text-muted-foreground"
         >

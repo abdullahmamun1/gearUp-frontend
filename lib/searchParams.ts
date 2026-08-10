@@ -14,6 +14,18 @@ export function matching(value: string | undefined, pattern: RegExp) {
   return value && pattern.test(value) ? value : undefined
 }
 
+export function parsePage(raw: RawSearchParams) {
+  const page = matching(first(raw.page), POSITIVE_INT)
+  return page ? Number(page) : 1
+}
+
+export function oneOf<T extends string>(
+  value: string | undefined,
+  allowed: readonly T[]
+) {
+  return allowed.includes(value as T) ? (value as T) : undefined
+}
+
 export type QueryParams = Record<string, string | number | undefined>
 
 export function toQueryString(params: QueryParams) {

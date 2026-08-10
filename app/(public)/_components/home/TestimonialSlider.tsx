@@ -56,7 +56,7 @@ export function TestimonialSlider({
         onScroll={sync}
         tabIndex={0}
         aria-label="Renter reviews"
-        className="flex snap-x snap-mandatory [scrollbar-width:none] gap-5 overflow-x-auto pb-2 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring [&::-webkit-scrollbar]:hidden"
+        className="flex snap-x snap-mandatory scrollbar-none gap-5 overflow-x-auto pb-2 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring [&::-webkit-scrollbar]:hidden"
       >
         {reviews.map((review) => (
           <li

@@ -12,7 +12,7 @@ import {
   type RawSearchParams,
 } from "@/lib/adminQuery"
 
-import { AdminFilters } from "../_components/AdminFilters"
+import { TableFilters } from "@/app/(dashboard)/_components/TableFilters"
 import { AdminUsersTable } from "./_components/AdminUsersTable"
 
 export const metadata: Metadata = { title: "Users · GearUp" }
@@ -31,7 +31,7 @@ export default async function AdminUsersPage({
     <>
       <PageHeader title="Users" description="Everyone on the platform." />
 
-      <AdminFilters
+      <TableFilters
         basePath={ADMIN_USERS_PATH}
         specs={[
           {

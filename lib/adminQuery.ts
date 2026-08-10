@@ -1,51 +1,45 @@
 import {
   first,
   matching,
-  POSITIVE_INT,
+  oneOf,
+  parsePage,
   toQueryString,
+  UUID,
   type QueryParams,
   type RawSearchParams,
 } from "@/lib/searchParams"
+import { RENTAL_STATUSES } from "@/lib/rental"
 import type { RentalStatus, Role, UserStatus } from "@/types"
 
 export type { RawSearchParams }
+export { RENTAL_STATUSES }
 
 export const ADMIN_PAGE_SIZE = 10
 
 export const ADMIN_USERS_PATH = "/admin-dashboard/users"
 export const ADMIN_GEAR_PATH = "/admin-dashboard/gear"
 export const ADMIN_RENTALS_PATH = "/admin-dashboard/rentals"
+export const ADMIN_CATEGORIES_PATH = "/admin-dashboard/categories"
 
 export const USER_ROLES: Role[] = ["CUSTOMER", "PROVIDER", "ADMIN"]
 export const USER_STATUSES: UserStatus[] = ["ACTIVE", "SUSPENDED"]
-export const RENTAL_STATUSES: RentalStatus[] = [
-  "PLACED",
-  "CONFIRMED",
-  "PAID",
-  "PICKED_UP",
-  "RETURNED",
-  "CANCELLED",
-]
+ 
+export const AVAILABILITY_VALUES = ["true", "false"] as const
+export type AvailabilityValue = (typeof AVAILABILITY_VALUES)[number]
 
 export type AdminUsersFilters = {
   role?: Role
   status?: UserStatus
   page: number
 }
-export type AdminGearFilters = { page: number }
+export type AdminGearFilters = {
+  searchTerm?: string
+  category?: string
+  isAvailable?: AvailabilityValue
+  page: number
+}
 export type AdminRentalsFilters = { status?: RentalStatus; page: number }
-
-function parsePage(raw: RawSearchParams) {
-  const page = matching(first(raw.page), POSITIVE_INT)
-  return page ? Number(page) : 1
-}
-
-function oneOf<T extends string>(
-  value: string | undefined,
-  allowed: readonly T[]
-) {
-  return allowed.includes(value as T) ? (value as T) : undefined
-}
+export type AdminCategoriesFilters = { searchTerm?: string; page: number }
 
 export function parseAdminUsersFilters(
   raw: RawSearchParams
@@ -58,7 +52,12 @@ export function parseAdminUsersFilters(
 }
 
 export function parseAdminGearFilters(raw: RawSearchParams): AdminGearFilters {
-  return { page: parsePage(raw) }
+  return {
+    searchTerm: first(raw.searchTerm)?.slice(0, 100),
+    category: matching(first(raw.category), UUID),
+    isAvailable: oneOf(first(raw.isAvailable), AVAILABILITY_VALUES),
+    page: parsePage(raw),
+  }
 }
 
 export function parseAdminRentalsFilters(
@@ -66,6 +65,15 @@ export function parseAdminRentalsFilters(
 ): AdminRentalsFilters {
   return {
     status: oneOf(first(raw.status), RENTAL_STATUSES),
+    page: parsePage(raw),
+  }
+}
+
+export function parseAdminCategoriesFilters(
+  raw: RawSearchParams
+): AdminCategoriesFilters {
+  return {
+    searchTerm: first(raw.searchTerm)?.slice(0, 100),
     page: parsePage(raw),
   }
 }
