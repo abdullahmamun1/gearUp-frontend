@@ -10,6 +10,8 @@ import { FeaturedGearSkeleton } from "./_components/home/FeaturedGearSkeleton"
 import { Hero } from "./_components/home/Hero"
 import { HowItWorks } from "./_components/home/HowItWorks"
 import { Newsletter } from "./_components/home/Newsletter"
+import { PlatformStats } from "./_components/home/PlatformStats"
+import { PlatformStatsSkeleton } from "./_components/home/PlatformStatsSkeleton"
 import { ProviderCta } from "./_components/home/ProviderCta"
 import { Testimonials } from "./_components/home/Testimonials"
 import { TestimonialsSkeleton } from "./_components/home/TestimonialsSkeleton"
@@ -26,6 +28,10 @@ export default async function HomePage() {
   return (
     <>
       <Hero gearCount={countRes.data?.meta?.total ?? 0} />
+
+      <Suspense fallback={<PlatformStatsSkeleton />}>
+        <PlatformStats />
+      </Suspense>
 
       <Suspense fallback={<CategoryGridSkeleton />}>
         <CategoryGrid />
