@@ -9,10 +9,17 @@ role-protected dashboards.
 
 ## Live
 
-|             |                                         |
-| ----------- | --------------------------------------- |
-| Frontend    | https://gear-up-frontend-chi.vercel.app |
-| Backend API | https://gear-up-backend-two.vercel.app  |
+|                  |                                                      |
+| ---------------- | ---------------------------------------------------- |
+| Frontend         | https://gear-up-frontend-chi.vercel.app              |
+| Backend API      | https://gear-up-backend-two.vercel.app               |
+| Frontend repo    | https://github.com/abdullahmamun1/gearUp-frontend    |
+| **Backend repo** | https://github.com/abdullahmamun1/gearup-backend-api |
+
+The API this talks to lives in a separate repository —
+[**gearup-backend-api**](https://github.com/abdullahmamun1/gearup-backend-api)
+(Express 5 · Prisma 7 · PostgreSQL). Run it alongside this app; see
+[Running locally](#running-locally).
 
 ### Demo accounts
 
