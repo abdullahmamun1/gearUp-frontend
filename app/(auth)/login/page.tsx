@@ -28,12 +28,26 @@ const PERKS = [
   },
 ]
 
+const ALERTS: Record<string, string> = {
+  suspended:
+    "Your account has been suspended, so you've been signed out. Please contact support if you think this is a mistake.",
+  google:
+    "We couldn't complete your Google sign-in. Please try again, or log in with your email and password.",
+  google_denied:
+    "You cancelled the Google sign-in, so nothing was changed. Try again whenever you're ready.",
+}
+
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ redirectTo?: string; reason?: string }>
+  searchParams: Promise<{
+    redirectTo?: string
+    reason?: string
+    error?: string
+  }>
 }) {
-  const { redirectTo, reason } = await searchParams
+  const { redirectTo, reason, error } = await searchParams
+  const alert = ALERTS[reason ?? ""] ?? ALERTS[error ?? ""]
   return (
     <section className="relative overflow-hidden">
       <div
@@ -90,13 +104,12 @@ export default async function LoginPage({
               </Link>
             </p>
           </div>
-          {reason === "suspended" ? (
+          {alert ? (
             <p
               role="alert"
               className="mt-6 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive"
             >
-              Your account has been suspended, so you&apos;ve been signed out.
-              Please contact support if you think this is a mistake.
+              {alert}
             </p>
           ) : null}
 

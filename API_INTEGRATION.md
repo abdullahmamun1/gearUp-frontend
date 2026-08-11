@@ -53,13 +53,14 @@ webhook and is only ever called by Stripe.
 
 ### Auth — `/api/auth`
 
-| Endpoint              | Guard                   | Frontend module                                                            | Used by                |
-| --------------------- | ----------------------- | -------------------------------------------------------------------------- | ---------------------- |
-| `POST /register`      | public                  | `registerUser` — [service/auth.ts](./service/auth.ts)                      | `RegisterForm`         |
-| `POST /login`         | public                  | `loginUser` — [service/auth.ts](./service/auth.ts)                         | `LoginForm`            |
-| `POST /refresh-token` | public (refresh cookie) | `getNewAccessToken` — [service/refreshToken.ts](./service/refreshToken.ts) | [proxy.ts](./proxy.ts) |
-| `GET /me`             | any role                | `getCurrentUser` — [service/currentUser.ts](./service/currentUser.ts)      | [proxy.ts](./proxy.ts) |
-| `PATCH /me`           | any role                | `updateProfile` — [\_actions/updateProfile.ts](<./app/(dashboard)/_actions/updateProfile.ts>) | `ProfileForm`          |
+| Endpoint              | Guard                   | Frontend module                                                                               | Used by                  |
+| --------------------- | ----------------------- | --------------------------------------------------------------------------------------------- | ------------------------ |
+| `POST /register`      | public                  | `registerUser` — [service/auth.ts](./service/auth.ts)                                         | `RegisterForm`           |
+| `POST /login`         | public                  | `loginUser` — [service/auth.ts](./service/auth.ts)                                            | `LoginForm`              |
+| `POST /google`        | public                  | `loginWithGoogle` — [service/auth.ts](./service/auth.ts)                                      | the OAuth callback route |
+| `POST /refresh-token` | public (refresh cookie) | `getNewAccessToken` — [service/refreshToken.ts](./service/refreshToken.ts)                    | [proxy.ts](./proxy.ts)   |
+| `GET /me`             | any role                | `getCurrentUser` — [service/currentUser.ts](./service/currentUser.ts)                         | [proxy.ts](./proxy.ts)   |
+| `PATCH /me`           | any role                | `updateProfile` — [\_actions/updateProfile.ts](<./app/(dashboard)/_actions/updateProfile.ts>) | `ProfileForm`            |
 
 `loginUser` writes both cookies via `setAuthCookies`, decodes the access token to
 pick a landing page, then `redirect()`s. The token never reaches the browser as
@@ -73,6 +74,35 @@ An empty-string `phone` is the documented way to clear the number.
 The two `service/` modules use a raw `fetch` rather than `apiFetch`, because
 they run inside the proxy and must send a _specific_ token rather than the one in
 the current cookie jar.
+
+### Google sign-in
+
+Two route handlers own the OAuth handshake; the backend owns everything that
+requires a secret.
+
+| Route                           | Does                                                                             |
+| ------------------------------- | -------------------------------------------------------------------------------- |
+| `GET /api/auth/google/start`    | mints `state` + PKCE verifier into one httpOnly cookie, 302s to Google           |
+| `GET /api/auth/google/callback` | checks `state`, hands the code to `POST /api/auth/google`, sets the auth cookies |
+
+`POST /api/auth/google` takes `{ code, codeVerifier, redirectUri, role? }` and
+returns the **same** `{ accessToken, refreshToken }` as `POST /login` — which is
+the whole point: the callback writes identical cookies either way, so nothing
+downstream knows or cares which route the session came from.
+
+The frontend holds `GOOGLE_CLIENT_ID` only. The client _secret_ lives solely in
+the backend, which exchanges the code and then verifies the returned ID token's
+signature against Google's JWKS with `aud` pinned to the client id — so a
+`{ email }` payload forged by anything impersonating the frontend gets nowhere.
+
+Shared constants live in [lib/googleOAuth.ts](./lib/googleOAuth.ts), except the
+two route paths, which sit in [lib/routes.ts](./lib/routes.ts) so the sign-in
+button can import them without pulling `node:crypto` into a client bundle.
+
+The handshake cookie is the one auth cookie that cannot reuse
+`AUTH_COOKIE_OPTIONS` wholesale: it needs `sameSite: "lax"` to survive Google's
+cross-site redirect back. It is scoped to `/api/auth/google`, lasts ten minutes,
+and is deleted on every exit from the callback — success or failure.
 
 ### Public catalogue
 
@@ -196,15 +226,15 @@ button up front, so the guard is explained before it fires rather than after.
 Filtering and pagination added on **every** dashboard table. Four endpoints
 gained query filters to make that real:
 
-| Endpoint                | Filters                                    |
-| ----------------------- | ------------------------------------------ |
-| `GET /admin/users`      | `role`, `status`                           |
-| `GET /admin/gear`       | **`searchTerm`, `category`, `isAvailable`** |
-| `GET /admin/rentals`    | `status`                                   |
-| `GET /provider/gear`    | `searchTerm`, `category`, `isAvailable`, `sortBy`, `sortOrder` |
-| `GET /provider/orders`  | **`status`**                               |
-| `GET /rentals`          | `status`                                   |
-| `GET /payments`         | **`status`**                               |
+| Endpoint               | Filters                                                        |
+| ---------------------- | -------------------------------------------------------------- |
+| `GET /admin/users`     | `role`, `status`                                               |
+| `GET /admin/gear`      | **`searchTerm`, `category`, `isAvailable`**                    |
+| `GET /admin/rentals`   | `status`                                                       |
+| `GET /provider/gear`   | `searchTerm`, `category`, `isAvailable`, `sortBy`, `sortOrder` |
+| `GET /provider/orders` | **`status`**                                                   |
+| `GET /rentals`         | `status`                                                       |
+| `GET /payments`        | **`status`**                                                   |
 
 Bold entries are new. Each is validated at the router — an unknown status or a
 malformed category id comes back as a 400, not a silently unfiltered list. The
@@ -374,7 +404,13 @@ user would keep browsing their dashboard until their token expired.
   falling back to the token's claims. A backend blip shouldn't log everyone out.
 
 Steps 1–2 need `JWT_ACCESS_SECRET` and `JWT_REFRESH_SECRET` to match the backend
-exactly. All three env vars are server-only — nothing is `NEXT_PUBLIC_`.
+exactly. Every env var here is server-only — nothing is `NEXT_PUBLIC_`, including
+`GOOGLE_CLIENT_ID`.
+
+A Google session goes through all of the above unchanged, because by the time
+the callback finishes there is nothing left to distinguish it from a password
+session. The proxy's matcher excludes `/api`, so neither OAuth route is
+intercepted mid-handshake.
 
 ---
 

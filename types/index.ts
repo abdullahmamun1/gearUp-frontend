@@ -39,6 +39,13 @@ export interface RegisterPayload {
   role: RegisterRole
 }
 
+export interface GoogleLoginPayload {
+  code: string
+  codeVerifier: string
+  redirectUri: string
+  role: RegisterRole
+}
+
 export interface AuthTokens {
   accessToken: string
   refreshToken: string

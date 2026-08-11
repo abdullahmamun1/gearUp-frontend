@@ -3,13 +3,15 @@
 import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Lock, Mail, Phone, User } from "lucide-react"
-import { useForm } from "react-hook-form"
+import { useForm, useWatch } from "react-hook-form"
 import { toast } from "sonner"
 
 import { TextField } from "@/components/shared/TextField"
 import { Button } from "@/components/ui/button"
 import { registerSchema, type RegisterInput } from "@/lib/schemas/auth"
 import { loginUser, registerUser } from "@/service/auth"
+
+import { AuthDivider, GoogleButton } from "./GoogleButton"
 
 const ROLES = [
   {
@@ -31,6 +33,7 @@ export function RegisterForm() {
     register,
     handleSubmit,
     setError,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
@@ -43,6 +46,8 @@ export function RegisterForm() {
       confirmPassword: "",
     },
   })
+
+  const role = useWatch({ control, name: "role" })
 
   async function onSubmit(values: RegisterInput) {
     const res = await registerUser({
@@ -117,6 +122,13 @@ export function RegisterForm() {
           <p className="text-xs text-destructive">{errors.role.message}</p>
         ) : null}
       </fieldset>
+
+      <GoogleButton
+        label="Sign up with Google"
+        role={role}
+        disabled={isSubmitting}
+      />
+      <AuthDivider />
 
       <TextField
         id="name"

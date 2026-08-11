@@ -10,6 +10,7 @@ import { safeRedirect } from "@/lib/utils"
 import type {
   ApiResponse,
   AuthTokens,
+  GoogleLoginPayload,
   LoginPayload,
   RegisterPayload,
   User,
@@ -51,6 +52,16 @@ export async function loginUser(
   const home = user ? DASHBOARD_HOME[user.role] : "/"
 
   redirect(safeRedirect(redirectTo, home))
+}
+
+export async function loginWithGoogle(
+  payload: GoogleLoginPayload
+): Promise<ApiResponse<AuthTokens>> {
+  return apiFetch<AuthTokens>("/api/auth/google", {
+    method: "POST",
+    body: payload,
+    auth: false,
+  })
 }
 
 export async function logout() {

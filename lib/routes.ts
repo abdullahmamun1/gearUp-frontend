@@ -1,5 +1,8 @@
 import type { Role } from "@/types"
 
+export const GOOGLE_START_PATH = "/api/auth/google/start"
+export const GOOGLE_CALLBACK_PATH = "/api/auth/google/callback"
+
 export const DASHBOARD_HOME: Record<Role, string> = {
   CUSTOMER: "/customer-dashboard",
   PROVIDER: "/provider-dashboard",

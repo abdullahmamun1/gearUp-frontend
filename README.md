@@ -74,6 +74,8 @@ any of these. Password is `Password123` for all three.
 
 ### Every role
 
+- **Sign in with Google**, or with an email and password — both land in the same
+  session.
 - Profile page showing the account as the server sees it, with an edit form for
   name and phone. Email, role and status are deliberately not editable — the
   API validates the payload down to those two fields, so it can't be talked
@@ -83,16 +85,17 @@ any of these. Password is `Password123` for all three.
 
 ## Tech
 
-|                                                                         |                                               |
-| ----------------------------------------------------------------------- | --------------------------------------------- |
-| **Next.js 16.2** (App Router)                                           | Server Components, Route Handlers, `proxy.ts` |
-| **React 19.2** · **TypeScript**                                         |                                               |
-| **Tailwind CSS v4** · **Base UI**                                       | shadcn-style components in `components/ui`    |
-| **TanStack Query v5**                                                   | Client cache for every dashboard table        |
-| **React Hook Form + Zod v4**                                            | All form state and validation                 |
-| **Recharts 3**                                                          | The two admin overview charts                 |
-| **Stripe.js**                                                           | Checkout redirect flow                        |
-| `jsonwebtoken` · `next-themes` · `date-fns` · `sonner` · `lucide-react` |                                               |
+|                                                                         |                                                 |
+| ----------------------------------------------------------------------- | ----------------------------------------------- |
+| **Next.js 16.2** (App Router)                                           | Server Components, Route Handlers, `proxy.ts`   |
+| **React 19.2** · **TypeScript**                                         |                                                 |
+| **Tailwind CSS v4** · **Base UI**                                       | shadcn-style components in `components/ui`      |
+| **TanStack Query v5**                                                   | Client cache for every dashboard table          |
+| **React Hook Form + Zod v4**                                            | All form state and validation                   |
+| **Recharts 3**                                                          | The two admin overview charts                   |
+| **Stripe.js**                                                           | Checkout redirect flow                          |
+| **Google OAuth 2.0 + PKCE**                                             | Hand-rolled in two route handlers — no NextAuth |
+| `jsonwebtoken` · `next-themes` · `date-fns` · `sonner` · `lucide-react` |                                                 |
 
 ---
 
@@ -114,12 +117,30 @@ npm run dev               # http://localhost:3000
 BACKEND_API_URL=http://localhost:5000
 JWT_ACCESS_SECRET=...      # must match the backend exactly
 JWT_REFRESH_SECRET=...     # must match the backend exactly
+GOOGLE_CLIENT_ID=...       # client ID only — the secret goes in the backend
+# APP_URL=https://…        # optional, pins the OAuth redirect_uri
 ```
 
-All three are **server-only** — nothing is prefixed `NEXT_PUBLIC_`, so no
+All of them are **server-only** — nothing is prefixed `NEXT_PUBLIC_`, so no
 secret and no token ever reaches the browser. The JWT secrets are needed
 because `proxy.ts` verifies tokens locally instead of calling the API on every
 navigation.
+
+### Setting up Google sign-in
+
+In the Google Cloud Console → APIs & Services → Credentials → **Create OAuth
+client ID** → _Web application_, add both redirect URIs (Google matches them
+character for character):
+
+```
+http://localhost:3000/api/auth/google/callback
+https://<your-frontend-domain>/api/auth/google/callback
+```
+
+Put `GOOGLE_CLIENT_ID` in the frontend's `.env`, and **both**
+`GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in the backend's. Without them the
+button redirects straight back to `/login?error=google` rather than failing
+mysteriously.
 
 ### Scripts
 
@@ -181,6 +202,24 @@ admin promoting someone wouldn't take effect for 24 hours, and a suspended user
 would keep browsing their dashboard until their token expired. Suspension now
 signs them out immediately; a role change re-mints their token instead of
 bouncing them to `/not-found`.
+
+**Google sign-in** is a real OAuth 2.0 authorization-code flow with PKCE, not a
+button that fakes one. `/api/auth/google/start` mints the `state` and verifier;
+`/api/auth/google/callback` checks `state` and hands the code to the backend,
+which is the only side holding the client secret. The backend exchanges the code
+and verifies the ID token's signature against Google's published keys before
+believing a single claim in it, then returns the same token pair a password
+login would — so the callback sets identical cookies and nothing downstream
+knows the difference. Both routes are plain links and redirects: the flow works
+with JavaScript disabled.
+
+A first Google sign-in creates the account with the role chosen on `/register`;
+signing in with an email that already has a password account **links** the two
+rather than duplicating, which is safe only because Google's `email_verified`
+claim is checked first. Those accounts keep their password. Accounts created
+_through_ Google have none — `passwordHash` is genuinely null in the database —
+so trying to log in with a password tells you to use Google instead of claiming
+the password is wrong.
 
 ### Global state
 
