@@ -40,7 +40,9 @@ any of these. Password is `Password123` for all three.
   **all held in the URL**, so every filtered view is shareable and
   server-rendered
 - Gear detail page with image gallery, specifications, provider info, average
-  rating and paginated reviews
+  rating, paginated reviews, and a **More in {category}** row of related gear
+  that lists rentable items first and disappears entirely when there is nothing
+  to relate to
 - Date-picker booking that blocks past dates and caps quantity at available
   stock
 

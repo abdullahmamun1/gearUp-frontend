@@ -20,6 +20,7 @@ import { POSITIVE_INT, first, matching } from "@/lib/searchParams"
 import type { GearItem } from "@/types"
 
 import { GearReviews } from "./_components/GearReviews"
+import { RelatedGear, RelatedGearSkeleton } from "./_components/RelatedGear"
 
 type Props = {
   params: Promise<{ id: string }>
@@ -144,6 +145,10 @@ export default async function GearDetailPage({ params, searchParams }: Props) {
           {gear.provider && <Provider provider={gear.provider} />}
         </div>
       </div>
+
+      <Suspense fallback={<RelatedGearSkeleton />}>
+        <RelatedGear gear={gear} />
+      </Suspense>
     </section>
   )
 }

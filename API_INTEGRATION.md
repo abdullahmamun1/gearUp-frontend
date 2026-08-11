@@ -117,6 +117,12 @@ These four are `auth: false` and cached — they are identical for every visitor
 which is exactly what makes them safe to cache and what makes the browse pages
 server-rendered for SEO.
 
+The detail page's related-gear row is a second `getGearList` call filtered to
+`category`, not a new endpoint — it asks for 12 and shows 4, because the item
+being viewed has to be dropped from whatever comes back. Since it is the same
+cached, tagged read as the browse page, a visitor who arrived from `/gear` has
+usually already paid for it.
+
 `GET /api/gear` accepts `searchTerm`, `category`, `brand`, `minPrice`,
 `maxPrice`, `isAvailable`, `sortBy`, `sortOrder`, `page`, `limit`. The frontend
 never builds that query by hand — [lib/gearQuery.ts](./lib/gearQuery.ts) parses
