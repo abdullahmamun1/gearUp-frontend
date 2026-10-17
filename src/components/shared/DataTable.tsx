@@ -30,13 +30,13 @@ export function DataTable({
 
       <div
         className={cn(
-          "overflow-x-auto rounded-xl border transition-opacity",
+          "overflow-x-auto rounded-xl border bg-card shadow-xs transition-opacity",
           isFetching && "opacity-60"
         )}
       >
         <Table>
-          <TableHeader>
-            <TableRow>
+          <TableHeader className="bg-muted/50">
+            <TableRow className="hover:bg-transparent">
               {headings.map((heading) => {
                 const label =
                   typeof heading === "string" ? heading : heading.label

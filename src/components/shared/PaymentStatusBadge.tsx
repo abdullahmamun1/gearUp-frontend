@@ -5,8 +5,8 @@ const STATUS: Record<
   PaymentStatus,
   { label: string; variant: React.ComponentProps<typeof Badge>["variant"] }
 > = {
-  PENDING: { label: "Awaiting payment", variant: "outline" },
-  COMPLETED: { label: "Paid", variant: "default" },
+  PENDING: { label: "Awaiting payment", variant: "warning" },
+  COMPLETED: { label: "Paid", variant: "success" },
   FAILED: { label: "Failed", variant: "destructive" },
 }
 

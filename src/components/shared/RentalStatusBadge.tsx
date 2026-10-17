@@ -5,10 +5,10 @@ const STATUS: Record<
   RentalStatus,
   { label: string; variant: React.ComponentProps<typeof Badge>["variant"] }
 > = {
-  PLACED: { label: "Awaiting confirmation", variant: "outline" },
-  CONFIRMED: { label: "Confirmed", variant: "secondary" },
-  PAID: { label: "Paid", variant: "default" },
-  PICKED_UP: { label: "Picked up", variant: "default" },
+  PLACED: { label: "Awaiting confirmation", variant: "warning" },
+  CONFIRMED: { label: "Confirmed · pay now", variant: "ember" },
+  PAID: { label: "Paid", variant: "success" },
+  PICKED_UP: { label: "Picked up", variant: "info" },
   RETURNED: { label: "Returned", variant: "secondary" },
   CANCELLED: { label: "Cancelled", variant: "destructive" },
 }

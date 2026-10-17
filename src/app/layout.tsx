@@ -1,4 +1,8 @@
-import { Geist_Mono, Raleway, Space_Grotesk } from "next/font/google"
+import {
+  Bricolage_Grotesque,
+  Geist_Mono,
+  Plus_Jakarta_Sans,
+} from "next/font/google"
 
 import "./globals.css"
 import { QueryProvider } from "@/providers/QueryProvider"
@@ -6,16 +10,26 @@ import { ThemeProvider } from "@/providers/ThemeProvider"
 import { Toaster } from "@/components/ui/sonner"
 import { cn } from "@/lib/utils"
 
-const spaceGroteskHeading = Space_Grotesk({
+/** Display and headings. The optical-size axis tightens it at large sizes. */
+const fontHeading = Bricolage_Grotesque({
   subsets: ["latin"],
   variable: "--font-heading",
+  axes: ["opsz"],
+  display: "swap",
 })
 
-const raleway = Raleway({ subsets: ["latin"], variable: "--font-sans" })
+/** Body and UI. */
+const fontSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+})
 
+/** Prices, stats and codes, with tabular figures. */
 const fontMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
+  display: "swap",
 })
 
 export default function RootLayout({
@@ -31,8 +45,8 @@ export default function RootLayout({
         "antialiased",
         fontMono.variable,
         "font-sans",
-        raleway.variable,
-        spaceGroteskHeading.variable
+        fontSans.variable,
+        fontHeading.variable
       )}
     >
       <body>

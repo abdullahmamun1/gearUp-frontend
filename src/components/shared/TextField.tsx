@@ -10,6 +10,8 @@ type TextFieldProps = React.ComponentProps<typeof Input> & {
   error?: string
   hint?: string
   icon?: LucideIcon
+  /** Rendered inside the input, on the right (e.g. a show-password toggle). */
+  trailing?: React.ReactNode
 }
 
 export function TextField({
@@ -18,6 +20,7 @@ export function TextField({
   error,
   hint,
   icon: Icon,
+  trailing,
   className,
   ...props
 }: TextFieldProps) {
@@ -41,9 +44,19 @@ export function TextField({
           id={id}
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? errorId : hint ? hintId : undefined}
-          className={cn("h-10 text-sm md:text-sm", Icon && "pl-9", className)}
+          className={cn(
+            "h-10 text-sm md:text-sm",
+            Icon && "pl-9",
+            trailing && "pr-10",
+            className
+          )}
           {...props}
         />
+        {trailing ? (
+          <div className="absolute inset-y-0 right-1 flex items-center">
+            {trailing}
+          </div>
+        ) : null}
       </div>
 
       {error ? (

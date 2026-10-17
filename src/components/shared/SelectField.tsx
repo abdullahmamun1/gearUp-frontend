@@ -7,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { cn } from "@/lib/utils"
 
 export type SelectOption = { value: string; label: string }
 
@@ -39,7 +40,9 @@ export function SelectField({
         id={id}
         aria-label={ariaLabel}
         aria-invalid={invalid ? true : undefined}
-        className={className}
+        // The trigger's own data-[size] height outranks a plain h-*; drop it
+        // so the height passed in (usually h-9, matching inputs) applies.
+        className={cn("data-[size=default]:h-auto", className)}
       >
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>

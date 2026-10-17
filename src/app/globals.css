@@ -4,80 +4,159 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * GearUp design tokens — "Land · Fire · Water".
+ *
+ *   Pine   (--primary)  main actions, links, focus, active navigation
+ *   Ember  (--ember)    main CTAs (Rent, Pay), AI accents, highlights
+ *   Lagoon (--lagoon)   info, maps, water categories, secondary charts
+ *
+ * Neutrals carry a slight warm stone tint. Every text/background pair is
+ * checked for WCAG AA in both themes by `npm run check:contrast`. Ember is
+ * too light for text on white, so --ember is for fills (with dark
+ * --ember-foreground text) and --ember-strong is for Ember text and icons.
+ */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --background: oklch(0.99 0.004 85);
+  --foreground: oklch(0.2 0.015 60);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(0.2 0.015 60);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.508 0.118 165.612);
-  --primary-foreground: oklch(0.979 0.021 166.113);
-  --secondary: oklch(0.967 0.001 286.375);
-  --secondary-foreground: oklch(0.21 0.006 285.885);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --success: oklch(0.596 0.145 152.5);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.55 0.14 165.612);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.45rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.596 0.145 163.225);
-  --sidebar-primary-foreground: oklch(0.979 0.021 166.113);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --popover-foreground: oklch(0.2 0.015 60);
+
+  --primary: oklch(0.5 0.11 160);
+  --primary-foreground: oklch(0.985 0.012 160);
+  --ember: oklch(0.72 0.165 48);
+  --ember-foreground: oklch(0.24 0.06 40);
+  /* Ember dark enough for text and icons on light surfaces. */
+  --ember-strong: oklch(0.52 0.15 40);
+  --lagoon: oklch(0.52 0.12 238);
+  --lagoon-foreground: oklch(0.985 0.01 238);
+
+  --secondary: oklch(0.955 0.008 85);
+  --secondary-foreground: oklch(0.25 0.015 60);
+  --muted: oklch(0.96 0.007 85);
+  --muted-foreground: oklch(0.49 0.016 60);
+  --accent: oklch(0.95 0.02 160);
+  --accent-foreground: oklch(0.3 0.06 160);
+
+  --destructive: oklch(0.55 0.2 27);
+  --success: oklch(0.52 0.13 152);
+  --warning: oklch(0.5 0.11 65);
+  --info: var(--lagoon);
+
+  --border: oklch(0.91 0.009 80);
+  --input: oklch(0.88 0.011 80);
+  --ring: oklch(0.6 0.11 160);
+
+  --chart-1: oklch(0.55 0.12 160);
+  --chart-2: oklch(0.72 0.16 48);
+  --chart-3: oklch(0.58 0.12 238);
+  --chart-4: oklch(0.75 0.1 160);
+  --chart-5: oklch(0.6 0.02 60);
+
+  --radius: 0.75rem;
+
+  --sidebar: oklch(0.975 0.006 85);
+  --sidebar-foreground: oklch(0.2 0.015 60);
+  --sidebar-primary: oklch(0.5 0.11 160);
+  --sidebar-primary-foreground: oklch(0.985 0.012 160);
+  --sidebar-accent: oklch(0.94 0.02 160);
+  --sidebar-accent-foreground: oklch(0.28 0.06 160);
+  --sidebar-border: oklch(0.91 0.009 80);
+  --sidebar-ring: oklch(0.6 0.11 160);
+
+  /* Text on these uses --primary-foreground / --ember-foreground. */
+  --gradient-brand: linear-gradient(135deg, var(--primary), var(--lagoon));
+  --gradient-sunset: linear-gradient(135deg, var(--ember), oklch(0.66 0.18 15));
+
+  /* Shadows are tinted with Pine so they read warm, not grey. */
+  --elevation-xs: 0 1px 2px oklch(0.3 0.05 160 / 0.06);
+  --elevation-sm:
+    0 1px 2px oklch(0.3 0.05 160 / 0.06),
+    0 2px 6px -1px oklch(0.3 0.05 160 / 0.08);
+  --elevation-md:
+    0 2px 4px -1px oklch(0.3 0.05 160 / 0.06),
+    0 8px 20px -4px oklch(0.3 0.05 160 / 0.12);
+  --elevation-lg:
+    0 4px 8px -2px oklch(0.3 0.05 160 / 0.06),
+    0 18px 40px -8px oklch(0.3 0.05 160 / 0.16);
+  --elevation-xl:
+    0 8px 16px -4px oklch(0.3 0.05 160 / 0.08),
+    0 32px 64px -12px oklch(0.3 0.05 160 / 0.22);
+  --glow-ember: 0 6px 20px -6px oklch(0.72 0.165 48 / 0.55);
+  --glow-primary: 0 6px 20px -6px oklch(0.5 0.11 160 / 0.45);
+
+  /* Same curves as src/constants/motion.ts, for CSS animations. */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.432 0.095 166.913);
-  --primary-foreground: oklch(0.979 0.021 166.113);
-  --secondary: oklch(0.274 0.006 286.033);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --success: oklch(0.704 0.155 152.5);
+  --background: oklch(0.17 0.012 65);
+  --foreground: oklch(0.96 0.008 85);
+  --card: oklch(0.21 0.013 65);
+  --card-foreground: oklch(0.96 0.008 85);
+  --popover: oklch(0.22 0.013 65);
+  --popover-foreground: oklch(0.96 0.008 85);
+
+  --primary: oklch(0.74 0.13 160);
+  --primary-foreground: oklch(0.2 0.04 160);
+  --ember: oklch(0.76 0.155 52);
+  --ember-foreground: oklch(0.22 0.06 40);
+  --ember-strong: oklch(0.83 0.13 58);
+  --lagoon: oklch(0.76 0.11 232);
+  --lagoon-foreground: oklch(0.2 0.04 238);
+
+  --secondary: oklch(0.27 0.012 65);
+  --secondary-foreground: oklch(0.96 0.008 85);
+  --muted: oklch(0.26 0.012 65);
+  --muted-foreground: oklch(0.73 0.014 70);
+  --accent: oklch(0.29 0.035 160);
+  --accent-foreground: oklch(0.95 0.025 160);
+
+  --destructive: oklch(0.74 0.17 22);
+  --success: oklch(0.74 0.15 152);
+  --warning: oklch(0.84 0.14 80);
+  --info: var(--lagoon);
+
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.65 0.14 165.612);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.696 0.17 162.48);
-  --sidebar-primary-foreground: oklch(0.262 0.051 172.552);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --ring: oklch(0.66 0.12 160);
+
+  --chart-1: oklch(0.7 0.13 160);
+  --chart-2: oklch(0.76 0.15 52);
+  --chart-3: oklch(0.7 0.12 232);
+  --chart-4: oklch(0.55 0.09 160);
+  --chart-5: oklch(0.6 0.02 60);
+
+  --sidebar: oklch(0.2 0.013 65);
+  --sidebar-foreground: oklch(0.96 0.008 85);
+  --sidebar-primary: oklch(0.74 0.13 160);
+  --sidebar-primary-foreground: oklch(0.2 0.04 160);
+  --sidebar-accent: oklch(0.28 0.03 160);
+  --sidebar-accent-foreground: oklch(0.95 0.025 160);
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar-ring: oklch(0.66 0.12 160);
+
+  --elevation-xs: 0 1px 2px oklch(0 0 0 / 0.3);
+  --elevation-sm:
+    0 1px 2px oklch(0 0 0 / 0.3), 0 2px 6px -1px oklch(0 0 0 / 0.3);
+  --elevation-md:
+    0 2px 4px -1px oklch(0 0 0 / 0.3), 0 8px 20px -4px oklch(0 0 0 / 0.4);
+  --elevation-lg:
+    0 4px 8px -2px oklch(0 0 0 / 0.3), 0 18px 40px -8px oklch(0 0 0 / 0.5);
+  --elevation-xl:
+    0 8px 16px -4px oklch(0 0 0 / 0.35), 0 32px 64px -12px oklch(0 0 0 / 0.6);
+  --glow-ember: 0 6px 24px -6px oklch(0.76 0.155 52 / 0.45);
+  --glow-primary: 0 6px 24px -6px oklch(0.74 0.13 160 / 0.4);
 }
 
 @theme inline {
   --font-sans: var(--font-sans);
   --font-heading: var(--font-heading);
+  --font-mono: var(--font-mono);
+
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -96,6 +175,13 @@
   --color-border: var(--border);
   --color-destructive: var(--destructive);
   --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+  --color-ember: var(--ember);
+  --color-ember-foreground: var(--ember-foreground);
+  --color-ember-strong: var(--ember-strong);
+  --color-lagoon: var(--lagoon);
+  --color-lagoon-foreground: var(--lagoon-foreground);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
@@ -110,6 +196,7 @@
   --color-card: var(--card);
   --color-foreground: var(--foreground);
   --color-background: var(--background);
+
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -117,6 +204,189 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  --shadow-xs: var(--elevation-xs);
+  --shadow-sm: var(--elevation-sm);
+  --shadow-md: var(--elevation-md);
+  --shadow-lg: var(--elevation-lg);
+  --shadow-xl: var(--elevation-xl);
+  --shadow-glow-ember: var(--glow-ember);
+  --shadow-glow-primary: var(--glow-primary);
+}
+
+/* ------------------------------------------------------------- type */
+
+/* Fluid sizes: they scale with the viewport between a phone and a desktop. */
+@utility text-display {
+  font-family: var(--font-heading);
+  font-size: clamp(2.5rem, 1.6rem + 3.6vw, 4.5rem);
+  font-weight: 700;
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+@utility text-h1 {
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 1.55rem + 1.8vw, 3rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+@utility text-h2 {
+  font-family: var(--font-heading);
+  font-size: clamp(1.5rem, 1.3rem + 0.9vw, 2.25rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+@utility text-h3 {
+  font-family: var(--font-heading);
+  font-size: clamp(1.15rem, 1.08rem + 0.3vw, 1.375rem);
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+}
+
+@utility text-eyebrow {
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+@utility text-gradient {
+  background-image: var(--gradient-brand);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+@utility text-gradient-sunset {
+  background-image: var(--gradient-sunset);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+/* ---------------------------------------------------------- surfaces */
+
+/* Raised card: the default for interactive tiles. */
+@utility card-elevated {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background-color: var(--card);
+  color: var(--card-foreground);
+  box-shadow: var(--elevation-sm);
+  transition:
+    box-shadow 200ms ease,
+    transform 200ms ease,
+    border-color 200ms ease;
+
+  &:hover {
+    box-shadow: var(--elevation-md);
+  }
+}
+
+/* Frosted panel for the navbar, floating chat and popovers. */
+@utility glass {
+  background-color: color-mix(in oklch, var(--background) 72%, transparent);
+  border-color: color-mix(in oklch, var(--border) 70%, transparent);
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+}
+
+/* A 1px gradient border via a masked pseudo-element; keeps any background. */
+@utility gradient-border {
+  position: relative;
+  isolation: isolate;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    padding: 1px;
+    border-radius: inherit;
+    background: var(--gradient-brand);
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+}
+
+/* ------------------------------------------------------- backgrounds */
+
+@utility bg-grid {
+  background-image:
+    linear-gradient(
+      to right,
+      color-mix(in oklch, var(--foreground) 6%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in oklch, var(--foreground) 6%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: 40px 40px;
+  mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%);
+}
+
+@utility bg-dots {
+  background-image: radial-gradient(
+    color-mix(in oklch, var(--foreground) 14%, transparent) 1px,
+    transparent 1.5px
+  );
+  background-size: 18px 18px;
+}
+
+/* Film grain. Static SVG noise, so it costs nothing at runtime. */
+@utility bg-noise {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.07 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+/* Soft multi-colour glow for hero sections. Drifts slowly unless the
+   visitor prefers reduced motion. */
+@utility bg-mesh {
+  background-color: var(--background);
+  background-image:
+    radial-gradient(
+      at 12% 18%,
+      color-mix(in oklch, var(--primary) 22%, transparent) 0,
+      transparent 50%
+    ),
+    radial-gradient(
+      at 88% 12%,
+      color-mix(in oklch, var(--lagoon) 20%, transparent) 0,
+      transparent 48%
+    ),
+    radial-gradient(
+      at 70% 88%,
+      color-mix(in oklch, var(--ember) 18%, transparent) 0,
+      transparent 50%
+    );
+  background-size: 140% 140%;
+
+  @media (prefers-reduced-motion: no-preference) {
+    animation: mesh-drift 24s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes mesh-drift {
+  from {
+    background-position: 0% 0%;
+  }
+  to {
+    background-position: 100% 100%;
+  }
 }
 
 /* Scroll-driven section entrance.
@@ -145,6 +415,253 @@
   }
 }
 
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal-stagger > * {
+      animation: reveal-in linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 25%;
+    }
+  }
+}
+
+/* Dashboards read at a slightly larger scale: the root font size sets every
+   rem, so text, controls, spacing and the sidebar all grow together, while
+   public pages keep the default. The header carries the marker. */
+:root:has([data-dashboard-shell]) {
+  font-size: 106.25%;
+}
+
+/* ----------------------------------------------------------- motion */
+
+/* Gentle bob for decorative cards. Animates `translate`, so a `rotate-*`
+   class on the same element keeps its tilt. Use with motion-safe:. */
+@keyframes float {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -8px;
+  }
+}
+
+/* Marquee: the track holds the items twice and slides by half its width. */
+@keyframes marquee {
+  to {
+    transform: translateX(calc(-50% - 1.25rem));
+  }
+}
+
+.marquee {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 8%,
+    #000 92%,
+    transparent
+  );
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .marquee-track {
+    animation: marquee var(--marquee-duration, 40s) linear infinite;
+  }
+  .marquee:hover .marquee-track,
+  .marquee:focus-within .marquee-track {
+    animation-play-state: paused;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    flex-wrap: wrap;
+    width: auto;
+  }
+  .marquee-track > [aria-hidden] {
+    display: none;
+  }
+}
+
+/* Spotlight: a cursor-following glow on the card and its border. */
+.spotlight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    420px circle at var(--spot-x, 50%) var(--spot-y, 50%),
+    color-mix(in oklch, var(--primary) 10%, transparent),
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 300ms ease;
+}
+
+.spotlight:hover::before {
+  opacity: 1;
+}
+
+/* Shine: a light sweep across CTA buttons on hover. */
+@utility shine {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(
+      110deg,
+      transparent 30%,
+      color-mix(in oklch, white 45%, transparent) 50%,
+      transparent 70%
+    );
+    transform: translateX(-120%);
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    &:hover::after {
+      transition: transform 700ms var(--ease-out-soft);
+      transform: translateX(120%);
+    }
+  }
+}
+
+/* Skeleton shimmer, replacing the pulse. Static with reduced motion. */
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@utility skeleton-shimmer {
+  background-image: linear-gradient(
+    90deg,
+    var(--muted) 25%,
+    color-mix(in oklch, var(--muted), var(--background) 55%) 50%,
+    var(--muted) 75%
+  );
+  background-size: 200% 100%;
+
+  @media (prefers-reduced-motion: no-preference) {
+    animation: shimmer 1.6s linear infinite;
+  }
+}
+
+/* Success toasts draw their checkmark. */
+@keyframes draw-check {
+  from {
+    stroke-dashoffset: 24;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.toast-check path {
+  stroke-dasharray: 24;
+  stroke-dashoffset: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .toast-check path {
+    animation: draw-check 420ms var(--ease-out-soft) 120ms both;
+  }
+}
+
+/* ------------------------------------------------- view transitions */
+
+/* Every navigation: a quick crossfade of the page content. */
+::view-transition-old(.page),
+::view-transition-new(.page) {
+  animation-duration: 180ms;
+}
+
+/* Gear image: the card photo morphs into the detail page gallery. */
+::view-transition-group(.morph) {
+  animation-duration: 420ms;
+  animation-timing-function: var(--ease-out-soft);
+}
+
+::view-transition-image-pair(.morph) {
+  animation-name: via-blur;
+}
+
+@keyframes via-blur {
+  30% {
+    filter: blur(3px);
+  }
+}
+
+/* Directional slides: forward goes left, back goes right. */
+@keyframes vt-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes vt-slide {
+  from {
+    translate: var(--slide-offset);
+  }
+}
+
+::view-transition-old(.nav-forward) {
+  --slide-offset: -48px;
+  animation:
+    150ms ease-in both vt-fade reverse,
+    380ms var(--ease-in-out-soft) both vt-slide reverse;
+}
+
+::view-transition-new(.nav-forward) {
+  --slide-offset: 48px;
+  animation:
+    210ms ease-out 120ms both vt-fade,
+    380ms var(--ease-in-out-soft) both vt-slide;
+}
+
+::view-transition-old(.nav-back) {
+  --slide-offset: 48px;
+  animation:
+    150ms ease-in both vt-fade reverse,
+    380ms var(--ease-in-out-soft) both vt-slide reverse;
+}
+
+::view-transition-new(.nav-back) {
+  --slide-offset: -48px;
+  animation:
+    210ms ease-out 120ms both vt-fade,
+    380ms var(--ease-in-out-soft) both vt-slide;
+}
+
+/* The header stays put while the content moves under it. */
+::view-transition-group(site-header) {
+  animation: none;
+  z-index: 100;
+}
+
+::view-transition-old(site-header) {
+  display: none;
+}
+
+::view-transition-new(site-header) {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -154,5 +671,29 @@
   }
   html {
     @apply font-sans;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-heading;
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+  /* Prices, counters and table numbers line up. */
+  .tabular-nums,
+  td,
+  [data-slot="table-cell"] {
+    font-variant-numeric: tabular-nums;
+  }
+  /* Lucide's default stroke is 2; 1.75 suits the lighter type. Icons that
+     set their own stroke width keep it. */
+  .lucide[stroke-width="2"] {
+    stroke-width: 1.75;
+  }
+  ::selection {
+    background-color: color-mix(in oklch, var(--primary) 22%, transparent);
   }
 }

@@ -18,9 +18,5 @@ export function RoleBadge({ role }: { role: Role }) {
 export function UserStatusBadge({ status }: { status: UserStatus }) {
   if (status === "SUSPENDED")
     return <Badge variant="destructive">Suspended</Badge>
-  return (
-    <Badge variant="outline" className="border-success/40 text-success">
-      Active
-    </Badge>
-  )
+  return <Badge variant="success">Active</Badge>
 }
