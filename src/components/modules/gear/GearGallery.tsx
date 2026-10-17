@@ -1,64 +1,146 @@
 "use client"
 
 import Image from "next/image"
-import { useState } from "react"
-import { Backpack } from "lucide-react"
+import { useCallback, useEffect, useState, ViewTransition } from "react"
+import useEmblaCarousel from "embla-carousel-react"
+import { Backpack, ChevronLeft, ChevronRight, Expand, X } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
+import { gearImageTransition } from "@/utils/viewTransitions"
 
+/**
+ * Swipeable photos with a synced thumbnail strip and a full-screen lightbox.
+ * The main viewport shares its view-transition name with the gear card, so
+ * the card photo morphs into it when opening the page.
+ */
 export function GearGallery({
+  gearId,
   images,
   name,
   outOfStock,
 }: {
+  gearId: string
   images: string[]
   name: string
   outOfStock: boolean
 }) {
-  const [active, setActive] = useState(0)
-  const current = images[active]
+  const [mainRef, main] = useEmblaCarousel({ loop: images.length > 1 })
+  const [thumbsRef, thumbs] = useEmblaCarousel({
+    containScroll: "keepSnaps",
+    dragFree: true,
+  })
+  const [selected, setSelected] = useState(0)
+  const [lightbox, setLightbox] = useState(false)
+
+  const onSelect = useCallback(() => {
+    if (!main) return
+    const index = main.selectedScrollSnap()
+    setSelected(index)
+    thumbs?.scrollTo(index)
+  }, [main, thumbs])
+
+  useEffect(() => {
+    if (!main) return
+    main.on("select", onSelect).on("reInit", onSelect)
+    return () => {
+      main.off("select", onSelect).off("reInit", onSelect)
+    }
+  }, [main, onSelect])
+
+  const alt = (index: number) =>
+    images.length > 1
+      ? `${name} — photo ${index + 1} of ${images.length}`
+      : name
 
   return (
     <div className="grid gap-3">
-      <div className="relative aspect-4/3 overflow-hidden rounded-xl border bg-muted">
-        {current ? (
-          <Image
-            key={current}
-            src={current}
-            alt={
-              images.length > 1
-                ? `${name} — image ${active + 1} of ${images.length}`
-                : name
-            }
-            fill
-            priority
-            sizes="(min-width: 1024px) 55vw, 100vw"
-            className="object-cover"
-          />
-        ) : (
-          <Placeholder />
-        )}
+      <ViewTransition name={gearImageTransition(gearId)} share="morph">
+        <div
+          role="region"
+          aria-roledescription="carousel"
+          aria-label={`${name} photos`}
+          className="group relative aspect-4/3 overflow-hidden rounded-xl border bg-muted shadow-xs"
+          onKeyDown={(event) => {
+            if (event.key === "ArrowLeft") main?.scrollPrev()
+            if (event.key === "ArrowRight") main?.scrollNext()
+          }}
+        >
+          {images.length === 0 ? (
+            <Placeholder />
+          ) : (
+            <div ref={mainRef} className="h-full overflow-hidden">
+              <div className="flex h-full touch-pan-y">
+                {images.map((image, index) => (
+                  <div
+                    key={image}
+                    role="group"
+                    aria-roledescription="slide"
+                    aria-label={`${index + 1} of ${images.length}`}
+                    className="relative h-full min-w-0 shrink-0 grow-0 basis-full"
+                  >
+                    <Image
+                      src={image}
+                      alt={alt(index)}
+                      fill
+                      priority={index === 0}
+                      sizes="(min-width: 1024px) 55vw, 100vw"
+                      className="object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
-        {outOfStock && (
-          <div className="absolute inset-0 grid place-items-center bg-background/70">
-            <Badge variant="secondary">Unavailable</Badge>
-          </div>
-        )}
-      </div>
+          {images.length > 1 && (
+            <>
+              <GalleryArrow side="left" onClick={() => main?.scrollPrev()} />
+              <GalleryArrow side="right" onClick={() => main?.scrollNext()} />
+            </>
+          )}
+
+          {images.length > 0 && (
+            <Button
+              type="button"
+              variant="glass"
+              size="icon-lg"
+              className="absolute right-3 bottom-3 size-9 rounded-full"
+              onClick={() => setLightbox(true)}
+              aria-label="View photos full screen"
+            >
+              <Expand aria-hidden />
+            </Button>
+          )}
+
+          {outOfStock && (
+            <div className="absolute inset-0 grid place-items-center bg-background/70">
+              <Badge variant="secondary">Unavailable</Badge>
+            </div>
+          )}
+        </div>
+      </ViewTransition>
 
       {images.length > 1 && (
-        <ul className="flex gap-2.5 overflow-x-auto px-0.5 py-1">
-          {images.map((image, index) => (
-            <li key={image}>
+        <div ref={thumbsRef} className="overflow-hidden px-0.5 py-1">
+          <div className="flex gap-2.5">
+            {images.map((image, index) => (
               <button
+                key={image}
                 type="button"
-                onClick={() => setActive(index)}
-                aria-label={`Show image ${index + 1} of ${images.length}`}
-                aria-current={index === active}
+                onClick={() => main?.scrollTo(index)}
+                aria-label={`Show photo ${index + 1} of ${images.length}`}
+                aria-current={index === selected}
                 className={cn(
                   "relative size-16 shrink-0 cursor-pointer overflow-hidden rounded-lg ring-1 transition-all outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                  index === active
+                  index === selected
                     ? "ring-2 ring-primary"
                     : "opacity-60 ring-border/80 hover:opacity-100 hover:ring-foreground/40"
                 )}
@@ -71,11 +153,161 @@ export function GearGallery({
                   className="object-cover"
                 />
               </button>
-            </li>
-          ))}
-        </ul>
+            ))}
+          </div>
+        </div>
       )}
+
+      <Lightbox
+        open={lightbox}
+        onOpenChange={setLightbox}
+        images={images}
+        start={selected}
+        alt={alt}
+        name={name}
+        onIndexChange={(index) => main?.scrollTo(index, true)}
+      />
     </div>
+  )
+}
+
+function GalleryArrow({
+  side,
+  onClick,
+}: {
+  side: "left" | "right"
+  onClick: () => void
+}) {
+  const Icon = side === "left" ? ChevronLeft : ChevronRight
+  return (
+    <Button
+      type="button"
+      variant="glass"
+      size="icon-lg"
+      onClick={onClick}
+      aria-label={side === "left" ? "Previous photo" : "Next photo"}
+      className={cn(
+        "absolute top-1/2 size-9 -translate-y-1/2 rounded-full opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 max-md:opacity-100",
+        side === "left" ? "left-3" : "right-3"
+      )}
+    >
+      <Icon aria-hidden />
+    </Button>
+  )
+}
+
+/**
+ * Full-screen photos. Swipe or use the arrow keys; pinch-zoom is left to the
+ * browser (`touch-action: pinch-zoom`), which handles it better than any JS.
+ */
+function Lightbox({
+  open,
+  onOpenChange,
+  images,
+  start,
+  alt,
+  name,
+  onIndexChange,
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  images: string[]
+  start: number
+  alt: (index: number) => string
+  name: string
+  onIndexChange: (index: number) => void
+}) {
+  const [ref, api] = useEmblaCarousel({
+    loop: images.length > 1,
+    startIndex: start,
+  })
+  const [selected, setSelected] = useState(start)
+
+  useEffect(() => {
+    if (!api) return
+    const sync = () => {
+      const index = api.selectedScrollSnap()
+      setSelected(index)
+      onIndexChange(index)
+    }
+    api.on("select", sync)
+    return () => {
+      api.off("select", sync)
+    }
+  }, [api, onIndexChange])
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        showCloseButton={false}
+        className="grid h-dvh max-h-none w-screen max-w-none! gap-0 rounded-none bg-black/95 p-0 text-white ring-0 sm:max-w-none"
+        onKeyDown={(event) => {
+          if (event.key === "ArrowLeft") api?.scrollPrev()
+          if (event.key === "ArrowRight") api?.scrollNext()
+        }}
+      >
+        <DialogTitle className="sr-only">{name} photos</DialogTitle>
+        <div ref={ref} className="h-full overflow-hidden">
+          <div className="flex h-full">
+            {images.map((image, index) => (
+              <div
+                key={image}
+                className="relative h-full min-w-0 shrink-0 grow-0 basis-full touch-pinch-zoom"
+              >
+                <Image
+                  src={image}
+                  alt={alt(index)}
+                  fill
+                  sizes="100vw"
+                  className="object-contain"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <p className="absolute top-4 left-4 rounded-full bg-white/10 px-3 py-1 font-mono text-xs tabular-nums">
+          {selected + 1} / {images.length}
+        </p>
+        <DialogClose
+          render={
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-lg"
+              className="absolute top-3 right-3 size-10 rounded-full text-white hover:bg-white/10 hover:text-white"
+              aria-label="Close"
+            />
+          }
+        >
+          <X aria-hidden />
+        </DialogClose>
+        {images.length > 1 && (
+          <>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-lg"
+              onClick={() => api?.scrollPrev()}
+              aria-label="Previous photo"
+              className="absolute top-1/2 left-3 size-11 -translate-y-1/2 rounded-full text-white hover:bg-white/10 hover:text-white"
+            >
+              <ChevronLeft aria-hidden />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-lg"
+              onClick={() => api?.scrollNext()}
+              aria-label="Next photo"
+              className="absolute top-1/2 right-3 size-11 -translate-y-1/2 rounded-full text-white hover:bg-white/10 hover:text-white"
+            >
+              <ChevronRight aria-hidden />
+            </Button>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
   )
 }
 
