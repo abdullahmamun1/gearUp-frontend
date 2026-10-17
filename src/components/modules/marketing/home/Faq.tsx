@@ -12,15 +12,19 @@ import { Section } from "./Section"
 const FAQS = [
   {
     q: "How does renting work?",
-    a: "Pick your gear, choose a start and end date, and the total is priced per day up front — no deposit, no membership. The provider confirms the booking, you pay, then you collect the kit from them and return it on the end date.",
+    a: "Pick your gear and your dates — the price per day and any refundable deposit are shown up front. The provider has up to 48 hours to confirm, then you pay, collect the kit from them and return it on the end date.",
   },
   {
     q: "When do I pay?",
-    a: "After the provider confirms your order. You'll get a Pay button on the order, which takes you to Stripe Checkout. Orders have a ৳65 minimum because Stripe rejects anything smaller.",
+    a: "Only after the provider confirms. You then have 24 hours to pay through Stripe Checkout, or the dates are released for other renters. Orders have a ৳65 minimum because Stripe rejects anything smaller.",
   },
   {
     q: "Can I cancel a booking?",
-    a: "Yes — while the order is still awaiting confirmation. Once a provider has confirmed it, get in touch and we'll sort it out with them directly.",
+    a: "Yes. It's free until you've paid. After paying you get a full refund if you cancel at least 24 hours before the start day.",
+  },
+  {
+    q: "What is the refundable deposit?",
+    a: "Some providers ask for a deposit on pricier kit. It's charged with the rental and refunded to your card when the gear comes back in good condition. If something is damaged, GearUp reviews the provider's claim before any of it is kept.",
   },
   {
     q: "Is my card information safe?",
@@ -28,7 +32,7 @@ const FAQS = [
   },
   {
     q: "Can I list my own gear?",
-    a: "Register as a provider and you get a dashboard to add listings with photos and pricing, toggle availability, and work through the order queue: confirm, mark picked up, mark returned.",
+    a: "Register as a provider, verify your email and you get a dashboard to add listings with photos, prices and deposits, and to confirm, hand over and check back in every booking.",
   },
   {
     q: "Who can leave a review?",
@@ -36,30 +40,52 @@ const FAQS = [
   },
 ]
 
+/** FAQ rich results for search engines. */
+const FAQ_JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: FAQS.map((faq) => ({
+    "@type": "Question",
+    name: faq.q,
+    acceptedAnswer: { "@type": "Answer", text: faq.a },
+  })),
+}
+
 export function Faq() {
   return (
-    <Section
-      tone="muted"
-      eyebrow="Before you book"
-      title="Frequently asked questions"
-      description={
-        <>
-          Still stuck? The{" "}
-          <Link href="/contact" className="text-primary hover:underline">
-            contact page
-          </Link>{" "}
-          has a real email and phone number.
-        </>
-      }
-    >
-      <Accordion keepMounted hiddenUntilFound className="max-w-full border-t">
-        {FAQS.map((faq) => (
-          <AccordionItem key={faq.q}>
-            <AccordionTrigger>{faq.q}</AccordionTrigger>
-            <AccordionPanel>{faq.a}</AccordionPanel>
-          </AccordionItem>
-        ))}
-      </Accordion>
-    </Section>
+    <>
+      <script
+        type="application/ld+json"
+        // Static, trusted content; JSON.stringify escapes it safely enough
+        // here, and "<" is escaped so it can't close the script tag.
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(FAQ_JSON_LD).replace(/</g, "\\u003c"),
+        }}
+      />
+      <Section
+        id="faq"
+        tone="muted"
+        eyebrow="Before you book"
+        title="Frequently asked questions"
+        description={
+          <>
+            Still stuck? The{" "}
+            <Link href="/contact" className="text-primary hover:underline">
+              contact page
+            </Link>{" "}
+            has a real email and phone number.
+          </>
+        }
+      >
+        <Accordion keepMounted hiddenUntilFound className="max-w-full border-t">
+          {FAQS.map((faq) => (
+            <AccordionItem key={faq.q}>
+              <AccordionTrigger>{faq.q}</AccordionTrigger>
+              <AccordionPanel>{faq.a}</AccordionPanel>
+            </AccordionItem>
+          ))}
+        </Accordion>
+      </Section>
+    </>
   )
 }

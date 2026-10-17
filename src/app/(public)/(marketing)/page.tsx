@@ -2,8 +2,12 @@ import type { Metadata } from "next"
 import { Suspense } from "react"
 
 import { getGearList } from "@/api/gear"
+import { getPlatformStats } from "@/api/stats"
+import { AdventureTabs } from "@/components/modules/marketing/home/AdventureTabs"
+import { BrandMarquee } from "@/components/modules/marketing/home/BrandMarquee"
 import { CategoryGrid } from "@/components/modules/marketing/home/CategoryGrid"
 import { CategoryGridSkeleton } from "@/components/modules/marketing/home/CategoryGridSkeleton"
+import { FinalCta } from "@/components/modules/marketing/home/FinalCta"
 import { Faq } from "@/components/modules/marketing/home/Faq"
 import { FeaturedGear } from "@/components/modules/marketing/home/FeaturedGear"
 import { FeaturedGearSkeleton } from "@/components/modules/marketing/home/FeaturedGearSkeleton"
@@ -23,11 +27,20 @@ export const metadata: Metadata = {
 }
 
 export default async function HomePage() {
-  const countRes = await getGearList({ limit: "1", isAvailable: "true" })
+  const [countRes, stats] = await Promise.all([
+    getGearList({ limit: "1", isAvailable: "true" }),
+    getPlatformStats(),
+  ])
 
   return (
     <>
-      <Hero gearCount={countRes.data?.meta?.total ?? 0} />
+      <Hero
+        gearCount={countRes.data?.meta?.total ?? 0}
+        providers={stats?.providers ?? 0}
+        reviews={stats?.reviews ?? 0}
+      />
+
+      <BrandMarquee />
 
       <Suspense fallback={<PlatformStatsSkeleton />}>
         <PlatformStats />
@@ -41,6 +54,10 @@ export default async function HomePage() {
         <FeaturedGear />
       </Suspense>
 
+      <Suspense fallback={<FeaturedGearSkeleton />}>
+        <AdventureTabs />
+      </Suspense>
+
       <HowItWorks />
 
       <Suspense fallback={<TestimonialsSkeleton />}>
@@ -52,6 +69,8 @@ export default async function HomePage() {
       <Faq />
 
       <Newsletter />
+
+      <FinalCta />
     </>
   )
 }

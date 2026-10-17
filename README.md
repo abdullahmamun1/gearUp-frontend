@@ -40,9 +40,8 @@ any of these. Password is `Password123` for all three.
 
 - Home page in eight sections — category grid, featured gear, how it works, a
   review slider, an FAQ accordion and a newsletter sign-up
-- Responsive gear grid with `next/image`, price per day, category and
-  availability, each card ending in a **View details** button — the only
-  clickable target on the card
+- Responsive gear grid with `next/image`, price per day, category, rating and
+  availability; the whole card is a single link to the gear page
 - Filter by search term, category, brand, price range and availability —
   **all held in the URL**, so every filtered view is shareable and
   server-rendered
@@ -96,7 +95,7 @@ any of these. Password is `Password123` for all three.
 
 |                                                                         |                                                 |
 | ----------------------------------------------------------------------- | ----------------------------------------------- |
-| **Next.js 16.2** (App Router)                                           | Server Components, Route Handlers, `src/proxy.ts`   |
+| **Next.js 16.4** (App Router)                                           | Server Components, Route Handlers, `src/proxy.ts`   |
 | **React 19.2** · **TypeScript**                                         |                                                 |
 | **Tailwind CSS v4** · **Base UI**                                       | shadcn-style components in `components/ui`      |
 | **TanStack Query v5**                                                   | Client cache for every dashboard table          |

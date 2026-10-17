@@ -2,6 +2,7 @@ import { Boxes, CalendarCheck, Star, Store } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 
 import { getPlatformStats } from "@/api/stats"
+import { AnimatedCounter } from "@/components/shared/motion/AnimatedCounter"
 
 import { Section } from "./Section"
 
@@ -52,9 +53,12 @@ export async function PlatformStats() {
       title="What's on GearUp right now"
       description="Counted live from the catalogue — not a marketing figure."
     >
-      <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <dl className="reveal-stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {tiles.map((tile) => (
-          <div key={tile.label} className="rounded-xl border bg-card p-5">
+          <div
+            key={tile.label}
+            className="rounded-xl border bg-card p-5 shadow-xs"
+          >
             <span
               className="grid size-10 place-items-center rounded-full bg-primary/10 text-primary"
               aria-hidden
@@ -63,7 +67,7 @@ export async function PlatformStats() {
             </span>
 
             <dd className="mt-4 font-heading text-3xl font-bold tabular-nums">
-              {tile.value.toLocaleString("en-US")}
+              <AnimatedCounter value={tile.value} />
               {tile.approx && "+"}
             </dd>
             <dt className="mt-0.5 text-sm font-medium">{tile.label}</dt>

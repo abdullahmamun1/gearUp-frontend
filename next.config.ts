@@ -1,6 +1,14 @@
+import path from "node:path"
+import { fileURLToPath } from "node:url"
 import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
+  // Pin the project root: a stray package-lock.json higher up the tree
+  // (e.g. in the home folder) otherwise makes Turbopack treat that folder as
+  // the root.
+  turbopack: {
+    root: path.dirname(fileURLToPath(import.meta.url)),
+  },
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "res.cloudinary.com" },

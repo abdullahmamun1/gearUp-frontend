@@ -2,6 +2,7 @@ import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 
 import { getFeaturedGear } from "@/api/gear"
+import { Carousel } from "@/components/shared/Carousel"
 import { GearCard } from "@/components/shared/GearCard"
 
 import { Section } from "./Section"
@@ -36,11 +37,15 @@ export async function FeaturedGear() {
           time.
         </p>
       ) : (
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <Carousel
+          label="Featured gear"
+          options={{ dragFree: true }}
+          slideClassName="basis-[78%] sm:basis-1/2 lg:basis-1/4"
+        >
           {items.map((gear) => (
             <GearCard key={gear.id} gear={gear} />
           ))}
-        </div>
+        </Carousel>
       )}
     </Section>
   )
