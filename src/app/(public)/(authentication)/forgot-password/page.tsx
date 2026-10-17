@@ -1,7 +1,6 @@
 import type { Metadata } from "next"
-import { KeyRound } from "lucide-react"
-
 import { CenteredCard } from "@/components/shared/CenteredCard"
+import { KeyScene } from "@/components/shared/illustrations/scenes"
 
 import { ForgotPasswordForm } from "@/components/modules/auth/ForgotPasswordForm"
 
@@ -13,7 +12,7 @@ export const metadata: Metadata = {
 export default function ForgotPasswordPage() {
   return (
     <CenteredCard
-      icon={KeyRound}
+      illustration={<KeyScene />}
       title="Forgot your password?"
       description="Enter the email you signed up with and we'll send you a link to choose a new one."
     >

@@ -1,20 +1,41 @@
 "use client"
 
+import { useState } from "react"
 import Link from "next/link"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Lock, Mail } from "lucide-react"
+import {
+  ArrowRight,
+  Backpack,
+  Check,
+  Loader2,
+  Mail,
+  ShieldCheck,
+  Sparkles,
+  Store,
+  type LucideIcon,
+} from "lucide-react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 
+import { PasswordField } from "@/components/shared/PasswordField"
 import { TextField } from "@/components/shared/TextField"
 import { Button } from "@/components/ui/button"
 import { DEMO_ACCOUNTS, type DemoAccount } from "@/constants/demoAccounts"
+import { cn } from "@/lib/utils"
 import { loginSchema, type LoginInput } from "@/validation/auth"
 import { loginUser } from "@/api/auth"
 
+import { FormError } from "./FormError"
 import { AuthDivider, GoogleButton } from "./GoogleButton"
 
+const DEMO_ICONS: Record<string, LucideIcon> = {
+  Customer: Backpack,
+  Provider: Store,
+  Admin: ShieldCheck,
+}
+
 export function LoginForm({ redirectTo }: { redirectTo?: string }) {
+  const [demo, setDemo] = useState<string | null>(null)
   const {
     register,
     handleSubmit,
@@ -36,15 +57,19 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
 
   function fillDemo(account: DemoAccount) {
     clearErrors()
+    setDemo(account.email)
     setValue("email", account.email, { shouldValidate: true })
     setValue("password", account.password, { shouldValidate: true })
   }
 
+  const email = register("email")
+  const password = register("password")
+
   return (
     <>
-      <div className="mt-8 grid gap-5">
+      <div className="mt-7 grid gap-5">
         <GoogleButton redirectTo={redirectTo} disabled={isSubmitting} />
-        <AuthDivider />
+        <AuthDivider label="or log in with email" />
       </div>
 
       <form
@@ -52,33 +77,42 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
         className="mt-5 grid gap-5"
         noValidate
       >
-        {errors.root ? (
-          <p
-            role="alert"
-            className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive"
-          >
-            {errors.root.message}
-          </p>
-        ) : null}
+        <FormError message={errors.root?.message} />
 
-        <div className="grid gap-2">
-          <p className="text-xs text-muted-foreground">Try a demo account</p>
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-            {DEMO_ACCOUNTS.map((account) => (
-              <Button
-                key={account.email}
-                type="button"
-                variant="outline"
-                size="lg"
-                onClick={() => fillDemo(account)}
-                disabled={isSubmitting}
-                className="h-9 text-xs"
-              >
-                {account.label}
-              </Button>
-            ))}
+        <fieldset className="rounded-xl border border-dashed border-foreground/20 bg-card/50 p-3">
+          <legend className="flex items-center gap-1.5 px-1 text-xs font-medium text-muted-foreground">
+            <Sparkles className="size-3.5 text-ember-strong" aria-hidden />
+            Try a demo account
+          </legend>
+          <div className="grid grid-cols-3 gap-2">
+            {DEMO_ACCOUNTS.map((account) => {
+              const Icon = DEMO_ICONS[account.label] ?? Backpack
+              const selected = demo === account.email
+              return (
+                <button
+                  key={account.email}
+                  type="button"
+                  onClick={() => fillDemo(account)}
+                  disabled={isSubmitting}
+                  aria-pressed={selected}
+                  className={cn(
+                    "relative flex cursor-pointer flex-col items-center gap-1.5 rounded-lg border bg-card px-2 py-2.5 text-xs font-medium transition-all outline-none hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-sm focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50",
+                    selected && "border-primary bg-primary/5 text-primary"
+                  )}
+                >
+                  <Icon className="size-4" aria-hidden />
+                  {account.label}
+                  {selected && (
+                    <Check
+                      className="absolute top-1 right-1 size-3"
+                      aria-hidden
+                    />
+                  )}
+                </button>
+              )
+            })}
           </div>
-        </div>
+        </fieldset>
 
         <TextField
           id="email"
@@ -88,33 +122,55 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
           autoComplete="email"
           placeholder="you@example.com"
           error={errors.email?.message}
-          {...register("email")}
+          {...email}
+          onChange={(event) => {
+            setDemo(null)
+            return email.onChange(event)
+          }}
         />
 
-        <TextField
-          id="password"
-          label="Password"
-          icon={Lock}
-          type="password"
-          autoComplete="current-password"
-          placeholder="••••••••"
-          error={errors.password?.message}
-          {...register("password")}
-        />
-        <Link
-          href="/forgot-password"
-          className="-mt-2 justify-self-end text-xs text-muted-foreground transition-colors hover:text-primary"
-        >
-          Forgot password?
-        </Link>
+        <div className="grid gap-2">
+          <PasswordField
+            id="password"
+            label="Password"
+            autoComplete="current-password"
+            placeholder="••••••••"
+            error={errors.password?.message}
+            {...password}
+            onChange={(event) => {
+              setDemo(null)
+              return password.onChange(event)
+            }}
+          />
+          <Link
+            href="/forgot-password"
+            className="justify-self-end text-xs font-medium text-primary underline-offset-4 hover:underline"
+          >
+            Forgot password?
+          </Link>
+        </div>
 
         <Button
           type="submit"
+          variant="cta"
           size="lg"
-          className="h-10 text-sm"
+          className="group h-11 gap-2 text-sm"
           disabled={isSubmitting}
         >
-          {isSubmitting ? "Logging in…" : "Log in"}
+          {isSubmitting ? (
+            <>
+              <Loader2 className="size-4 animate-spin" aria-hidden />
+              Logging in…
+            </>
+          ) : (
+            <>
+              Log in
+              <ArrowRight
+                className="size-4 transition-transform group-hover:translate-x-0.5"
+                aria-hidden
+              />
+            </>
+          )}
         </Button>
       </form>
     </>

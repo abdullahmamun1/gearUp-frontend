@@ -49,7 +49,7 @@ export function ContactForm() {
 
   if (sent) {
     return (
-      <div className="rounded-xl border border-primary/30 bg-primary/5 p-6">
+      <div className="rounded-2xl border border-primary/30 bg-primary/5 p-6 shadow-lg sm:p-8">
         <CheckCircle2 className="size-6 text-primary" aria-hidden />
         <h2 className="mt-3 font-heading text-lg font-semibold">{sent}</h2>
         <p className="mt-1.5 text-sm text-muted-foreground">
@@ -72,9 +72,15 @@ export function ContactForm() {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="grid gap-5 rounded-xl border bg-card p-6"
+      className="grid gap-5 rounded-2xl border bg-card p-6 shadow-lg sm:p-8"
       noValidate
     >
+      <div>
+        <h2 className="text-h3">Send us a message</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Every field is required. We reply by email.
+        </p>
+      </div>
       {errors.root ? (
         <p
           role="alert"

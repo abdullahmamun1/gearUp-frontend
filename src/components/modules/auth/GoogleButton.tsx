@@ -28,22 +28,22 @@ export function GoogleButton({
       tabIndex={disabled ? -1 : undefined}
       className={cn(
         buttonVariants({ variant: "outline", size: "lg" }),
-        "h-10 w-full gap-2.5 text-sm",
+        "h-11 w-full gap-2.5 bg-card text-sm font-medium shadow-xs hover:border-foreground/20 hover:shadow-sm",
         disabled && "pointer-events-none opacity-50"
       )}
     >
-      <GoogleIcon className="size-4" />
+      <GoogleIcon className="size-[18px]" />
       {label}
     </a>
   )
 }
 
-export function AuthDivider() {
+export function AuthDivider({ label = "or" }: { label?: string }) {
   return (
     <div className="flex items-center gap-3">
-      <span className="h-px flex-1 bg-border" aria-hidden />
-      <span className="text-xs text-muted-foreground">or</span>
-      <span className="h-px flex-1 bg-border" aria-hidden />
+      <span className="h-px flex-1 bg-foreground/15" aria-hidden />
+      <span className="text-xs text-muted-foreground">{label}</span>
+      <span className="h-px flex-1 bg-foreground/15" aria-hidden />
     </div>
   )
 }

@@ -2,22 +2,15 @@
 
 import { useRouter } from "next/navigation"
 import { useEffect, useState, useTransition } from "react"
-import type { DateRange } from "react-day-picker"
-import { CalendarDays, X } from "lucide-react"
+import { SlidersHorizontal, X } from "lucide-react"
 
+import { DateRangePicker } from "@/components/shared/DateRangePicker"
 import { FilterField } from "@/components/shared/FilterField"
 import { SearchInput } from "@/components/shared/SearchInput"
 import { SelectField } from "@/components/shared/SelectField"
 import { Button } from "@/components/ui/button"
-import { Calendar } from "@/components/ui/calendar"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import { formatDate } from "@/utils/format"
 import {
   buildGearHref,
   DEFAULT_SORT,
@@ -25,26 +18,15 @@ import {
   SORT_OPTIONS,
   type GearFilters,
 } from "@/utils/filters/gear"
-import {
-  addDays,
-  fromDateValue,
-  RENTAL_POLICY,
-  startOfToday,
-  toDateValue,
-} from "@/utils/rental"
-import type { Category } from "@/types"
 
-const ALL_CATEGORIES = "all"
 const ALL_BRANDS = "__all_brands__"
 const SEARCH_DEBOUNCE_MS = 500
 
 export function GearFilterBar({
   filters,
-  categories,
   brands,
 }: {
   filters: GearFilters
-  categories: Category[]
   brands: string[]
 }) {
   const router = useRouter()
@@ -52,14 +34,8 @@ export function GearFilterBar({
   const [searchTerm, setSearchTerm] = useState(filters.searchTerm ?? "")
   const [minPrice, setMinPrice] = useState(filters.minPrice ?? "")
   const [maxPrice, setMaxPrice] = useState(filters.maxPrice ?? "")
-
-  const categoryItems = [
-    { value: ALL_CATEGORIES, label: "All categories" },
-    ...categories.map((category) => ({
-      value: category.id,
-      label: category.name,
-    })),
-  ]
+  // null until the visitor toggles it: then it follows the active filters.
+  const [moreOpen, setMoreOpen] = useState<boolean | null>(null)
 
   const brandNames =
     filters.brand && !brands.includes(filters.brand)
@@ -115,15 +91,23 @@ export function GearFilterBar({
     startTransition(() => router.push("/gear"))
   }
 
+  const extraFilters = [
+    filters.brand,
+    filters.minPrice,
+    filters.maxPrice,
+    filters.availableOnly || undefined,
+  ].filter(Boolean).length
+  const showMore = moreOpen ?? extraFilters > 0
+
   return (
     <form
       onSubmit={(event) => {
         event.preventDefault()
         apply()
       }}
-      className="mt-6 grid gap-4 rounded-xl border bg-card p-4"
+      className="mt-6 rounded-2xl border bg-card p-3 shadow-sm sm:p-4"
     >
-      <div className="flex flex-col gap-3 sm:flex-row">
+      <div className="grid gap-2 sm:grid-cols-[1fr_auto] lg:grid-cols-[1fr_15rem_13rem_auto]">
         <SearchInput
           value={searchTerm}
           onChange={setSearchTerm}
@@ -132,6 +116,14 @@ export function GearFilterBar({
           isPending={isPending}
         />
 
+        <div className="sm:order-last lg:order-none">
+          <DateRangePicker
+            from={filters.from}
+            to={filters.to}
+            onChange={(from, to) => apply({ from, to })}
+          />
+        </div>
+
         <SelectField
           options={SORT_OPTIONS}
           value={filters.sort}
@@ -139,84 +131,84 @@ export function GearFilterBar({
             apply({ sort: (value as GearFilters["sort"]) || DEFAULT_SORT })
           }
           aria-label="Sort results"
-          className="h-9 w-full text-sm sm:w-52"
+          className="h-9 w-full text-sm"
         />
-      </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <FilterField label="Category">
-          <SelectField
-            options={categoryItems}
-            value={filters.category ?? ALL_CATEGORIES}
-            onValueChange={(value) =>
-              apply({
-                category: value === ALL_CATEGORIES ? undefined : value,
-              })
-            }
-            className="h-9 w-full text-sm"
-          />
-        </FilterField>
-
-        {brandNames.length > 0 && (
-          <FilterField label="Brand">
-            <SelectField
-              options={brandItems}
-              value={filters.brand ?? ALL_BRANDS}
-              onValueChange={(value) =>
-                apply({ brand: value === ALL_BRANDS ? undefined : value })
-              }
-              className="h-9 w-full text-sm"
-            />
-          </FilterField>
-        )}
-
-        <FilterField label="Dates">
-          <DateRangeFilter
-            from={filters.from}
-            to={filters.to}
-            onChange={(from, to) => apply({ from, to })}
-          />
-        </FilterField>
-
-        <FilterField label="Min price / day">
-          <Input
-            value={minPrice}
-            onChange={(event) => setMinPrice(event.target.value)}
-            inputMode="decimal"
-            placeholder="0"
-            className="h-9 text-sm"
-          />
-        </FilterField>
-
-        <FilterField label="Max price / day">
-          <Input
-            value={maxPrice}
-            onChange={(event) => setMaxPrice(event.target.value)}
-            inputMode="decimal"
-            placeholder="Any"
-            className="h-9 text-sm"
-          />
-        </FilterField>
-      </div>
-
-      <div className="flex items-center gap-3">
-        <label className="flex items-center gap-2 text-sm">
-          <Checkbox
-            checked={filters.availableOnly}
-            onCheckedChange={(checked) =>
-              apply({ availableOnly: Boolean(checked) })
-            }
-          />
-          Available only
-        </label>
-
-        <Button type="submit" size="lg" className="ml-auto h-9 text-sm">
-          Apply
+        <Button
+          type="button"
+          variant={showMore ? "secondary" : "outline"}
+          size="lg"
+          aria-expanded={showMore}
+          aria-controls="more-gear-filters"
+          onClick={() => setMoreOpen(!showMore)}
+          className="h-9 gap-2 text-sm"
+        >
+          <SlidersHorizontal className="size-4" aria-hidden />
+          Filters
+          {extraFilters > 0 && (
+            <span className="grid size-5 place-items-center rounded-full bg-primary text-[11px] font-semibold text-primary-foreground">
+              {extraFilters}
+            </span>
+          )}
         </Button>
       </div>
 
+      {showMore && (
+        <div
+          id="more-gear-filters"
+          className="mt-3 grid animate-in gap-3 border-t pt-4 duration-300 fade-in slide-in-from-top-1 motion-reduce:animate-none sm:grid-cols-2 lg:grid-cols-[1fr_10rem_10rem_auto_auto] lg:items-end"
+        >
+          {brandNames.length > 0 && (
+            <FilterField label="Brand">
+              <SelectField
+                options={brandItems}
+                value={filters.brand ?? ALL_BRANDS}
+                onValueChange={(value) =>
+                  apply({ brand: value === ALL_BRANDS ? undefined : value })
+                }
+                className="h-9 w-full text-sm"
+              />
+            </FilterField>
+          )}
+
+          <FilterField label="Min price / day">
+            <Input
+              value={minPrice}
+              onChange={(event) => setMinPrice(event.target.value)}
+              inputMode="decimal"
+              placeholder="0"
+              className="h-9 text-sm"
+            />
+          </FilterField>
+
+          <FilterField label="Max price / day">
+            <Input
+              value={maxPrice}
+              onChange={(event) => setMaxPrice(event.target.value)}
+              inputMode="decimal"
+              placeholder="Any"
+              className="h-9 text-sm"
+            />
+          </FilterField>
+
+          <label className="flex h-9 items-center gap-2 text-sm">
+            <Checkbox
+              checked={filters.availableOnly}
+              onCheckedChange={(checked) =>
+                apply({ availableOnly: Boolean(checked) })
+              }
+            />
+            Available now
+          </label>
+
+          <Button type="submit" size="lg" className="h-9 px-5 text-sm">
+            Apply
+          </Button>
+        </div>
+      )}
+
       {hasActiveFilters(filters) && (
-        <div>
+        <div className="mt-3 flex justify-end">
           <Button
             type="button"
             variant="ghost"
@@ -231,88 +223,5 @@ export function GearFilterBar({
         </div>
       )}
     </form>
-  )
-}
-
-function DateRangeFilter({
-  from,
-  to,
-  onChange,
-}: {
-  from?: string
-  to?: string
-  onChange: (from?: string, to?: string) => void
-}) {
-  const [open, setOpen] = useState(false)
-  const [draft, setDraft] = useState<DateRange | undefined>(
-    from && to
-      ? { from: fromDateValue(from), to: fromDateValue(to) }
-      : undefined
-  )
-  const today = startOfToday()
-
-  function select(range: DateRange | undefined) {
-    setDraft(range)
-    if (range?.from && range.to && range.to > range.from) {
-      setOpen(false)
-      onChange(toDateValue(range.from), toDateValue(range.to))
-    }
-  }
-
-  return (
-    <div className="flex gap-1">
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger
-          render={
-            <Button
-              type="button"
-              variant="outline"
-              size="lg"
-              className="h-9 flex-1 justify-start gap-2 text-sm font-normal"
-            >
-              <CalendarDays
-                className="size-4 text-muted-foreground"
-                aria-hidden
-              />
-              {from && to
-                ? `${formatDate(from)} → ${formatDate(to)}`
-                : "Any dates"}
-            </Button>
-          }
-        />
-        <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            mode="range"
-            selected={draft}
-            onSelect={select}
-            numberOfMonths={1}
-            autoFocus
-            max={RENTAL_POLICY.maxRentalDays}
-            disabled={[
-              { before: today },
-              { after: addDays(today, RENTAL_POLICY.maxDaysAhead) },
-            ]}
-          />
-          <p className="border-t px-3 py-2 text-xs text-muted-foreground">
-            Shows only gear that&apos;s free for your whole trip.
-          </p>
-        </PopoverContent>
-      </Popover>
-      {from && to && (
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          className="size-9"
-          aria-label="Clear dates"
-          onClick={() => {
-            setDraft(undefined)
-            onChange(undefined, undefined)
-          }}
-        >
-          <X className="size-3.5" aria-hidden />
-        </Button>
-      )}
-    </div>
   )
 }

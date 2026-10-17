@@ -1,32 +1,50 @@
 "use client"
 
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Lock, Mail, Phone, User } from "lucide-react"
+import {
+  ArrowRight,
+  Backpack,
+  Check,
+  Loader2,
+  Mail,
+  Phone,
+  Store,
+  User,
+} from "lucide-react"
 import { useForm, useWatch } from "react-hook-form"
 import { toast } from "sonner"
 
+import { PasswordField } from "@/components/shared/PasswordField"
 import { TextField } from "@/components/shared/TextField"
 import { Button } from "@/components/ui/button"
 import { registerSchema, type RegisterInput } from "@/validation/auth"
 import { loginUser, registerUser } from "@/api/auth"
 
+import { FormError } from "./FormError"
 import { AuthDivider, GoogleButton } from "./GoogleButton"
+import { PasswordStrength } from "./PasswordStrength"
 
 const ROLES = [
   {
     value: "CUSTOMER",
+    icon: Backpack,
     title: "I want to rent",
     body: "Browse and book gear for your trips.",
   },
   {
     value: "PROVIDER",
+    icon: Store,
     title: "I want to list",
     body: "Rent out gear you already own.",
   },
 ] as const
 
-export function RegisterForm() {
+export function RegisterForm({
+  defaultRole = "CUSTOMER",
+}: {
+  defaultRole?: "CUSTOMER" | "PROVIDER"
+}) {
   const router = useRouter()
 
   const {
@@ -41,13 +59,14 @@ export function RegisterForm() {
       name: "",
       email: "",
       phone: "",
-      role: "CUSTOMER",
+      role: defaultRole,
       password: "",
       confirmPassword: "",
     },
   })
 
   const role = useWatch({ control, name: "role" })
+  const password = useWatch({ control, name: "password" })
 
   async function onSubmit(values: RegisterInput) {
     const res = await registerUser({
@@ -83,37 +102,41 @@ export function RegisterForm() {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="mt-8 grid gap-5"
+      className="mt-7 grid gap-5"
       noValidate
     >
-      {errors.root ? (
-        <p
-          role="alert"
-          className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive"
-        >
-          {errors.root.message}
-        </p>
-      ) : null}
+      <FormError message={errors.root?.message} />
 
       <fieldset className="grid gap-2">
         <legend className="mb-2 text-sm font-medium">
           How will you use GearUp?
         </legend>
-        <div className="grid gap-3 sm:grid-cols-2">
-          {ROLES.map((role) => (
+        <div className="grid grid-cols-2 gap-3">
+          {ROLES.map((option) => (
             <label
-              key={role.value}
-              className="cursor-pointer rounded-lg border p-3 transition-colors hover:bg-accent/50 has-checked:border-primary has-checked:bg-primary/5 has-focus-visible:ring-2 has-focus-visible:ring-ring/30"
+              key={option.value}
+              className="group/role relative cursor-pointer rounded-xl border bg-card p-3.5 transition-all hover:border-primary/40 has-checked:border-primary has-checked:bg-primary/5 has-checked:shadow-glow-primary has-focus-visible:ring-2 has-focus-visible:ring-ring"
             >
               <input
                 type="radio"
-                value={role.value}
+                value={option.value}
                 className="sr-only"
                 {...register("role")}
               />
-              <span className="block text-sm font-medium">{role.title}</span>
-              <span className="mt-1 block text-xs text-muted-foreground">
-                {role.body}
+              <span className="grid size-9 place-items-center rounded-lg bg-muted text-muted-foreground transition-colors group-has-checked/role:bg-primary group-has-checked/role:text-primary-foreground">
+                <option.icon className="size-[18px]" aria-hidden />
+              </span>
+              <span className="mt-3 block text-sm font-semibold">
+                {option.title}
+              </span>
+              <span className="mt-0.5 block text-xs text-muted-foreground">
+                {option.body}
+              </span>
+              <span
+                aria-hidden
+                className="absolute top-3 right-3 grid size-5 place-items-center rounded-full border bg-background text-transparent transition-colors group-has-checked/role:border-primary group-has-checked/role:bg-primary group-has-checked/role:text-primary-foreground"
+              >
+                <Check className="size-3" />
               </span>
             </label>
           ))}
@@ -128,7 +151,7 @@ export function RegisterForm() {
         role={role}
         disabled={isSubmitting}
       />
-      <AuthDivider />
+      <AuthDivider label="or sign up with email" />
 
       <TextField
         id="name"
@@ -170,37 +193,55 @@ export function RegisterForm() {
         {...register("phone")}
       />
 
-      <TextField
+      <PasswordField
         id="password"
         label="Password"
-        icon={Lock}
-        type="password"
         autoComplete="new-password"
-        placeholder="••••••••"
-        hint="At least 8 characters."
+        placeholder="At least 8 characters"
         error={errors.password?.message}
         {...register("password")}
       />
+      {!errors.password && <PasswordStrength password={password ?? ""} />}
 
-      <TextField
+      <PasswordField
         id="confirmPassword"
         label="Confirm password"
-        icon={Lock}
-        type="password"
         autoComplete="new-password"
-        placeholder="••••••••"
+        placeholder="Type it again"
         error={errors.confirmPassword?.message}
         {...register("confirmPassword")}
       />
 
       <Button
         type="submit"
+        variant="cta"
         size="lg"
-        className="h-10 text-sm"
+        className="group h-11 gap-2 text-sm"
         disabled={isSubmitting}
       >
-        {isSubmitting ? "Creating account…" : "Create account"}
+        {isSubmitting ? (
+          <>
+            <Loader2 className="size-4 animate-spin" aria-hidden />
+            Creating account…
+          </>
+        ) : (
+          <>
+            {role === "PROVIDER" ? "Create provider account" : "Create account"}
+            <ArrowRight
+              className="size-4 transition-transform group-hover:translate-x-0.5"
+              aria-hidden
+            />
+          </>
+        )}
       </Button>
     </form>
+  )
+}
+
+/** "List your gear" links send ?role=PROVIDER to preselect the provider form. */
+export function RegisterFormFromUrl() {
+  const role = useSearchParams().get("role")
+  return (
+    <RegisterForm defaultRole={role === "PROVIDER" ? "PROVIDER" : "CUSTOMER"} />
   )
 }

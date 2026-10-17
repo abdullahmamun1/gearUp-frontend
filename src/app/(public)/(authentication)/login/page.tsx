@@ -1,8 +1,12 @@
 import type { Metadata } from "next"
 import Link from "next/link"
+import { Suspense } from "react"
 import { CalendarRange, PackageCheck, ShieldCheck } from "lucide-react"
 
+import { AuthShell } from "@/components/modules/auth/AuthShell"
 import { LoginForm } from "@/components/modules/auth/LoginForm"
+import { CampingScene } from "@/components/shared/illustrations/scenes"
+import { LoginPanel } from "@/components/modules/auth/LoginPanel"
 
 export const metadata: Metadata = {
   title: "Log in · GearUp",
@@ -28,113 +32,43 @@ const PERKS = [
   },
 ]
 
-const ALERTS: Record<string, string> = {
-  suspended:
-    "Your account has been suspended, so you've been signed out. Please contact support if you think this is a mistake.",
-  google:
-    "We couldn't complete your Google sign-in. Please try again, or log in with your email and password.",
-  google_denied:
-    "You cancelled the Google sign-in, so nothing was changed. Try again whenever you're ready.",
-}
-
-/** Good news shown above the form, e.g. after a password reset. */
-const NOTICES: Record<string, string> = {
-  reset: "Your password has been changed. Log in with your new password.",
-  verified: "Your email is verified. Log in to keep going.",
-}
-
-export default async function LoginPage({
-  searchParams,
-}: {
-  searchParams: Promise<{
-    redirectTo?: string
-    reason?: string
-    error?: string
-  }>
-}) {
-  const { redirectTo, reason, error } = await searchParams
-  const alert = ALERTS[reason ?? ""] ?? ALERTS[error ?? ""]
-  const notice = NOTICES[reason ?? ""]
+/** Static: query-string messages and redirects are read in LoginPanel. */
+export default function LoginPage() {
   return (
-    <section className="relative overflow-hidden">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-linear-to-br from-primary/10 via-background to-background"
-      />
-
-      <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 sm:py-20 lg:grid-cols-2 lg:gap-16">
-        {/* Marketing panel */}
-        <div className="hidden lg:block">
-          <p className="mb-4 inline-flex items-center gap-2 rounded-full border bg-card px-3 py-1 text-xs text-muted-foreground">
-            <span className="size-1.5 rounded-full bg-primary" aria-hidden />
-            Welcome back
-          </p>
-
-          <h1 className="font-heading text-4xl font-bold tracking-tight text-balance">
-            Pick up where you <span className="text-primary">left off</span>
-          </h1>
-
-          <p className="mt-4 max-w-md text-pretty text-muted-foreground">
-            Log in to manage your rentals, message providers and get back on the
-            trail sooner.
-          </p>
-
-          <ul className="mt-10 grid gap-6">
-            {PERKS.map((perk) => (
-              <li key={perk.title} className="flex gap-4">
-                <div className="grid size-10 shrink-0 place-items-center rounded-full bg-primary/10">
-                  <perk.icon className="size-4 text-primary" aria-hidden />
-                </div>
-                <div>
-                  <h2 className="font-heading text-sm font-semibold">
-                    {perk.title}
-                  </h2>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {perk.body}
-                  </p>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Form panel */}
-        <div className="mx-auto w-full max-w-md rounded-xl border bg-card p-6 shadow-sm sm:p-8">
-          <div className="text-center lg:text-left">
-            <h2 className="font-heading text-2xl font-bold tracking-tight">
-              Log in
-            </h2>
-            <p className="mt-1.5 text-sm text-muted-foreground">
-              New to GearUp?{" "}
-              <Link href="/register" className="text-primary hover:underline">
-                Create an account
-              </Link>
-            </p>
-          </div>
-          {alert ? (
-            <p
-              role="alert"
-              className="mt-6 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive"
-            >
-              {alert}
-            </p>
-          ) : null}
-          {notice ? (
-            <p
-              role="status"
-              className="mt-6 rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-xs"
-            >
-              {notice}
-            </p>
-          ) : null}
-
-          <LoginForm redirectTo={redirectTo} />
-
-          <p className="mt-6 text-center text-xs text-muted-foreground">
-            By logging in you agree to our Terms and Privacy Policy.
-          </p>
-        </div>
-      </div>
-    </section>
+    <AuthShell
+      eyebrow="Welcome back"
+      headline="Pick up where you left off"
+      description="Log in to manage your rentals, message providers and get back on the trail sooner."
+      perks={PERKS}
+      scene={<CampingScene />}
+      title="Log in"
+      subtitle={
+        <>
+          New to GearUp?{" "}
+          <Link
+            href="/register"
+            className="font-medium text-primary hover:underline"
+          >
+            Create an account
+          </Link>
+        </>
+      }
+      footnote={
+        <>
+          By logging in you agree to our{" "}
+          <Link
+            href="/privacy#terms"
+            className="underline-offset-2 hover:underline"
+          >
+            Terms and Privacy Policy
+          </Link>
+          .
+        </>
+      }
+    >
+      <Suspense fallback={<LoginForm />}>
+        <LoginPanel />
+      </Suspense>
+    </AuthShell>
   )
 }

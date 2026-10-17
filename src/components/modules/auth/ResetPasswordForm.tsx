@@ -2,14 +2,16 @@
 
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useForm } from "react-hook-form"
+import { Loader2 } from "lucide-react"
+import { useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Lock } from "lucide-react"
 
-import { TextField } from "@/components/shared/TextField"
+import { PasswordField } from "@/components/shared/PasswordField"
 import { Button } from "@/components/ui/button"
 import { resetPasswordSchema, type ResetPasswordInput } from "@/validation/auth"
 import { resetPassword } from "@/api/auth"
+
+import { PasswordStrength } from "./PasswordStrength"
 
 export function ResetPasswordForm({ token }: { token: string }) {
   const router = useRouter()
@@ -17,11 +19,14 @@ export function ResetPasswordForm({ token }: { token: string }) {
     register,
     handleSubmit,
     setError,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<ResetPasswordInput>({
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: { password: "", confirmPassword: "" },
   })
+
+  const password = useWatch({ control, name: "password" })
 
   async function onSubmit(values: ResetPasswordInput) {
     const res = await resetPassword(token, values.password)
@@ -39,7 +44,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
       {errors.root?.message && (
         <p
           role="alert"
-          className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive"
+          className="rounded-lg border border-destructive/30 bg-destructive/8 px-3.5 py-3 text-sm text-destructive"
         >
           {errors.root.message}{" "}
           <Link href="/forgot-password" className="font-medium underline">
@@ -47,21 +52,18 @@ export function ResetPasswordForm({ token }: { token: string }) {
           </Link>
         </p>
       )}
-      <TextField
+      <PasswordField
         id="password"
         label="New password"
-        icon={Lock}
-        type="password"
         autoComplete="new-password"
         placeholder="At least 8 characters"
         error={errors.password?.message}
         {...register("password")}
       />
-      <TextField
+      {!errors.password && <PasswordStrength password={password ?? ""} />}
+      <PasswordField
         id="confirmPassword"
         label="Confirm new password"
-        icon={Lock}
-        type="password"
         autoComplete="new-password"
         error={errors.confirmPassword?.message}
         {...register("confirmPassword")}
@@ -69,9 +71,12 @@ export function ResetPasswordForm({ token }: { token: string }) {
       <Button
         type="submit"
         size="lg"
-        className="h-10 text-sm"
+        className="h-11 text-sm"
         disabled={isSubmitting}
       >
+        {isSubmitting && (
+          <Loader2 className="size-4 animate-spin" aria-hidden />
+        )}
         {isSubmitting ? "Saving…" : "Set new password"}
       </Button>
       <p className="text-center text-xs text-muted-foreground">

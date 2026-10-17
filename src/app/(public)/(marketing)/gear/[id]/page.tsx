@@ -2,13 +2,22 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { Suspense } from "react"
-import { ArrowLeft, Mail, Package, Store } from "lucide-react"
+import {
+  ChevronRight,
+  Clock,
+  Mail,
+  Package,
+  ShieldCheck,
+  Star,
+  Store,
+  Undo2,
+} from "lucide-react"
 
-import { getGearById } from "@/api/gear"
+import { getGearById, getGearList } from "@/api/gear"
 import { GearGallery } from "@/components/modules/gear/GearGallery"
 import { RentCta } from "@/components/modules/gear/RentCta"
+import { StickyRentBar } from "@/components/modules/gear/StickyRentBar"
 import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { formatDate, formatPrice } from "@/utils/format"
 import {
@@ -16,7 +25,7 @@ import {
   gearAvailability,
   isRentable,
 } from "@/utils/gearAvailability"
-import { POSITIVE_INT, first, matching } from "@/utils/searchParams"
+import { RENTAL_POLICY } from "@/utils/rental"
 import type { GearItem } from "@/types"
 
 import { GearReviews } from "@/components/modules/gear/GearReviews"
@@ -27,7 +36,23 @@ import {
 
 type Props = {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ reviewPage?: string | string[] }>
+}
+
+/** ISR: pages refresh at most every 5 minutes, or at once via the `gear` tag. */
+export const revalidate = 300
+
+/**
+ * Prebuild the newest listings; any other id is rendered on its first visit
+ * and then cached like the rest. A failed fetch just means nothing is
+ * prebuilt — the build never depends on the API being up.
+ */
+export async function generateStaticParams() {
+  const res = await getGearList({
+    limit: "48",
+    sortBy: "createdAt",
+    sortOrder: "desc",
+  })
+  return (res.data?.data ?? []).map((gear) => ({ id: gear.id }))
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -44,11 +69,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default async function GearDetailPage({ params, searchParams }: Props) {
+export default async function GearDetailPage({ params }: Props) {
   const { id } = await params
-  const reviewPage = Number(
-    matching(first((await searchParams).reviewPage), POSITIVE_INT) ?? "1"
-  )
   const res = await getGearById(id)
 
   if (!res.success && (res.statusCode === 404 || res.statusCode === 400)) {
@@ -73,60 +95,112 @@ export default async function GearDetailPage({ params, searchParams }: Props) {
 
   return (
     <section className="mx-auto max-w-6xl px-4 py-10">
-      <Link
-        href="/gear"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-      >
-        <ArrowLeft className="size-3.5" aria-hidden />
-        Back to browse
-      </Link>
+      <nav aria-label="Breadcrumb">
+        <ol className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
+          <li>
+            <Link href="/" className="transition-colors hover:text-foreground">
+              Home
+            </Link>
+          </li>
+          <li aria-hidden>
+            <ChevronRight className="size-3.5" />
+          </li>
+          <li>
+            <Link
+              href="/gear"
+              transitionTypes={["nav-back"]}
+              className="transition-colors hover:text-foreground"
+            >
+              Browse
+            </Link>
+          </li>
+          {gear.category && (
+            <>
+              <li aria-hidden>
+                <ChevronRight className="size-3.5" />
+              </li>
+              <li>
+                <Link
+                  href={`/gear?category=${gear.category.id}`}
+                  transitionTypes={["nav-back"]}
+                  className="transition-colors hover:text-foreground"
+                >
+                  {gear.category.name}
+                </Link>
+              </li>
+            </>
+          )}
+          <li aria-hidden>
+            <ChevronRight className="size-3.5" />
+          </li>
+          <li aria-current="page" className="max-w-56 truncate text-foreground">
+            {gear.name}
+          </li>
+        </ol>
+      </nav>
 
       <div className="mt-6 grid gap-10 lg:grid-cols-[1.4fr_1fr]">
         <div>
           <GearGallery
+            gearId={gear.id}
             images={images}
             name={gear.name}
             outOfStock={outOfStock}
           />
 
           {gear.description && (
-            <>
-              <Separator className="my-8" />
-              <h2 className="font-heading text-sm font-semibold">
-                About this gear
-              </h2>
-              <p className="mt-2 text-sm leading-relaxed text-pretty text-muted-foreground">
+            <Panel title="About this gear">
+              <p className="text-[15px] leading-relaxed text-pretty text-muted-foreground">
                 {gear.description}
               </p>
-            </>
+            </Panel>
           )}
 
-          <Separator className="my-8" />
-          <Specifications gear={gear} />
+          <Panel title="Specifications">
+            <Specifications gear={gear} />
+          </Panel>
 
-          <Separator className="my-8" />
-          <section id="reviews" className="scroll-mt-20">
-            <h2 className="font-heading text-sm font-semibold">Reviews</h2>
-            <Suspense key={reviewPage} fallback={<ReviewsSkeleton />}>
-              <GearReviews gearId={gear.id} page={reviewPage} />
+          <section
+            id="reviews"
+            className="mt-6 scroll-mt-24 rounded-2xl border bg-card p-6 shadow-xs"
+          >
+            <h2 className="text-h3">Reviews</h2>
+            <Suspense fallback={<ReviewsSkeleton />}>
+              <GearReviews gearId={gear.id} />
             </Suspense>
           </section>
         </div>
 
-        <div className="lg:sticky lg:top-6 lg:self-start">
+        <div className="lg:sticky lg:top-24 lg:self-start">
           {gear.category && (
             <Badge variant="secondary">{gear.category.name}</Badge>
           )}
 
-          <h1 className="mt-3 font-heading text-3xl font-bold tracking-tight">
-            {gear.name}
-          </h1>
+          <h1 className="mt-3 text-h1">{gear.name}</h1>
 
-          {gear.brand && (
-            <p className="mt-1 text-sm text-muted-foreground">{gear.brand}</p>
-          )}
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+            {gear.brand && <span>{gear.brand}</span>}
+            {gear.rating &&
+              gear.rating.count > 0 &&
+              gear.rating.average !== null && (
+                <a
+                  href="#reviews"
+                  className="inline-flex items-center gap-1 transition-colors hover:text-foreground"
+                >
+                  <Star
+                    className="size-4 fill-current text-amber-500"
+                    aria-hidden
+                  />
+                  <span className="font-medium text-foreground">
+                    {gear.rating.average.toFixed(1)}
+                  </span>
+                  ({gear.rating.count}{" "}
+                  {gear.rating.count === 1 ? "review" : "reviews"})
+                </a>
+              )}
+          </div>
 
-          <p className="mt-5 text-2xl font-semibold">
+          <p className="mt-5 font-heading text-3xl font-bold">
             {formatPrice(gear.pricePerDay)}
             <span className="text-sm font-normal text-muted-foreground">
               {" "}
@@ -141,9 +215,34 @@ export default async function GearDetailPage({ params, searchParams }: Props) {
               : `${gear.stock} ${gear.stock === 1 ? "unit" : "units"} · pick dates to check availability`}
           </p>
 
-          <div className="mt-6">
+          <div id="rent" className="mt-6 scroll-mt-24">
             <RentCta gear={gear} />
           </div>
+          {!outOfStock && (
+            <StickyRentBar targetId="rent" pricePerDay={gear.pricePerDay} />
+          )}
+
+          <ul className="mt-5 grid gap-2.5 rounded-2xl border bg-muted/30 p-4 text-sm">
+            {[
+              {
+                icon: Clock,
+                text: `The provider confirms within ${RENTAL_POLICY.respondWithinHours} hours — you pay only after that`,
+              },
+              {
+                icon: Undo2,
+                text: `Free cancellation until you pay, full refund up to ${RENTAL_POLICY.freeCancellationHours} hours before pickup`,
+              },
+              { icon: ShieldCheck, text: "Secure checkout with Stripe" },
+            ].map((item) => (
+              <li key={item.text} className="flex gap-2.5">
+                <item.icon
+                  className="mt-0.5 size-4 shrink-0 text-primary"
+                  aria-hidden
+                />
+                <span className="text-muted-foreground">{item.text}</span>
+              </li>
+            ))}
+          </ul>
 
           {gear.provider && <Provider provider={gear.provider} />}
         </div>
@@ -152,6 +251,21 @@ export default async function GearDetailPage({ params, searchParams }: Props) {
       <Suspense fallback={<RelatedGearSkeleton />}>
         <RelatedGear gear={gear} />
       </Suspense>
+    </section>
+  )
+}
+
+function Panel({
+  title,
+  children,
+}: {
+  title: string
+  children: React.ReactNode
+}) {
+  return (
+    <section className="mt-6 rounded-2xl border bg-card p-6 shadow-xs">
+      <h2 className="mb-3 text-h3">{title}</h2>
+      {children}
     </section>
   )
 }
@@ -194,8 +308,7 @@ function Specifications({ gear }: { gear: GearItem }) {
 
   return (
     <>
-      <h2 className="font-heading text-sm font-semibold">Specifications</h2>
-      <dl className="mt-3 grid gap-x-8 sm:grid-cols-2">
+      <dl className="grid gap-x-8 sm:grid-cols-2">
         {specs.map((spec) => (
           <div
             key={spec.label}
@@ -216,11 +329,11 @@ function Provider({
   provider: NonNullable<GearItem["provider"]>
 }) {
   return (
-    <div className="mt-6 rounded-xl border bg-card p-4">
-      <h2 className="font-heading text-sm font-semibold">Listed by</h2>
+    <div className="mt-5 rounded-2xl border bg-card p-4 shadow-xs">
+      <h2 className="text-eyebrow text-muted-foreground">Listed by</h2>
       <div className="mt-3 flex items-center gap-3">
         <span
-          className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/10 text-primary"
+          className="grid size-11 shrink-0 place-items-center rounded-xl bg-(image:--gradient-brand) text-primary-foreground"
           aria-hidden
         >
           <Store className="size-4" />

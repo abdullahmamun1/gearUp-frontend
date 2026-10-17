@@ -124,7 +124,7 @@ export function RentPanel({
   }
 
   return (
-    <div className="rounded-xl border bg-card p-4">
+    <div className="rounded-xl border bg-card p-4 shadow-xs">
       <p className="font-heading text-sm font-semibold">Rent this gear</p>
 
       <div className="mt-4 grid gap-3">
@@ -148,7 +148,7 @@ export function RentPanel({
                 </Button>
               }
             />
-            <PopoverContent className="w-auto p-0" align="start">
+            <PopoverContent className="w-min p-0" align="start">
               <Calendar
                 mode="range"
                 selected={range}
@@ -240,6 +240,7 @@ export function RentPanel({
 
       <Button
         type="button"
+        variant="cta"
         size="lg"
         onClick={submit}
         disabled={!canSubmit || isPending}

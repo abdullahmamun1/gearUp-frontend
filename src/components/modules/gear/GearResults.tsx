@@ -1,42 +1,90 @@
-import { getGearList } from "@/api/gear"
+"use client"
+
+import Link from "next/link"
+
 import { GearCard } from "@/components/shared/GearCard"
+import { CompassScene } from "@/components/shared/illustrations/scenes"
+import { buttonVariants } from "@/components/ui/button"
+import { GearGridSkeleton } from "@/components/shared/GearCardSkeleton"
 import { Pagination } from "@/components/shared/Pagination"
 import {
   buildGearHref,
+  GEAR_PAGE_SIZE,
   hasActiveFilters,
-  toGearQuery,
   type GearFilters,
 } from "@/utils/filters/gear"
+import { cn } from "@/lib/utils"
+import type { GearItem, Paginated } from "@/types"
 
-export async function GearResults({ filters }: { filters: GearFilters }) {
-  const res = await getGearList(toGearQuery(filters))
-
-  if (!res.success) {
+/** Presentational: renders whatever results it is given. */
+export function GearResults({
+  filters,
+  data,
+  error,
+  isFetching = false,
+}: {
+  filters: GearFilters
+  data?: Paginated<GearItem>
+  error?: string | null
+  isFetching?: boolean
+}) {
+  if (error) {
     return (
-      <Message>
-        {res.message || "Couldn't load gear. Please try again."}
+      <Message title="Couldn't load gear">
+        {error || "Please try again in a moment."}
       </Message>
     )
   }
 
-  const items = res.data?.data ?? []
-  const meta = res.data?.meta
+  if (!data) {
+    return (
+      <div className="mt-10">
+        <GearGridSkeleton count={GEAR_PAGE_SIZE} />
+      </div>
+    )
+  }
+
+  const items = data.data
+  const meta = data.meta
   const total = meta?.total ?? items.length
 
   if (items.length === 0) {
     return (
-      <Message>
+      <Message
+        title={
+          hasActiveFilters(filters)
+            ? "Nothing matches yet"
+            : "No gear listed yet"
+        }
+        action={
+          hasActiveFilters(filters) && (
+            <Link
+              href="/gear"
+              className={cn(
+                buttonVariants({ variant: "outline", size: "lg" }),
+                "mt-5 h-10 px-5 text-sm"
+              )}
+            >
+              Clear all filters
+            </Link>
+          )
+        }
+      >
         {hasActiveFilters(filters)
-          ? "No gear matches those filters. Try widening your price range or clearing a filter."
-          : "No gear listed yet. Check back soon — providers are adding kit all the time."}
+          ? "Try other dates, widen your price range or clear a filter."
+          : "Check back soon — providers are adding kit all the time."}
       </Message>
     )
   }
 
   return (
-    <>
-      <p className="mt-6 text-sm text-muted-foreground">
-        {total} {total === 1 ? "item" : "items"} available
+    <div
+      className={cn("transition-opacity", isFetching && "opacity-60")}
+      aria-busy={isFetching}
+    >
+      <p className="mt-6 text-sm text-muted-foreground" aria-live="polite">
+        <span className="font-semibold text-foreground">{total}</span>{" "}
+        {total === 1 ? "item" : "items"} available
       </p>
 
       <div className="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -51,10 +99,27 @@ export async function GearResults({ filters }: { filters: GearFilters }) {
         hrefFor={(page) => buildGearHref({ ...filters, page })}
         label="Gear pagination"
       />
-    </>
+    </div>
   )
 }
 
-function Message({ children }: { children: React.ReactNode }) {
-  return <p className="mt-10 text-sm text-muted-foreground">{children}</p>
+function Message({
+  title,
+  action,
+  children,
+}: {
+  title: string
+  action?: React.ReactNode
+  children: React.ReactNode
+}) {
+  return (
+    <div className="mt-8 flex flex-col items-center rounded-2xl border border-dashed bg-card/50 px-6 py-12 text-center">
+      <CompassScene className="max-w-52" />
+      <h2 className="mt-4 text-h3">{title}</h2>
+      <p className="mt-1.5 max-w-sm text-sm text-muted-foreground">
+        {children}
+      </p>
+      {action}
+    </div>
+  )
 }
