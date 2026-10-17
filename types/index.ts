@@ -74,6 +74,9 @@ export interface User {
   role: Role
   status: UserStatus
   phone?: string
+  /** Null until the emailed verification link is clicked. */
+  emailVerifiedAt?: string | null
+  marketingEmails?: boolean
   createdAt: string
   updatedAt: string
 }

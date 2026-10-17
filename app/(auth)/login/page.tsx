@@ -37,6 +37,12 @@ const ALERTS: Record<string, string> = {
     "You cancelled the Google sign-in, so nothing was changed. Try again whenever you're ready.",
 }
 
+/** Good news shown above the form, e.g. after a password reset. */
+const NOTICES: Record<string, string> = {
+  reset: "Your password has been changed. Log in with your new password.",
+  verified: "Your email is verified. Log in to keep going.",
+}
+
 export default async function LoginPage({
   searchParams,
 }: {
@@ -48,6 +54,7 @@ export default async function LoginPage({
 }) {
   const { redirectTo, reason, error } = await searchParams
   const alert = ALERTS[reason ?? ""] ?? ALERTS[error ?? ""]
+  const notice = NOTICES[reason ?? ""]
   return (
     <section className="relative overflow-hidden">
       <div
@@ -110,6 +117,14 @@ export default async function LoginPage({
               className="mt-6 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive"
             >
               {alert}
+            </p>
+          ) : null}
+          {notice ? (
+            <p
+              role="status"
+              className="mt-6 rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-xs"
+            >
+              {notice}
             </p>
           ) : null}
 

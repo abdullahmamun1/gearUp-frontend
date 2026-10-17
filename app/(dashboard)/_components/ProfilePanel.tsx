@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge"
 import { getMe } from "@/service/auth"
 
+import { EmailPreferences } from "./EmailPreferences"
 import { PageHeader } from "./PageHeader"
 import { ProfileForm } from "./ProfileForm"
 
@@ -23,7 +24,19 @@ export async function ProfilePanel() {
         <div className="grid max-w-lg gap-6">
           <dl className="grid gap-px overflow-hidden rounded-xl border bg-border">
             <Row label="Name" value={user.name} />
-            <Row label="Email" value={user.email} />
+            <Row
+              label="Email"
+              value={
+                <span className="inline-flex items-center gap-2">
+                  {user.email}
+                  <Badge
+                    variant={user.emailVerifiedAt ? "secondary" : "outline"}
+                  >
+                    {user.emailVerifiedAt ? "Verified" : "Not verified"}
+                  </Badge>
+                </span>
+              }
+            />
             <Row label="Phone" value={user.phone || "Not provided"} />
             <Row
               label="Role"
@@ -50,6 +63,7 @@ export async function ProfilePanel() {
           </dl>
 
           <ProfileForm user={user} />
+          <EmailPreferences marketing={user.marketingEmails ?? true} />
         </div>
       )}
     </>

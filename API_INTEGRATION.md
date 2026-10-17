@@ -472,3 +472,22 @@ payment pages treat **404 and 403 alike**, so a customer probing another
 customer's order id gets the not-found page instead of a 403 that would confirm
 the order exists. The gear page maps **404 and 400**, since a malformed id fails
 UUID validation before anything is looked up.
+
+## Accounts and email (Phase 3)
+
+All of these calls are uncached and go through `apiFetch`, like everything else.
+
+| Flow | Frontend | Backend |
+| --- | --- | --- |
+| Forgot password | `/forgot-password` → `forgotPassword` (service/auth.ts) | `POST /api/auth/forgot-password` (always the same 200) |
+| Reset password | `/reset-password?token=` → `resetPassword`, then `/login?reason=reset` | `POST /api/auth/reset-password` |
+| Verify email | `/verify-email?token=` (Server Component calls `verifyEmail` while rendering) | `POST /api/auth/verify-email` |
+| Resend verification | `ResendVerificationButton` (dashboard banner, verify page) | `POST /api/auth/resend-verification` |
+| Email preferences | `EmailPreferences` on the profile page → `updateEmailPreferences` | `PATCH /api/auth/me { marketingEmails }` |
+| Contact form | `sendContactMessage` | `POST /api/contact` |
+| Newsletter | `subscribeNewsletter`, `/newsletter/confirm`, `/newsletter/unsubscribe` | `POST /api/newsletter`, `/confirm`, `/unsubscribe` |
+
+- **Verification banner:** `VerifyEmailBanner` in `(dashboard)/layout.tsx` calls `getMe()` and shows until `emailVerifiedAt` is set.
+- **403 from unverified users:** paying and publishing a listing return 403 with a message that tells the user to verify. Call sites already show `res.message`.
+- **Links in emails** point at `APP_URL` on the frontend: `/verify-email`, `/reset-password`, `/newsletter/*`, the order pages, and `/provider-dashboard/orders`.
+

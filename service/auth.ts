@@ -73,6 +73,41 @@ export async function getMe(): Promise<ApiResponse<User | null>> {
   return apiFetch<User | null>("/api/auth/me")
 }
 
+export async function verifyEmail(token: string) {
+  return apiFetch<null>("/api/auth/verify-email", {
+    method: "POST",
+    body: { token },
+    auth: false,
+  })
+}
+
+export async function resendVerification() {
+  return apiFetch<null>("/api/auth/resend-verification", { method: "POST" })
+}
+
+export async function forgotPassword(email: string) {
+  return apiFetch<null>("/api/auth/forgot-password", {
+    method: "POST",
+    body: { email },
+    auth: false,
+  })
+}
+
+export async function resetPassword(token: string, password: string) {
+  return apiFetch<null>("/api/auth/reset-password", {
+    method: "POST",
+    body: { token, password },
+    auth: false,
+  })
+}
+
+export async function updateEmailPreferences(marketingEmails: boolean) {
+  return apiFetch<User>("/api/auth/me", {
+    method: "PATCH",
+    body: { marketingEmails },
+  })
+}
+
 function loginErrorMessage(res: ApiResponse<AuthTokens>) {
   if (res.statusCode === 400) return "Email or password is incorrect."
   if (res.statusCode >= 500) return "Something went wrong. Please try again."

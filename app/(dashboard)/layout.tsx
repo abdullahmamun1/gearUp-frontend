@@ -11,6 +11,7 @@ import { PROFILE_HOME } from "@/lib/routes"
 import { requireSession } from "@/lib/session"
 
 import { DashboardSidebar } from "./_components/DashboardSidebar"
+import { VerifyEmailBanner } from "./_components/VerifyEmailBanner"
 
 export default async function DashboardLayout({
   children,
@@ -45,7 +46,10 @@ export default async function DashboardLayout({
             </div>
           </header>
 
-          <main className="flex-1 p-4 sm:p-6">{children}</main>
+          <main className="flex-1 p-4 sm:p-6">
+            <VerifyEmailBanner />
+            {children}
+          </main>
         </SidebarInset>
       </SidebarProvider>
     </SessionProvider>

@@ -20,7 +20,10 @@ export const registerSchema = z
     role: z.enum(["CUSTOMER", "PROVIDER"], {
       error: "Choose how you'll use GearUp.",
     }),
-    password: z.string().min(8, "Use at least 8 characters."),
+    password: z
+      .string()
+      .min(8, "Use at least 8 characters.")
+      .max(128, "Use at most 128 characters."),
     confirmPassword: z.string().min(1, "Confirm your password."),
   })
   .refine((values) => values.password === values.confirmPassword, {
@@ -29,3 +32,24 @@ export const registerSchema = z
   })
 
 export type RegisterInput = z.infer<typeof registerSchema>
+
+export const forgotPasswordSchema = z.object({
+  email: z.email("Enter a valid email address."),
+})
+
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>
+
+export const resetPasswordSchema = z
+  .object({
+    password: z
+      .string()
+      .min(8, "Use at least 8 characters.")
+      .max(128, "Use at most 128 characters."),
+    confirmPassword: z.string().min(1, "Confirm your new password."),
+  })
+  .refine((values) => values.password === values.confirmPassword, {
+    error: "Passwords do not match.",
+    path: ["confirmPassword"],
+  })
+
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>

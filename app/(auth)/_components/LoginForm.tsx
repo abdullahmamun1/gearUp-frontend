@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Lock, Mail } from "lucide-react"
 import { useForm } from "react-hook-form"
@@ -100,6 +101,12 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
           error={errors.password?.message}
           {...register("password")}
         />
+        <Link
+          href="/forgot-password"
+          className="-mt-2 justify-self-end text-xs text-muted-foreground transition-colors hover:text-primary"
+        >
+          Forgot password?
+        </Link>
 
         <Button
           type="submit"
