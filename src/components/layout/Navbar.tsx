@@ -1,132 +1,67 @@
-import Link from "next/link"
-import { Menu, Mountain } from "lucide-react"
-
-import { AccountMenu } from "@/components/layout/AccountMenu"
+import { getBrands, getFeaturedGear } from "@/api/gear"
+import { getCategories } from "@/api/categories"
 import { ThemeToggle } from "@/components/shared/ThemeToggle"
-import { Button, buttonVariants } from "@/components/ui/button"
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet"
-import { DASHBOARD_HOME, PROFILE_HOME } from "@/routes"
-import { getSession } from "@/lib/session"
-import { cn } from "@/lib/utils"
 
-const NAV_LINKS = [
-  { label: "Browse gear", href: "/gear" },
-  { label: "How it works", href: "/#how-it-works" },
-  { label: "About", href: "/about" },
-  { label: "Contact", href: "/contact" },
-]
+import { AccountArea } from "./AccountArea"
+import { CommandPalette } from "./CommandPalette"
+import { DesktopNav, type NavCategory, type NavFeatured } from "./DesktopNav"
+import { Logo } from "./Logo"
+import { MobileNav } from "./MobileNav"
+import { NavbarShell } from "./NavbarShell"
+import { SearchButton } from "./SearchButton"
 
+/**
+ * Only cached public reads here — never cookies — so every page that uses
+ * this navbar can be prerendered. The signed-in parts are client components
+ * that read the session after load (see useSessionUser).
+ */
 export async function Navbar() {
-  const session = await getSession()
-  const dashboardHref = session ? DASHBOARD_HOME[session.role] : null
+  const [categoriesRes, brandsRes, featuredRes] = await Promise.all([
+    getCategories(),
+    getBrands(),
+    getFeaturedGear(1),
+  ])
 
-  const mobileLinks = session
-    ? NAV_LINKS
-    : [
-        ...NAV_LINKS,
-        { label: "Log in", href: "/login" },
-        { label: "Sign up", href: "/register" },
-      ]
+  const categories: NavCategory[] = (categoriesRes.data ?? []).map(
+    (category) => ({
+      id: category.id,
+      name: category.name,
+      count: category._count?.gearItems ?? 0,
+    })
+  )
+  const brands = brandsRes.data ?? []
+  const gear = featuredRes.data?.data?.[0]
+  const featured: NavFeatured | null = gear
+    ? {
+        id: gear.id,
+        name: gear.name,
+        imageUrl: gear.imageUrl,
+        pricePerDay: gear.pricePerDay,
+        category: gear.category?.name,
+      }
+    : null
 
   return (
-    <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-sm">
-      <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-4">
-        <Link
-          href="/"
-          className="flex items-center gap-2 font-heading text-lg font-bold"
-        >
-          <Mountain className="size-5 text-primary" aria-hidden />
-          GearUp
-        </Link>
+    <NavbarShell>
+      <div className="mx-auto flex h-20 max-w-6xl items-center gap-4 px-4 transition-[height] duration-300 group-data-[scrolled=true]/nav:h-16 lg:gap-6">
+        <Logo />
 
-        <nav className="hidden gap-6 text-sm md:flex">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="text-muted-foreground transition-colors hover:text-foreground"
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
+        <DesktopNav
+          categories={categories}
+          brands={brands}
+          featured={featured}
+        />
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+          <SearchButton className="hidden lg:flex" />
+          <SearchButton compact className="lg:hidden" />
           <ThemeToggle />
-
-          {session && dashboardHref ? (
-            <AccountMenu
-              user={session}
-              links={[
-                { label: "Dashboard", href: dashboardHref, icon: "dashboard" },
-                {
-                  label: "Profile",
-                  href: PROFILE_HOME[session.role],
-                  icon: "profile",
-                },
-              ]}
-            />
-          ) : (
-            <>
-              <Link
-                href="/login"
-                className={cn(
-                  buttonVariants({ variant: "ghost", size: "lg" }),
-                  "hidden sm:inline-flex"
-                )}
-              >
-                Log in
-              </Link>
-              <Link
-                href="/register"
-                className={cn(
-                  buttonVariants({ size: "lg" }),
-                  "hidden sm:inline-flex"
-                )}
-              >
-                Sign up
-              </Link>
-            </>
-          )}
-
-          <Sheet>
-            <SheetTrigger
-              render={
-                <Button
-                  variant="ghost"
-                  size="icon-lg"
-                  className="md:hidden"
-                  aria-label="Open menu"
-                />
-              }
-            >
-              <Menu />
-            </SheetTrigger>
-            <SheetContent side="right">
-              <SheetHeader>
-                <SheetTitle>Menu</SheetTitle>
-              </SheetHeader>
-              <nav className="grid gap-1 px-4 text-sm">
-                {mobileLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className="rounded-md px-2 py-2 hover:bg-accent"
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-              </nav>
-            </SheetContent>
-          </Sheet>
+          <AccountArea />
+          <MobileNav categories={categories} />
         </div>
       </div>
-    </header>
+
+      <CommandPalette categories={categories} />
+    </NavbarShell>
   )
 }
