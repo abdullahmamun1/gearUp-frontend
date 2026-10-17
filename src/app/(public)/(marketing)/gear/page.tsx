@@ -1,0 +1,60 @@
+import type { Metadata } from "next"
+import { Suspense } from "react"
+
+import { getBrands } from "@/api/gear"
+import { getCategories } from "@/api/categories"
+import { GearFilterBar } from "@/components/modules/gear/GearFilterBar"
+import { GearResults } from "@/components/modules/gear/GearResults"
+import { GearGridSkeleton } from "@/components/shared/GearCardSkeleton"
+import {
+  GEAR_PAGE_SIZE,
+  parseGearFilters,
+  type RawSearchParams,
+} from "@/utils/filters/gear"
+
+export const metadata: Metadata = {
+  title: "Browse gear · GearUp",
+  description:
+    "Search tents, kayaks, bikes and more from local providers, and filter by category, price and availability.",
+}
+
+export default async function GearPage({
+  searchParams,
+}: {
+  searchParams: Promise<RawSearchParams>
+}) {
+  const filters = parseGearFilters(await searchParams)
+  const [categoriesRes, brandsRes] = await Promise.all([
+    getCategories(),
+    getBrands(),
+  ])
+
+  return (
+    <section className="mx-auto max-w-6xl px-4 py-10 sm:py-14">
+      <h1 className="font-heading text-3xl font-bold tracking-tight sm:text-4xl">
+        Browse gear
+      </h1>
+      <p className="mt-2 max-w-lg text-pretty text-muted-foreground">
+        Rent by the day from providers near you. Filter by category, price and
+        what&apos;s in stock right now.
+      </p>
+
+      <GearFilterBar
+        filters={filters}
+        categories={categoriesRes.data ?? []}
+        brands={brandsRes.data ?? []}
+      />
+
+      <Suspense
+        key={JSON.stringify(filters)}
+        fallback={
+          <div className="mt-10">
+            <GearGridSkeleton count={GEAR_PAGE_SIZE} />
+          </div>
+        }
+      >
+        <GearResults filters={filters} />
+      </Suspense>
+    </section>
+  )
+}

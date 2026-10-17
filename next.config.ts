@@ -9,6 +9,22 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "upload.wikimedia.org" },
     ],
   },
+  // Dashboards moved from /<role>-dashboard to /dashboard/<role>. Keeps old
+  // bookmarks and links in emails sent before the move working.
+  async redirects() {
+    return ["customer", "provider", "admin"].flatMap((role) => [
+      {
+        source: `/${role}-dashboard`,
+        destination: `/dashboard/${role}`,
+        permanent: true,
+      },
+      {
+        source: `/${role}-dashboard/:path*`,
+        destination: `/dashboard/${role}/:path*`,
+        permanent: true,
+      },
+    ])
+  },
 }
 
 export default nextConfig

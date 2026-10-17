@@ -96,7 +96,7 @@ any of these. Password is `Password123` for all three.
 
 |                                                                         |                                                 |
 | ----------------------------------------------------------------------- | ----------------------------------------------- |
-| **Next.js 16.2** (App Router)                                           | Server Components, Route Handlers, `proxy.ts`   |
+| **Next.js 16.2** (App Router)                                           | Server Components, Route Handlers, `src/proxy.ts`   |
 | **React 19.2** · **TypeScript**                                         |                                                 |
 | **Tailwind CSS v4** · **Base UI**                                       | shadcn-style components in `components/ui`      |
 | **TanStack Query v5**                                                   | Client cache for every dashboard table          |
@@ -132,7 +132,7 @@ GOOGLE_CLIENT_ID=...       # client ID only — the secret goes in the backend
 
 All of them are **server-only** — nothing is prefixed `NEXT_PUBLIC_`, so no
 secret and no token ever reaches the browser. The JWT secrets are needed
-because `proxy.ts` verifies tokens locally instead of calling the API on every
+because `src/proxy.ts` verifies tokens locally instead of calling the API on every
 navigation.
 
 ### Setting up Google sign-in
@@ -200,7 +200,7 @@ Full endpoint-to-component mapping is in
 
 ### Auth
 
-`proxy.ts` (Next 16's renamed `middleware.ts`) guards every dashboard route:
+`src/proxy.ts` (Next 16's renamed `middleware.ts`) guards every dashboard route:
 
 1. Verify the access token
 2. If it's expired but the refresh token is valid, mint a new one silently
@@ -268,22 +268,18 @@ because of this, so there is always a route that genuinely reaches a person.
 ## Structure
 
 ```
-app/
-  (public)/        home, gear browse, gear detail
-  (auth)/          login, register
-  (dashboard)/     customer · provider · admin, plus shared _actions
-  api/             read endpoints for TanStack Query
-components/
-  providers/       QueryProvider, SessionProvider
-  shared/          cross-role components
-  ui/              Base UI primitives
-lib/
-  api.ts           the single fetch helper
-  queries/         TanStack Query hooks
-  schemas/         Zod schemas
-  *Query.ts        URL filter parsers
-service/           auth calls used by proxy.ts
-proxy.ts           route protection
+src/
+  app/
+    (public)/(marketing)/       home, gear browse + detail, about, contact, newsletter
+    (public)/(authentication)/  login, register, forgot/reset password, verify email
+    (dashboard)/dashboard/      customer · provider · admin  (/dashboard/<role>)
+    api/                        read endpoints for TanStack Query, Google OAuth
+  api/          "use server" calls, one file per backend module
+  hooks/        TanStack Query hooks, useOrderAction
+  components/   ui (Base UI primitives), shared, layout, modules/<domain>
+  lib/          apiClient (the single fetch helper), session, cookies, jwt
+  constants/  routes/  utils/  validation/  providers/  types/
+  proxy.ts      route protection
 ```
 
 ---

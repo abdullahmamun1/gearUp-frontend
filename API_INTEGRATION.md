@@ -14,13 +14,13 @@ calls it, and the component you'd land on if you followed it from the UI.
 **The backend is only ever called from the server.** Never from a browser
 `fetch`.
 
-Every request goes through `apiFetch` in [lib/api.ts](./lib/api.ts), which runs
+Every request goes through `apiFetch` in [src/lib/apiClient.ts](./src/lib/apiClient.ts), which runs
 in a Server Component, a `"use server"` action, or a Route Handler. It reads the
 access token out of the httpOnly cookie and forwards it as a `Cookie` header.
 
 That cookie is scoped to the Next origin, so a client component _could not_ call
 `localhost:5000` with credentials even if we wanted it to. That constraint is
-why [`app/api/*`](./app/api) exists — see [Route Handlers](#route-handlers-appapi).
+why [`app/api/*`](./src/app/api) exists — see [Route Handlers](#route-handlers-appapi).
 
 ### `apiFetch` never throws
 
@@ -55,12 +55,12 @@ webhook and is only ever called by Stripe.
 
 | Endpoint              | Guard                   | Frontend module                                                                               | Used by                  |
 | --------------------- | ----------------------- | --------------------------------------------------------------------------------------------- | ------------------------ |
-| `POST /register`      | public                  | `registerUser` — [service/auth.ts](./service/auth.ts)                                         | `RegisterForm`           |
-| `POST /login`         | public                  | `loginUser` — [service/auth.ts](./service/auth.ts)                                            | `LoginForm`              |
-| `POST /google`        | public                  | `loginWithGoogle` — [service/auth.ts](./service/auth.ts)                                      | the OAuth callback route |
-| `POST /refresh-token` | public (refresh cookie) | `getNewAccessToken` — [service/refreshToken.ts](./service/refreshToken.ts)                    | [proxy.ts](./proxy.ts)   |
-| `GET /me`             | any role                | `getCurrentUser` — [service/currentUser.ts](./service/currentUser.ts)                         | [proxy.ts](./proxy.ts)   |
-| `PATCH /me`           | any role                | `updateProfile` — [\_actions/updateProfile.ts](<./app/(dashboard)/_actions/updateProfile.ts>) | `ProfileForm`            |
+| `POST /register`      | public                  | `registerUser` — [src/api/auth.ts](./src/api/auth.ts)                                         | `RegisterForm`           |
+| `POST /login`         | public                  | `loginUser` — [src/api/auth.ts](./src/api/auth.ts)                                            | `LoginForm`              |
+| `POST /google`        | public                  | `loginWithGoogle` — [src/api/auth.ts](./src/api/auth.ts)                                      | the OAuth callback route |
+| `POST /refresh-token` | public (refresh cookie) | `getNewAccessToken` — [src/lib/refreshToken.ts](./src/lib/refreshToken.ts)                    | [src/proxy.ts](./src/proxy.ts)   |
+| `GET /me`             | any role                | `getCurrentUser` — [src/lib/currentUser.ts](./src/lib/currentUser.ts)                         | [src/proxy.ts](./src/proxy.ts)   |
+| `PATCH /me`           | any role                | `updateProfile` — [api/auth.ts](./src/api/auth.ts) | `ProfileForm`            |
 
 `loginUser` writes both cookies via `setAuthCookies`, decodes the access token to
 pick a landing page, then `redirect()`s. The token never reaches the browser as
@@ -71,7 +71,7 @@ one. Anything else in the payload is stripped by Zod before it reaches Prisma,
 so `role`, `status` and `email` cannot be edited by the account that owns them.
 An empty-string `phone` is the documented way to clear the number.
 
-The two `service/` modules use a raw `fetch` rather than `apiFetch`, because
+The two proxy helpers (`src/lib/currentUser.ts`, `src/lib/refreshToken.ts`) use a raw `fetch` rather than `apiFetch`, because
 they run inside the proxy and must send a _specific_ token rather than the one in
 the current cookie jar.
 
@@ -95,8 +95,8 @@ the backend, which exchanges the code and then verifies the returned ID token's
 signature against Google's JWKS with `aud` pinned to the client id — so a
 `{ email }` payload forged by anything impersonating the frontend gets nowhere.
 
-Shared constants live in [lib/googleOAuth.ts](./lib/googleOAuth.ts), except the
-two route paths, which sit in [lib/routes.ts](./lib/routes.ts) so the sign-in
+Shared constants live in [src/lib/googleOAuth.ts](./src/lib/googleOAuth.ts), except the
+two route paths, which sit in [src/routes/index.ts](./src/routes/index.ts) so the sign-in
 button can import them without pulling `node:crypto` into a client bundle.
 
 The handshake cookie is the one auth cookie that cannot reuse
@@ -108,10 +108,10 @@ and is deleted on every exit from the callback — success or failure.
 
 | Endpoint                | Frontend module                                                                      | Cache                           | Used by                                             |
 | ----------------------- | ------------------------------------------------------------------------------------ | ------------------------------- | --------------------------------------------------- |
-| `GET /api/gear`         | `getGear` — [app/(public)/_actions/getGear.ts](<./app/(public)/_actions/getGear.ts>) | tags `gear`, 5 min              | `GearResults`, `FeaturedGear`                       |
+| `GET /api/gear`         | `getGear` — [src/api/gear.ts](<./src/api/gear.ts>) | tags `gear`, 5 min              | `GearResults`, `FeaturedGear`                       |
 | `GET /api/gear/:gearId` | `getGearById` — same file                                                            | tags `gear`, `gear:{id}`, 5 min | gear detail page                                    |
-| `GET /api/categories`   | `getCategories` — [getCategories.ts](<./app/(public)/_actions/getCategories.ts>)     | tags `categories`, 1 hr         | `CategoryStrip`, both filter bars, `GearFormDialog` |
-| `GET /api/brands`       | `getBrands` — [getBrands.ts](<./app/(public)/_actions/getBrands.ts>)                 | tags `brands`, `gear`, 1 hr     | `GearFilterBar`                                     |
+| `GET /api/categories`   | `getCategories` — [getCategories.ts](<./src/api/categories.ts>)     | tags `categories`, 1 hr         | `CategoryStrip`, both filter bars, `GearFormDialog` |
+| `GET /api/brands`       | `getBrands` — [getBrands.ts](<./src/api/gear.ts>)                 | tags `brands`, `gear`, 1 hr     | `GearFilterBar`                                     |
 
 These four are `auth: false` and cached — they are identical for every visitor,
 which is exactly what makes them safe to cache and what makes the browse pages
@@ -124,9 +124,9 @@ backend where no tag can be revalidated. So:
 - `GET /api/gear?from=&to=` (browse with dates) — `getGearList` skips the Data
   Cache whenever `from`/`to` are set.
 - `GET /api/gear/:gearId/availability?from=&to=` — `getGearAvailability`
-  ([getGearAvailability.ts](<./app/(public)/_actions/getGearAvailability.ts>)),
+  ([getGearAvailability.ts](<./src/api/gear.ts>)),
   no-store, exposed to the client as `app/api/gear/[id]/availability` and read
-  by `useGearAvailability` (`lib/queries/gear.ts`, 30 s stale time) in
+  by `useGearAvailability` (`src/hooks/queries/gear.ts`, 30 s stale time) in
   `RentPanel`. A failed booking (409: someone took the last unit) invalidates
   `gearAvailabilityKeys.gear(id)`.
 
@@ -138,15 +138,15 @@ usually already paid for it.
 
 `GET /api/gear` accepts `searchTerm`, `category`, `brand`, `minPrice`,
 `maxPrice`, `isAvailable`, `sortBy`, `sortOrder`, `page`, `limit`. The frontend
-never builds that query by hand — [lib/gearQuery.ts](./lib/gearQuery.ts) parses
+never builds that query by hand — [src/utils/filters/gear.ts](./src/utils/filters/gear.ts) parses
 it out of the URL and back again.
 
 ### Reviews
 
 | Endpoint                        | Guard    | Frontend module                                                                  | Used by        |
 | ------------------------------- | -------- | -------------------------------------------------------------------------------- | -------------- |
-| `GET /api/gear/:gearId/reviews` | public   | `getReviews` — [getReviews.ts](<./app/(public)/_actions/getReviews.ts>)          | `GearReviews`  |
-| `POST /api/reviews`             | customer | `createReview` — [createReview.ts](<./app/(dashboard)/_actions/createReview.ts>) | `ReviewDialog` |
+| `GET /api/gear/:gearId/reviews` | public   | `getReviews` — [getReviews.ts](<./src/api/reviews.ts>)          | `GearReviews`  |
+| `POST /api/reviews`             | customer | `createReview` — [createReview.ts](<./src/api/reviews.ts>) | `ReviewDialog` |
 
 The list response carries a `summary` with the average rating and total, so the
 detail page shows an aggregate without a second request.
@@ -167,7 +167,7 @@ volume ever makes that fan-out the wrong shape, the fix is a
 
 | Endpoint                 | Guard                       | Frontend module                                                               | Used by                                             |
 | ------------------------ | --------------------------- | ----------------------------------------------------------------------------- | --------------------------------------------------- |
-| `POST /`                 | customer                    | `createRental` — [createRental.ts](<./app/(public)/_actions/createRental.ts>) | `RentPanel`                                         |
+| `POST /`                 | customer                    | `createRental` — [createRental.ts](<./src/api/rentals.ts>) | `RentPanel`                                         |
 | `GET /`                  | customer                    | `getMyRentals`                                                                | orders page, customer home, `/api/customer/rentals` |
 | `GET /:orderId`          | customer · provider · admin | `getRentalById`                                                               | order detail page                                   |
 | `PATCH /:orderId/cancel` | customer                    | `cancelRental`                                                                | `CancelOrderButton`                                 |
@@ -203,7 +203,7 @@ Every route here is `auth(PROVIDER)` at the router level.
 
 **`PUT` is a full replace, not a patch.** A cleared optional field must be sent
 explicitly as `""` or the old value survives. `toGearPayload` in
-[lib/schemas/gear.ts](./lib/schemas/gear.ts) is what gets this right, and it is
+[src/validation/gear.ts](./src/validation/gear.ts) is what gets this right, and it is
 why create and edit have opposite blank-field semantics.
 
 `AvailabilityToggle` reuses `updateGear` to flip one boolean, optimistically.
@@ -214,7 +214,7 @@ Every route here is `auth(ADMIN)` at the router level.
 
 | Endpoint                       | Frontend module                                                                       | Used by                                   |
 | ------------------------------ | ------------------------------------------------------------------------------------- | ----------------------------------------- |
-| `GET /users`                   | `getAdminUsers` — [getAdminTables.ts](<./app/(dashboard)/_actions/getAdminTables.ts>) | `AdminUsersTable`, `/api/admin/users`     |
+| `GET /users`                   | `getAdminUsers` — [getAdminTables.ts](<./src/api/admin.ts>) | `AdminUsersTable`, `/api/admin/users`     |
 | `PATCH /users/:userId`         | `updateUserStatus`                                                                    | `UserStatusToggle`                        |
 | `GET /gear`                    | `getAdminGear`                                                                        | `AdminGearTable`, `/api/admin/gear`       |
 | `GET /rentals`                 | `getAdminRentals`                                                                     | `AdminRentalsTable`, `/api/admin/rentals` |
@@ -226,7 +226,7 @@ The admin dashboard's stat cards call the three listings in parallel with
 `limit=1` and read only `meta.total` — see `getAdminCounts`.
 
 **The two overview charts add no endpoints.** `getRentalsByStatus` in
-[getAdminCharts.ts](<./app/(dashboard)/_actions/getAdminCharts.ts>) fires
+[getAdminCharts.ts](<./src/api/admin.ts>) fires
 `GET /rentals?status=…&limit=1` once per status and keeps only `meta.total`, so
 six counts cost six headers and no order bodies. `getGearByCategory` calls the
 public `getCategories()` — `_count.gearItems` is already on every row — which
@@ -257,7 +257,7 @@ gained query filters to make that real:
 
 Bold entries are new. Each is validated at the router — an unknown status or a
 malformed category id comes back as a 400, not a silently unfiltered list. The
-frontend parsers (`lib/adminQuery.ts`, `lib/dashboardQuery.ts`) drop unknown
+frontend parsers (`src/utils/filters/admin.ts`, `src/utils/filters/dashboard.ts`) drop unknown
 values before building the query, so a hand-typed `?status=BOGUS` renders the
 unfiltered table rather than an error.
 
@@ -307,13 +307,13 @@ They add no authorisation of their own — they call the same server actions the
 pages call, and the backend's role guards are what actually decide. Signed in as
 an admin, `/api/customer/rentals` returns 403.
 
-All seven return through `jsonResponse` in [lib/apiRoute.ts](./lib/apiRoute.ts),
+All seven return through `jsonResponse` in [src/lib/apiRoute.ts](./src/lib/apiRoute.ts),
 which maps `success: false` onto the real HTTP status. Returning a 200 carrying
 an error would get cached by TanStack Query as a success.
 
 ### Query hooks
 
-[lib/queries/](./lib/queries) — `queryFetch` unwraps the envelope and throws on
+[hooks/queries/](./src/hooks/queries) — `queryFetch` unwraps the envelope and throws on
 `success: false`, which is what puts the message into `error.message`.
 
 | Hook              | Key                          | Endpoint                 |
@@ -403,7 +403,7 @@ carries the new name, and `setAuthCookies` swaps it in.
 
 ## Auth flow
 
-[proxy.ts](./proxy.ts) — Next 16's renamed `middleware.ts`, at the repo root —
+[src/proxy.ts](./src/proxy.ts) — Next 16's renamed `middleware.ts`, at the repo root —
 guards every dashboard route:
 
 1. Verify the access token locally with `JWT_ACCESS_SECRET`
@@ -437,7 +437,7 @@ intercepted mid-handshake.
 
 Every payload is validated twice, and the two are independent.
 
-**Client** — Zod schemas in [lib/schemas/](./lib/schemas) (`auth`, `category`,
+**Client** — Zod schemas in [validation/](./src/validation) (`auth`, `category`,
 `gear`, `review`) drive React Hook Form through `zodResolver`, so errors appear
 inline before a request is made.
 
@@ -462,7 +462,7 @@ render one of:
 Opaque backend messages are translated wherever there's enough context to say
 something useful. Prisma's `"Duplicate Key Error"` reaches the user as _"An
 account with this email already exists."_ — translated in `registerUser`
-([service/auth.ts](./service/auth.ts)) because the action itself knows it was a
+([src/api/auth.ts](./src/api/auth.ts)) because the action itself knows it was a
 registration — and as _"A category with that name already exists."_, translated
 in `CategoryFormDialog`, which additionally attaches it to the **`name` field**
 rather than the form root, so the error lands on the input that caused it.
@@ -479,7 +479,7 @@ All of these calls are uncached and go through `apiFetch`, like everything else.
 
 | Flow | Frontend | Backend |
 | --- | --- | --- |
-| Forgot password | `/forgot-password` → `forgotPassword` (service/auth.ts) | `POST /api/auth/forgot-password` (always the same 200) |
+| Forgot password | `/forgot-password` → `forgotPassword` (src/api/auth.ts) | `POST /api/auth/forgot-password` (always the same 200) |
 | Reset password | `/reset-password?token=` → `resetPassword`, then `/login?reason=reset` | `POST /api/auth/reset-password` |
 | Verify email | `/verify-email?token=` (Server Component calls `verifyEmail` while rendering) | `POST /api/auth/verify-email` |
 | Resend verification | `ResendVerificationButton` (dashboard banner, verify page) | `POST /api/auth/resend-verification` |
@@ -489,5 +489,5 @@ All of these calls are uncached and go through `apiFetch`, like everything else.
 
 - **Verification banner:** `VerifyEmailBanner` in `(dashboard)/layout.tsx` calls `getMe()` and shows until `emailVerifiedAt` is set.
 - **403 from unverified users:** paying and publishing a listing return 403 with a message that tells the user to verify. Call sites already show `res.message`.
-- **Links in emails** point at `APP_URL` on the frontend: `/verify-email`, `/reset-password`, `/newsletter/*`, the order pages, and `/provider-dashboard/orders`.
+- **Links in emails** point at `APP_URL` on the frontend: `/verify-email`, `/reset-password`, `/newsletter/*`, the order pages, and `/dashboard/provider/orders`.
 
