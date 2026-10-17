@@ -1,20 +1,11 @@
-import { UserRound } from "lucide-react"
-
-import { Pagination } from "@/components/shared/Pagination"
-import { Stars } from "@/components/shared/Stars"
-import { formatDate } from "@/utils/format"
-import type { Review } from "@/types"
-
 import { getGearReviews } from "@/api/reviews"
+import { Stars } from "@/components/shared/Stars"
 
-export async function GearReviews({
-  gearId,
-  page,
-}: {
-  gearId: string
-  page: number
-}) {
-  const res = await getGearReviews(gearId, page)
+import { ReviewsList } from "./ReviewsList"
+
+/** First page is prerendered with the gear page; "Show more" loads the rest. */
+export async function GearReviews({ gearId }: { gearId: string }) {
+  const res = await getGearReviews(gearId, 1)
 
   if (!res.success || !res.data) {
     return (
@@ -51,51 +42,11 @@ export async function GearReviews({
         </div>
       )}
 
-      <ul className="mt-6 grid gap-5">
-        {reviews.map((review) => (
-          <ReviewRow key={review.id} review={review} />
-        ))}
-      </ul>
-
-      <Pagination
-        page={meta.page}
+      <ReviewsList
+        gearId={gearId}
+        initial={reviews}
         totalPages={meta.totalPages ?? 1}
-        hrefFor={(next) => `?reviewPage=${next}#reviews`}
-        label="Reviews pages"
-        className="mt-8"
       />
     </>
-  )
-}
-
-function ReviewRow({ review }: { review: Review }) {
-  return (
-    <li className="border-b pb-5 last:border-b-0 last:pb-0">
-      <div className="flex items-center gap-3">
-        <span
-          className="grid size-8 shrink-0 place-items-center rounded-full bg-primary/10 text-primary"
-          aria-hidden
-        >
-          <UserRound className="size-4" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium">
-            {review.customer?.name ?? "A renter"}
-          </p>
-          {review.createdAt && (
-            <p className="text-xs text-muted-foreground">
-              {formatDate(review.createdAt)}
-            </p>
-          )}
-        </div>
-        <Stars rating={review.rating} />
-      </div>
-
-      {review.comment && (
-        <p className="mt-2.5 text-sm leading-relaxed text-pretty text-muted-foreground">
-          {review.comment}
-        </p>
-      )}
-    </li>
   )
 }

@@ -1,9 +1,11 @@
 "use client"
 
-import { useQuery } from "@tanstack/react-query"
+import { keepPreviousData, useQuery } from "@tanstack/react-query"
 
 import { queryFetch } from "@/hooks/queries/fetcher"
-import type { GearAvailability } from "@/types"
+import { toGearQuery, type GearFilters } from "@/utils/filters/gear"
+import { toQueryString } from "@/utils/searchParams"
+import type { GearAvailability, GearItem, Paginated } from "@/types"
 
 export const gearAvailabilityKeys = {
   all: ["gear-availability"] as const,
@@ -19,5 +21,27 @@ export function useGearAvailability(gearId: string, from: string, to: string) {
       ),
     staleTime: 30 * 1000,
     refetchOnWindowFocus: true,
+  })
+}
+
+export const gearListKeys = {
+  all: ["gear-list"] as const,
+  list: (filters: GearFilters) => [...gearListKeys.all, filters] as const,
+}
+
+/** Browse results; `initialData` is the prerendered first page, if it applies. */
+export function useGearList(
+  filters: GearFilters,
+  initialData?: Paginated<GearItem>
+) {
+  return useQuery({
+    queryKey: gearListKeys.list(filters),
+    queryFn: () =>
+      queryFetch<Paginated<GearItem>>(
+        `/api/gear?${toQueryString(toGearQuery(filters))}`
+      ),
+    initialData,
+    placeholderData: keepPreviousData,
+    staleTime: 60 * 1000,
   })
 }

@@ -491,3 +491,16 @@ All of these calls are uncached and go through `apiFetch`, like everything else.
 - **403 from unverified users:** paying and publishing a listing return 403 with a message that tells the user to verify. Call sites already show `res.message`.
 - **Links in emails** point at `APP_URL` on the frontend: `/verify-email`, `/reset-password`, `/newsletter/*`, the order pages, and `/dashboard/provider/orders`.
 
+## Static rendering
+
+Public pages are prerendered, so they never read cookies or `searchParams` on the server. That supersedes the older notes above: `/gear` filtering and gear review paging now run in the browser.
+
+| Route handler | Used by | Notes |
+| --- | --- | --- |
+| `GET /api/session` | `useSessionUser()` | Verifies the access-token cookie locally. `private, no-store`. |
+| `GET /api/gear?…filters` | `useGearList` on `/gear` | The same whitelist as the URL (`parseGearFilters`). |
+| `GET /api/gear/[id]/reviews?page=` | `ReviewsList` ("Show more") | Page 1 is prerendered with the gear page. |
+
+- `GearBrowser` passes the prerendered first page as `initialData` only when the URL has no filters.
+- `RentCta` is a client island: a skeleton while the session loads, then a login prompt, a "customers only" notice, or `RentPanel`.
+

@@ -1,13 +1,20 @@
-import { redirect } from "next/navigation"
+import type { Metadata } from "next"
+import { Suspense } from "react"
 
-export default async function PaymentCancelledPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ orderId?: string }>
-}) {
-  const { orderId } = await searchParams
+import {
+  PaymentRedirect,
+  PaymentRedirectCard,
+} from "@/components/modules/customer/PaymentRedirect"
 
-  if (!orderId) redirect("/dashboard/customer/orders")
+export const metadata: Metadata = {
+  title: "Payment · GearUp",
+  robots: { index: false },
+}
 
-  redirect(`/dashboard/customer/orders/${orderId}?cancelled=1`)
+export default function PaymentCancelledPage() {
+  return (
+    <Suspense fallback={<PaymentRedirectCard />}>
+      <PaymentRedirect flag="cancelled" />
+    </Suspense>
+  )
 }

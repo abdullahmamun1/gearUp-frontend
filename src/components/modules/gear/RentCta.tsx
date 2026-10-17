@@ -1,22 +1,33 @@
+"use client"
+
 import Link from "next/link"
 
 import { RentPanel } from "./RentPanel"
 import { buttonVariants } from "@/components/ui/button"
-import { getSession } from "@/lib/session"
+import { Skeleton } from "@/components/ui/skeleton"
+import { useSessionUser } from "@/hooks/useSessionUser"
 import { cn } from "@/lib/utils"
 import type { GearItem } from "@/types"
 
-export async function RentCta({ gear }: { gear: GearItem }) {
-  const session = await getSession()
+/**
+ * Client island: the gear page itself is prerendered (ISR), and this decides
+ * what to show once it knows who is signed in.
+ */
+export function RentCta({ gear }: { gear: GearItem }) {
+  const { user: session, isPending } = useSessionUser()
   const outOfStock = !gear.isAvailable || gear.stock < 1
 
   if (outOfStock) {
     return <Notice>This gear is unavailable right now. Check back soon.</Notice>
   }
 
+  if (isPending) {
+    return <Skeleton className="h-[420px] rounded-xl" />
+  }
+
   if (!session) {
     return (
-      <div className="rounded-xl border bg-card p-4">
+      <div className="rounded-xl border bg-card p-4 shadow-xs">
         <p className="font-heading text-sm font-semibold">Rent this gear</p>
         <p className="mt-1.5 text-sm text-muted-foreground">
           Log in to pick your dates and place an order.

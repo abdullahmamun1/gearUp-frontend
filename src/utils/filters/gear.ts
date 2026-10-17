@@ -112,3 +112,10 @@ export function hasActiveFilters(filters: GearFilters) {
     filters.sort !== DEFAULT_SORT
   )
 }
+
+/**
+ * The unfiltered first page: what /gear prerenders. Lives here, not in the
+ * client component, because a server page can't read plain values exported
+ * from a "use client" module.
+ */
+export const DEFAULT_GEAR_FILTERS: GearFilters = parseGearFilters({})
