@@ -15,14 +15,18 @@ function toSearchParams(query: GearQuery) {
 
 export async function getGearList(query: GearQuery = {}) {
   const search = toSearchParams(query)
-  return apiFetch<Paginated<GearItem>>(
-    `/api/gear${search ? `?${search}` : ""}`,
-    {
-      auth: false,
-      tags: ["gear"],
-      revalidate: 60 * 5,
-    }
-  )
+  const path = `/api/gear${search ? `?${search}` : ""}`
+
+  // Date-filtered results depend on live bookings, so skip the Data Cache.
+  if (query.from || query.to) {
+    return apiFetch<Paginated<GearItem>>(path, { auth: false })
+  }
+
+  return apiFetch<Paginated<GearItem>>(path, {
+    auth: false,
+    tags: ["gear"],
+    revalidate: 60 * 5,
+  })
 }
 
 export async function getGearById(id: string) {

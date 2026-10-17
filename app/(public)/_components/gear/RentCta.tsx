@@ -47,6 +47,7 @@ export async function RentCta({ gear }: { gear: GearItem }) {
     <RentPanel
       gearId={gear.id}
       pricePerDay={gear.pricePerDay}
+      depositAmount={Number(gear.depositAmount ?? 0)}
       stock={gear.stock}
     />
   )

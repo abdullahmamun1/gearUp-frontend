@@ -29,6 +29,16 @@ export const gearFormSchema = z.object({
       (value) => Number(value) <= 1000000,
       "Price per day is unrealistically high."
     ),
+  depositAmount: z
+    .string()
+    .trim()
+    .regex(DECIMAL, "Enter a number, like 1000.")
+    .refine(
+      (value) => Number(value) <= 1000000,
+      "Deposit is unrealistically high."
+    )
+    .or(z.literal(""))
+    .optional(),
   stock: z
     .string()
     .trim()
@@ -60,6 +70,7 @@ export type GearPayload = {
   name: string
   categoryId: string
   pricePerDay: number
+  depositAmount?: number
   stock: number
   brand?: string
   description?: string
@@ -77,6 +88,7 @@ export const emptyGearForm: GearFormInput = {
   name: "",
   categoryId: "",
   pricePerDay: "",
+  depositAmount: "",
   stock: "",
   brand: "",
   description: "",
@@ -89,6 +101,10 @@ export function toGearFormValues(gear: GearItem): GearFormInput {
     name: gear.name,
     categoryId: gear.categoryId,
     pricePerDay: String(Number(gear.pricePerDay)),
+    depositAmount:
+      Number(gear.depositAmount ?? 0) > 0
+        ? String(Number(gear.depositAmount))
+        : "",
     stock: String(gear.stock),
     brand: gear.brand ?? "",
     description: gear.description ?? "",
@@ -102,6 +118,7 @@ export function toGearUpdatePayload(values: GearFormInput): GearUpdatePayload {
     name: values.name.trim(),
     categoryId: values.categoryId,
     pricePerDay: Number(values.pricePerDay),
+    depositAmount: Number(values.depositAmount || 0),
     stock: Number(values.stock),
     brand: values.brand?.trim() ?? "",
     description: values.description?.trim() ?? "",
@@ -120,12 +137,14 @@ export function toGearPayload(values: GearFormInput): GearPayload {
   const brand = values.brand?.trim()
   const description = values.description?.trim()
   const imageUrl = values.imageUrl?.trim()
+  const depositAmount = Number(values.depositAmount || 0)
 
   return {
     name: values.name.trim(),
     categoryId: values.categoryId,
     pricePerDay: Number(values.pricePerDay),
     stock: Number(values.stock),
+    ...(depositAmount > 0 ? { depositAmount } : {}),
     ...(brand ? { brand } : {}),
     ...(description ? { description } : {}),
     ...(imageUrl ? { imageUrl } : {}),

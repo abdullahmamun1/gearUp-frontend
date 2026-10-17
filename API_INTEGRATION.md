@@ -117,6 +117,19 @@ These four are `auth: false` and cached — they are identical for every visitor
 which is exactly what makes them safe to cache and what makes the browse pages
 server-rendered for SEO.
 
+**Availability is never cached.** Free units change with every booking, and
+most of those changes (provider confirms, Stripe webhook, expiry) happen on the
+backend where no tag can be revalidated. So:
+
+- `GET /api/gear?from=&to=` (browse with dates) — `getGearList` skips the Data
+  Cache whenever `from`/`to` are set.
+- `GET /api/gear/:gearId/availability?from=&to=` — `getGearAvailability`
+  ([getGearAvailability.ts](<./app/(public)/_actions/getGearAvailability.ts>)),
+  no-store, exposed to the client as `app/api/gear/[id]/availability` and read
+  by `useGearAvailability` (`lib/queries/gear.ts`, 30 s stale time) in
+  `RentPanel`. A failed booking (409: someone took the last unit) invalidates
+  `gearAvailabilityKeys.gear(id)`.
+
 The detail page's related-gear row is a second `getGearList` call filtered to
 `category`, not a new endpoint — it asks for 12 and shows 4, because the item
 being viewed has to be dropped from whatever comes back. Since it is the same

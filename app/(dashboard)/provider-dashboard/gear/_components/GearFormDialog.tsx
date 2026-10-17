@@ -203,11 +203,28 @@ function GearForm({
           label="Stock"
           inputMode="numeric"
           placeholder="4"
-          hint="How many you can rent out at once."
+          hint="Units you own. Bookings are checked date by date."
           error={errors.stock?.message}
           {...register("stock")}
         />
       </div>
+
+      <TextField
+        id="gear-deposit"
+        label={
+          <>
+            Refundable deposit per unit (৳){" "}
+            <span className="font-normal text-muted-foreground">
+              (optional)
+            </span>
+          </>
+        }
+        inputMode="decimal"
+        placeholder="0"
+        hint="Charged with the rental and refunded when it comes back in good condition."
+        error={errors.depositAmount?.message}
+        {...register("depositAmount")}
+      />
 
       <TextField
         id="gear-brand"

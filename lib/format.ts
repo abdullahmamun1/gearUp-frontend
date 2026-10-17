@@ -20,3 +20,17 @@ export function formatDate(value: string) {
   const parsed = new Date(value)
   return Number.isNaN(parsed.getTime()) ? "—" : date.format(parsed)
 }
+
+const dateTime = new Intl.DateTimeFormat("en-GB", {
+  day: "numeric",
+  month: "short",
+  hour: "numeric",
+  minute: "2-digit",
+  hour12: true,
+})
+
+/** For deadlines: "20 Oct, 3:00 pm". */
+export function formatDateTime(value: string) {
+  const parsed = new Date(value)
+  return Number.isNaN(parsed.getTime()) ? "—" : dateTime.format(parsed)
+}

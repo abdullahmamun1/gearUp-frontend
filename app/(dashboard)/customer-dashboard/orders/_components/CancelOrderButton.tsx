@@ -8,6 +8,7 @@ import { Loader2 } from "lucide-react"
 
 import { cancelRental } from "@/app/(dashboard)/_actions/cancelRental"
 import { Button } from "@/components/ui/button"
+import { formatPrice } from "@/lib/format"
 import { myRentalsKeys } from "@/lib/queries/customer"
 import {
   Dialog,
@@ -20,7 +21,14 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 
-export function CancelOrderButton({ orderId }: { orderId: string }) {
+export function CancelOrderButton({
+  orderId,
+  refundAmount = 0,
+}: {
+  orderId: string
+  /** Set for paid orders: what goes back to the card. */
+  refundAmount?: number
+}) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [open, setOpen] = useState(false)
@@ -37,7 +45,11 @@ export function CancelOrderButton({ orderId }: { orderId: string }) {
 
       queryClient.invalidateQueries({ queryKey: myRentalsKeys.all })
       setOpen(false)
-      toast.success("Order cancelled. The units are back in stock.")
+      toast.success(
+        refundAmount > 0
+          ? `Order cancelled. ${formatPrice(refundAmount)} is on its way back to your card.`
+          : "Order cancelled."
+      )
       router.refresh()
     })
   }
@@ -59,8 +71,11 @@ export function CancelOrderButton({ orderId }: { orderId: string }) {
         <DialogHeader>
           <DialogTitle>Cancel this order?</DialogTitle>
           <DialogDescription>
-            The gear goes back into stock and this can&apos;t be undone.
-            You&apos;d need to place a new order to rent it again.
+            {refundAmount > 0
+              ? `You'll get a full refund of ${formatPrice(refundAmount)} to your card. Refunds usually arrive within 5–10 business days.`
+              : "Your dates are released for other renters."}{" "}
+            This can&apos;t be undone — you&apos;d need to place a new order to
+            rent it again.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>

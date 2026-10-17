@@ -6,6 +6,7 @@ import {
   UUID,
   type RawSearchParams,
 } from "@/lib/searchParams"
+import { RENTAL_POLICY } from "@/lib/rental"
 import type { GearQuery } from "@/types"
 
 export type { RawSearchParams }
@@ -29,16 +30,25 @@ export type GearFilters = {
   brand?: string
   minPrice?: string
   maxPrice?: string
+  /** "YYYY-MM-DD", both or neither — gear free on every day of [from, to). */
+  from?: string
+  to?: string
   availableOnly: boolean
   sort: SortValue
   page: number
 }
 
 const DECIMAL = /^\d+(\.\d+)?$/
+const DATE_KEY = /^\d{4}-\d{2}-\d{2}$/
 
 export function parseGearFilters(raw: RawSearchParams): GearFilters {
   const sort = first(raw.sort)
   const page = matching(first(raw.page), POSITIVE_INT)
+  const from = matching(first(raw.from), DATE_KEY)
+  const to = matching(first(raw.to), DATE_KEY)
+  const spanDays =
+    from && to ? (Date.parse(to) - Date.parse(from)) / 86_400_000 : 0
+  const datesValid = spanDays >= 1 && spanDays <= RENTAL_POLICY.maxRentalDays
 
   return {
     searchTerm: first(raw.searchTerm)?.slice(0, 100),
@@ -46,6 +56,8 @@ export function parseGearFilters(raw: RawSearchParams): GearFilters {
     brand: first(raw.brand)?.slice(0, 80),
     minPrice: matching(first(raw.minPrice), DECIMAL),
     maxPrice: matching(first(raw.maxPrice), DECIMAL),
+    from: datesValid ? from : undefined,
+    to: datesValid ? to : undefined,
     availableOnly: first(raw.isAvailable) === "true",
     sort: SORT_OPTIONS.some((option) => option.value === sort)
       ? (sort as SortValue)
@@ -63,6 +75,8 @@ export function toGearQuery(filters: GearFilters): GearQuery {
     brand: filters.brand,
     minPrice: filters.minPrice,
     maxPrice: filters.maxPrice,
+    from: filters.from,
+    to: filters.to,
     isAvailable: filters.availableOnly ? "true" : undefined,
     sortBy,
     sortOrder: sortOrder as "asc" | "desc",
@@ -78,6 +92,8 @@ export function buildGearHref(filters: GearFilters) {
     brand: filters.brand,
     minPrice: filters.minPrice,
     maxPrice: filters.maxPrice,
+    from: filters.from,
+    to: filters.to,
     isAvailable: filters.availableOnly ? "true" : undefined,
     sort: filters.sort === DEFAULT_SORT ? undefined : filters.sort,
     page: filters.page,
@@ -91,6 +107,7 @@ export function hasActiveFilters(filters: GearFilters) {
     filters.brand ||
     filters.minPrice ||
     filters.maxPrice ||
+    filters.from ||
     filters.availableOnly ||
     filters.sort !== DEFAULT_SORT
   )

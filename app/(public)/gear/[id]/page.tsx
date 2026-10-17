@@ -135,7 +135,7 @@ export default async function GearDetailPage({ params, searchParams }: Props) {
             <Package className="size-4" aria-hidden />
             {outOfStock
               ? "Out of stock"
-              : `${gear.stock} ${gear.stock === 1 ? "unit" : "units"} available`}
+              : `${gear.stock} ${gear.stock === 1 ? "unit" : "units"} · pick dates to check availability`}
           </p>
 
           <div className="mt-6">
@@ -172,7 +172,14 @@ function Specifications({ gear }: { gear: GearItem }) {
     { label: "Brand", value: gear.brand },
     { label: "Category", value: gear.category?.name },
     { label: "Price per day", value: formatPrice(gear.pricePerDay) },
-    { label: "Units in stock", value: String(gear.stock) },
+    {
+      label: "Refundable deposit",
+      value:
+        Number(gear.depositAmount ?? 0) > 0
+          ? formatPrice(gear.depositAmount!)
+          : "None",
+    },
+    { label: "Units", value: String(gear.stock) },
     {
       label: "Availability",
       value: AVAILABILITY_LABEL[gearAvailability(gear)],

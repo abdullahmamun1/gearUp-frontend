@@ -99,6 +99,11 @@ export function MyPaymentsList({
             </TableCell>
             <TableCell className="text-right tabular-nums">
               {formatPrice(payment.amount)}
+              {Number(payment.refundedAmount ?? 0) > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  {formatPrice(payment.refundedAmount!)} refunded
+                </p>
+              )}
             </TableCell>
           </TableRow>
         ))}

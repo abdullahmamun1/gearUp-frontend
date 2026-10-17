@@ -9,13 +9,15 @@ import {
   PROVIDER_ORDERS_PATH,
   type RentalTableFilters,
 } from "@/lib/dashboardQuery"
-import { formatDate, formatPrice } from "@/lib/format"
+import { formatDate, formatDateTime, formatPrice } from "@/lib/format"
 import { useProviderOrders } from "@/lib/queries/providerOrders"
 import { PROVIDER_NEXT_STATUS } from "@/lib/rental"
 import { buildHref } from "@/lib/searchParams"
 import type { Paginated, RentalOrder } from "@/types"
 
+import { DeclineOrderButton } from "./DeclineOrderButton"
 import { OrderStatusButton } from "./OrderStatusButton"
+import { ReturnOrderButton } from "./ReturnOrderButton"
 
 const HEADINGS = [
   "Order",
@@ -70,7 +72,6 @@ export function ProviderOrdersList({
           const items = order.items ?? []
           const first = items[0]?.gearItem?.name ?? "—"
           const extra = items.length - 1
-          const action = PROVIDER_NEXT_STATUS[order.status]
 
           return (
             <TableRow key={order.id} className="hover:bg-transparent">
@@ -102,17 +103,7 @@ export function ProviderOrdersList({
                 {formatPrice(order.totalAmount)}
               </TableCell>
               <TableCell className="text-right">
-                {action ? (
-                  <OrderStatusButton
-                    orderId={order.id}
-                    next={action.next}
-                    label={action.label}
-                  />
-                ) : (
-                  <span className="text-xs text-muted-foreground">
-                    {order.status === "CONFIRMED" ? "Awaiting payment" : "—"}
-                  </span>
-                )}
+                <OrderActions order={order} />
               </TableCell>
             </TableRow>
           )
@@ -129,4 +120,57 @@ export function ProviderOrdersList({
       />
     </>
   )
+}
+
+function OrderActions({ order }: { order: RentalOrder }) {
+  switch (order.status) {
+    case "PLACED":
+      return (
+        <div className="grid justify-items-end gap-1">
+          <div className="flex justify-end gap-1">
+            <DeclineOrderButton orderId={order.id} />
+            <OrderStatusButton
+              orderId={order.id}
+              next="CONFIRMED"
+              label={PROVIDER_NEXT_STATUS.PLACED!.label}
+            />
+          </div>
+          {order.respondBy && (
+            <span className="text-xs text-muted-foreground">
+              Respond by {formatDateTime(order.respondBy)}
+            </span>
+          )}
+        </div>
+      )
+    case "CONFIRMED":
+      return (
+        <span className="text-xs text-muted-foreground">
+          Awaiting payment
+          {order.paymentDueAt && (
+            <span className="block">
+              due {formatDateTime(order.paymentDueAt)}
+            </span>
+          )}
+        </span>
+      )
+    case "PAID":
+      return (
+        <OrderStatusButton
+          orderId={order.id}
+          next="PICKED_UP"
+          label={PROVIDER_NEXT_STATUS.PAID!.label}
+        />
+      )
+    case "PICKED_UP":
+      return (
+        <ReturnOrderButton
+          orderId={order.id}
+          deposit={
+            order.depositStatus === "HELD" ? Number(order.depositAmount) : 0
+          }
+        />
+      )
+    default:
+      return <span className="text-xs text-muted-foreground">—</span>
+  }
 }

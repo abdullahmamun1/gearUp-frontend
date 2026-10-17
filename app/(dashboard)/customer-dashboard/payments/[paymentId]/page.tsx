@@ -81,6 +81,18 @@ export default async function PaymentReceiptPage({ params }: Props) {
             </span>
           </div>
 
+          {Number(payment.refundedAmount ?? 0) > 0 && (
+            <div className="mt-1.5 flex items-baseline justify-between gap-3 text-sm">
+              <span className="text-muted-foreground">
+                Refunded
+                {payment.refundedAt && ` · ${formatDate(payment.refundedAt)}`}
+              </span>
+              <span className="tabular-nums">
+                − {formatPrice(payment.refundedAmount!)}
+              </span>
+            </div>
+          )}
+
           {payment.status === "PENDING" && (
             <p className="mt-4 rounded-lg border border-dashed px-3 py-2 text-xs text-muted-foreground">
               This checkout session is still open. Nothing has been charged
