@@ -16,7 +16,7 @@ export function ChartCard({
   const total = series.data.reduce((sum, row) => sum + row.value, 0)
 
   return (
-    <section className="rounded-xl border bg-card p-4">
+    <section className="rounded-xl border bg-card p-4 shadow-xs">
       <h2 className="font-heading text-sm font-semibold">{title}</h2>
       <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
 

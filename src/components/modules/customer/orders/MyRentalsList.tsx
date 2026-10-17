@@ -74,6 +74,7 @@ export function MyRentalsList({
             <TableCell>
               <Link
                 href={`/dashboard/customer/orders/${order.id}`}
+                transitionTypes={["nav-forward"]}
                 className="font-medium after:absolute after:inset-0"
               >
                 {order.id.slice(0, 8)}

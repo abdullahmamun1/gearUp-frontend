@@ -8,7 +8,7 @@ export default function Loading() {
       <PageHeaderSkeleton action />
 
       <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
-        <div className="rounded-xl border bg-card p-4">
+        <div className="rounded-xl border bg-card p-4 shadow-xs">
           <Skeleton className="h-4 w-16" />
           <ul className="mt-3 grid gap-3">
             {Array.from({ length: 2 }, (_, i) => (
@@ -24,7 +24,7 @@ export default function Loading() {
           </ul>
         </div>
 
-        <div className="rounded-xl border bg-card p-4">
+        <div className="rounded-xl border bg-card p-4 shadow-xs">
           <Skeleton className="h-4 w-28" />
           <Skeleton className="mt-3 h-4 w-48" />
           <Skeleton className="mt-1.5 h-3 w-16" />

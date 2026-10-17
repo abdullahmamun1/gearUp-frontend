@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Phone, User } from "lucide-react"
+import { Pencil, Phone, User } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 
@@ -50,8 +50,13 @@ export function ProfileForm({ user }: { user: UserType }) {
 
   if (!isEditing) {
     return (
-      <Button variant="outline" onClick={() => setIsEditing(true)}>
-        Edit profile
+      <Button
+        variant="outline"
+        onClick={() => setIsEditing(true)}
+        className="w-fit gap-2"
+      >
+        <Pencil className="size-3.5" aria-hidden />
+        Edit name or phone
       </Button>
     )
   }
@@ -59,7 +64,7 @@ export function ProfileForm({ user }: { user: UserType }) {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="grid max-w-lg gap-5 rounded-xl border bg-card p-4 sm:p-5"
+      className="grid gap-5 rounded-2xl border bg-card p-5 shadow-xs"
       noValidate
     >
       <div>

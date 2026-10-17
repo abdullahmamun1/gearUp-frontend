@@ -6,9 +6,9 @@ import {
   ArrowLeft,
   Backpack,
   CalendarDays,
+  Check,
   CheckCircle2,
-  Circle,
-  XCircle,
+  X,
 } from "lucide-react"
 
 import { getRentalById } from "@/api/rentals"
@@ -28,6 +28,7 @@ import {
 import { cn } from "@/lib/utils"
 import type { OrderItem, RentalOrder } from "@/types"
 import { CancelOrderButton } from "@/components/modules/customer/orders/CancelOrderButton"
+import { OrderLiveRefresh } from "@/components/modules/customer/orders/OrderLiveRefresh"
 import { PayButton } from "@/components/modules/customer/orders/PayButton"
 import { ReviewDialog } from "@/components/modules/customer/orders/ReviewDialog"
 
@@ -64,10 +65,18 @@ export default async function OrderDetailPage({ params, searchParams }: Props) {
   )
   const refunded = Number(completed?.refundedAmount ?? 0)
 
+  // Just back from Stripe and the webhook hasn't landed yet: check often.
+  const awaitingWebhook = paid === "1" && order.status === "CONFIRMED"
+
   return (
     <>
+      <OrderLiveRefresh
+        active={!["RETURNED", "CANCELLED"].includes(order.status)}
+        intervalMs={awaitingWebhook ? 3_000 : 15_000}
+      />
       <Link
         href="/dashboard/customer/orders"
+        transitionTypes={["nav-back"]}
         className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="size-3.5" aria-hidden />
@@ -129,8 +138,8 @@ export default async function OrderDetailPage({ params, searchParams }: Props) {
         }
       />
 
-      <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
-        <div className="rounded-xl border bg-card p-4">
+      <div className="grid items-start gap-6 lg:grid-cols-[1.5fr_1fr]">
+        <div className="rounded-xl border bg-card p-4 shadow-xs">
           <h2 className="font-heading text-sm font-semibold">Gear</h2>
           <ul className="mt-3 grid gap-3">
             {items.map((item) => (
@@ -145,7 +154,7 @@ export default async function OrderDetailPage({ params, searchParams }: Props) {
         </div>
 
         <div>
-          <div className="rounded-xl border bg-card p-4">
+          <div className="rounded-xl border bg-card p-4 shadow-xs">
             <h2 className="font-heading text-sm font-semibold">
               Rental period
             </h2>
@@ -299,7 +308,19 @@ function PaymentPanel({ order }: { order: RentalOrder }) {
     )
   }
 
-  if (paid || order.status === "PICKED_UP") {
+  if (order.status === "PICKED_UP") {
+    return (
+      <Notice>
+        Enjoy your trip! Bring the gear back to{" "}
+        {order.provider?.name ?? "the provider"} on {formatDate(order.endDate)}
+        {Number(order.depositAmount ?? 0) > 0 &&
+          " — your deposit is refunded once they check it in"}
+        .
+      </Notice>
+    )
+  }
+
+  if (paid) {
     return (
       <Notice>
         Payment received. The provider will arrange pickup with you.
@@ -320,7 +341,7 @@ function PaymentPanel({ order }: { order: RentalOrder }) {
   }
 
   return (
-    <div className="mt-6 rounded-xl border bg-card p-4">
+    <div className="mt-6 rounded-xl border bg-card p-4 shadow-xs">
       <h2 className="font-heading text-sm font-semibold">Payment</h2>
       <p className="mt-1.5 text-sm text-muted-foreground">
         {pending
@@ -362,7 +383,7 @@ function ReviewPanel({
   const reviewable = items.filter((item) => item.gearItem)
 
   return (
-    <div className="mt-6 rounded-xl border bg-card p-4">
+    <div className="mt-6 rounded-xl border bg-card p-4 shadow-xs">
       <h2 className="font-heading text-sm font-semibold">Your review</h2>
 
       {order.review ? (
@@ -423,14 +444,37 @@ const TIMELINE = [
   { status: "RETURNED", label: "Returned" },
 ] as const
 
+type Step = (typeof TIMELINE)[number]["status"]
+
+/** What the customer is waiting for at the current (first unreached) step. */
+function waitingFor(order: RentalOrder, step: Step) {
+  switch (step) {
+    case "CONFIRMED":
+      return order.respondBy
+        ? `Waiting for the provider — they answer by ${formatDateTime(order.respondBy)}`
+        : "Waiting for the provider to confirm"
+    case "PAID":
+      return order.paymentDueAt
+        ? `Your turn — pay by ${formatDateTime(order.paymentDueAt)}`
+        : "Your turn — pay to lock it in"
+    case "PICKED_UP":
+      return `Pick it up on ${formatDate(order.startDate)}`
+    case "RETURNED":
+      return `Bring it back on ${formatDate(order.endDate)}`
+    default:
+      return undefined
+  }
+}
+
+/**
+ * The order's journey. A step counts as done once the order's status has
+ * reached it (timestamps are shown when the API has them, but a missing or
+ * refunded one never un-ticks a step). Cancelled orders show only the steps
+ * they really reached, then the cancellation.
+ */
 function OrderTimeline({ order }: { order: RentalOrder }) {
-  const paidAt = order.payments?.find(
-    (payment) => payment.status === "COMPLETED"
-  )?.paidAt
-  const reachedAt: Record<
-    (typeof TIMELINE)[number]["status"],
-    string | null | undefined
-  > = {
+  const paidAt = order.payments?.find((payment) => payment.paidAt)?.paidAt
+  const at: Record<Step, string | null | undefined> = {
     PLACED: order.createdAt,
     CONFIRMED: order.confirmedAt,
     PAID: paidAt,
@@ -438,34 +482,72 @@ function OrderTimeline({ order }: { order: RentalOrder }) {
     RETURNED: order.returnedAt,
   }
   const cancelled = order.status === "CANCELLED"
+  const rank = TIMELINE.findIndex((step) => step.status === order.status)
+  const reached = (index: number) =>
+    cancelled ? Boolean(at[TIMELINE[index]!.status]) : index <= rank
   const steps = cancelled
-    ? TIMELINE.filter((step) => reachedAt[step.status])
+    ? TIMELINE.filter((_, index) => reached(index))
     : TIMELINE
+  const current = cancelled ? -1 : rank + 1
 
   return (
-    <div className="mt-6 rounded-xl border bg-card p-4">
-      <h2 className="font-heading text-sm font-semibold">Progress</h2>
-      <ol className="mt-3 grid gap-3">
+    <div className="mt-6 rounded-2xl border bg-card p-5 shadow-xs">
+      <h2 className="font-heading font-semibold">Progress</h2>
+      <ol className="mt-4">
         {steps.map((step) => {
-          const at = reachedAt[step.status]
+          const index = TIMELINE.indexOf(step)
+          const done = reached(index)
+          const isCurrent = index === current
+          const last = step === steps.at(-1) && !cancelled
           return (
-            <li key={step.status} className="flex items-start gap-2.5 text-sm">
-              {at ? (
-                <CheckCircle2
-                  className="mt-0.5 size-4 shrink-0 text-primary"
+            <li
+              key={step.status}
+              className="relative flex gap-3 pb-5 last:pb-0"
+            >
+              {!last && (
+                <span
                   aria-hidden
-                />
-              ) : (
-                <Circle
-                  className="mt-0.5 size-4 shrink-0 text-muted-foreground/50"
-                  aria-hidden
+                  className={cn(
+                    "absolute top-6 bottom-0 left-[11px] w-0.5",
+                    done && reached(index + 1) ? "bg-primary" : "bg-border"
+                  )}
                 />
               )}
-              <span className={cn(!at && "text-muted-foreground")}>
-                {step.label}
-                {at && (
+              <span
+                className={cn(
+                  "relative grid size-6 shrink-0 place-items-center rounded-full",
+                  done && "bg-primary text-primary-foreground",
+                  isCurrent &&
+                    "border-2 border-primary bg-card ring-4 ring-primary/15",
+                  !done && !isCurrent && "border-2 border-border bg-card"
+                )}
+              >
+                {done ? (
+                  <Check className="size-3.5" aria-hidden />
+                ) : isCurrent ? (
+                  <span className="size-2 rounded-full bg-primary motion-safe:animate-pulse" />
+                ) : null}
+              </span>
+              <span className="min-w-0 pt-0.5">
+                <span
+                  className={cn(
+                    "block text-[15px]",
+                    done || isCurrent ? "font-medium" : "text-muted-foreground"
+                  )}
+                >
+                  {step.label}
+                  <span className="sr-only">
+                    {done ? " (done)" : isCurrent ? " (current step)" : ""}
+                  </span>
+                </span>
+                {done && at[step.status] && (
                   <span className="block text-xs text-muted-foreground">
-                    {formatDateTime(at)}
+                    {formatDateTime(at[step.status]!)}
+                  </span>
+                )}
+                {isCurrent && (
+                  <span className="mt-0.5 block text-sm text-ember-strong">
+                    {waitingFor(order, step.status)}
                   </span>
                 )}
               </span>
@@ -473,15 +555,16 @@ function OrderTimeline({ order }: { order: RentalOrder }) {
           )
         })}
         {cancelled && (
-          <li className="flex items-start gap-2.5 text-sm">
-            <XCircle
-              className="mt-0.5 size-4 shrink-0 text-destructive"
-              aria-hidden
-            />
-            <span>
-              {order.cancelReason
-                ? CANCEL_REASON_LABEL[order.cancelReason]
-                : "Cancelled"}
+          <li className="flex gap-3">
+            <span className="grid size-6 shrink-0 place-items-center rounded-full bg-destructive/12 text-destructive">
+              <X className="size-3.5" aria-hidden />
+            </span>
+            <span className="pt-0.5">
+              <span className="block text-[15px] font-medium">
+                {order.cancelReason
+                  ? CANCEL_REASON_LABEL[order.cancelReason]
+                  : "Cancelled"}
+              </span>
               {order.cancelledAt && (
                 <span className="block text-xs text-muted-foreground">
                   {formatDateTime(order.cancelledAt)}

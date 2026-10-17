@@ -26,8 +26,8 @@ export function EmailPreferences({ marketing }: { marketing: boolean }) {
   }
 
   return (
-    <section className="rounded-xl border bg-card p-4">
-      <h2 className="font-heading text-sm font-semibold">Email preferences</h2>
+    <section className="rounded-2xl border bg-card p-5 shadow-xs">
+      <h2 className="font-heading font-semibold">Email preferences</h2>
       <div className="mt-3 flex items-start justify-between gap-4">
         <label htmlFor="marketing-emails" className="text-sm">
           News and offers

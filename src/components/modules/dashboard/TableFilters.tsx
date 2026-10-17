@@ -8,6 +8,7 @@ import { FilterField } from "@/components/shared/FilterField"
 import { SearchInput } from "@/components/shared/SearchInput"
 import { SelectField, type SelectOption } from "@/components/shared/SelectField"
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 import { buildHref } from "@/utils/searchParams"
 
 const ALL = "all"
@@ -81,8 +82,48 @@ export function TableFilters({
     startTransition(() => router.push(basePath))
   }
 
+  // A lone filter with a handful of values reads best as one-tap chips.
+  const chips =
+    !search && specs.length === 1 && specs[0]!.options.length <= 8
+      ? specs[0]!
+      : null
+
+  if (chips) {
+    const options = [{ value: ALL, label: "All" }, ...chips.options]
+    const active = chips.value ?? ALL
+    return (
+      <div
+        role="group"
+        aria-label={`Filter by ${chips.label.toLowerCase()}`}
+        className={cn(
+          "mb-5 flex flex-wrap gap-2 transition-opacity",
+          isPending && "opacity-70"
+        )}
+      >
+        {options.map((option) => (
+          <button
+            key={option.value}
+            type="button"
+            aria-pressed={active === option.value}
+            onClick={() =>
+              apply(chips.name, option.value === ALL ? undefined : option.value)
+            }
+            className={cn(
+              "inline-flex h-9 cursor-pointer items-center rounded-full border px-4 text-sm font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              active === option.value
+                ? "border-primary bg-primary text-primary-foreground shadow-glow-primary"
+                : "bg-card hover:border-primary/40 hover:bg-accent"
+            )}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+    )
+  }
+
   return (
-    <div className="mb-6 flex flex-wrap items-end gap-3 rounded-xl border bg-card p-4">
+    <div className="mb-6 flex flex-wrap items-end gap-3 rounded-2xl border bg-card p-4 shadow-xs">
       {search && (
         <FilterField label={search.label} className="min-w-56 flex-1">
           <SearchInput

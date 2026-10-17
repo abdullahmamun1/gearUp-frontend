@@ -68,8 +68,12 @@ export const CANCEL_REASON_LABEL: Record<CancelReason, string> = {
   ADMIN: "Cancelled by GearUp",
 }
 
+/**
+ * NONE means "nothing held yet": an order with a deposit stays NONE until
+ * it is paid, so describe it as a future charge, not as "no deposit".
+ */
 export const DEPOSIT_STATUS_LABEL: Record<DepositStatus, string> = {
-  NONE: "No deposit",
+  NONE: "Charged with payment, refunded on return",
   HELD: "Held until return",
   REFUNDED: "Refunded",
   PARTIALLY_REFUNDED: "Partly refunded",

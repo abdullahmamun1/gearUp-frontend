@@ -2,6 +2,7 @@
 
 import {
   Bar,
+  Cell,
   BarChart,
   LabelList,
   ResponsiveContainer,
@@ -52,11 +53,15 @@ export function BarChartPanel({
         <Bar
           dataKey="value"
           fill="var(--chart-1)"
-          maxBarSize={20}
+          maxBarSize={18}
           minPointSize={2}
-          radius={[0, 4, 4, 0]}
+          radius={[0, 6, 6, 0]}
           isAnimationActive={false}
         >
+          {/* One brand colour per row, so neighbouring bars read apart. */}
+          {data.map((datum, index) => (
+            <Cell key={datum.label} fill={`var(--chart-${(index % 5) + 1})`} />
+          ))}
           <LabelList
             dataKey="value"
             position="right"

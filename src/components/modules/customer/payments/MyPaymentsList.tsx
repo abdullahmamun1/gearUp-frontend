@@ -75,6 +75,7 @@ export function MyPaymentsList({
             <TableCell>
               <Link
                 href={`/dashboard/customer/payments/${payment.id}`}
+                transitionTypes={["nav-forward"]}
                 className="font-medium after:absolute after:inset-0"
               >
                 {payment.id.slice(0, 8)}

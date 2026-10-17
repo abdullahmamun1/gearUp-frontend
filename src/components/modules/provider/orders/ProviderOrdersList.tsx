@@ -22,8 +22,7 @@ import { ReturnOrderButton } from "./ReturnOrderButton"
 const HEADINGS = [
   "Order",
   "Customer",
-  "Gear",
-  "Dates",
+  "Gear & dates",
   "Status",
   { label: "Total", align: "right" },
   { label: "Action", align: "right" },
@@ -77,7 +76,7 @@ export function ProviderOrdersList({
             <TableRow key={order.id} className="hover:bg-transparent">
               <TableCell>
                 <span className="font-medium">{order.id.slice(0, 8)}</span>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs whitespace-nowrap text-muted-foreground">
                   {formatDate(order.createdAt)}
                 </p>
               </TableCell>
@@ -92,9 +91,9 @@ export function ProviderOrdersList({
                 {extra > 0 && (
                   <span className="text-muted-foreground"> +{extra} more</span>
                 )}
-              </TableCell>
-              <TableCell className="whitespace-nowrap">
-                {formatDate(order.startDate)} → {formatDate(order.endDate)}
+                <p className="text-xs whitespace-nowrap text-muted-foreground">
+                  {formatDate(order.startDate)} → {formatDate(order.endDate)}
+                </p>
               </TableCell>
               <TableCell>
                 <RentalStatusBadge status={order.status} />

@@ -86,10 +86,11 @@ export function ProviderGearFilterBar({
         event.preventDefault()
         apply()
       }}
-      className="mb-6 grid gap-4 rounded-xl border bg-card p-4"
+      className="mb-6 rounded-2xl border bg-card p-4 shadow-xs"
     >
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <FilterField label="Search" className="lg:col-span-2">
+      {/* One row: search debounces and the selects apply at once. */}
+      <div className="grid items-end gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_12rem_11rem_12rem]">
+        <FilterField label="Search" className="sm:col-span-2 lg:col-span-1">
           <SearchInput
             value={searchTerm}
             onChange={setSearchTerm}
@@ -120,18 +121,27 @@ export function ProviderGearFilterBar({
             className="h-9 w-full text-sm"
           />
         </FilterField>
+
+        <FilterField label="Sort by">
+          <SelectField
+            options={PROVIDER_GEAR_SORT_OPTIONS}
+            value={filters.sort}
+            onValueChange={(value) =>
+              apply({ sort: value as ProviderGearSort })
+            }
+            aria-label="Sort listings"
+            className="h-9 w-full text-sm"
+          />
+        </FilterField>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <SelectField
-          options={PROVIDER_GEAR_SORT_OPTIONS}
-          value={filters.sort}
-          onValueChange={(value) => apply({ sort: value as ProviderGearSort })}
-          aria-label="Sort listings"
-          className="h-9 w-full text-sm sm:w-52"
-        />
+      {/* Enter in the search box still submits. */}
+      <button type="submit" className="sr-only">
+        Apply
+      </button>
 
-        {hasActiveProviderGearFilters(filters) && (
+      {hasActiveProviderGearFilters(filters) && (
+        <div className="mt-3 flex justify-end">
           <Button
             type="button"
             variant="ghost"
@@ -143,12 +153,8 @@ export function ProviderGearFilterBar({
             <X className="size-3.5" aria-hidden />
             Clear filters
           </Button>
-        )}
-
-        <Button type="submit" size="lg" className="ml-auto h-9 text-sm">
-          Apply
-        </Button>
-      </div>
+        </div>
+      )}
     </form>
   )
 }

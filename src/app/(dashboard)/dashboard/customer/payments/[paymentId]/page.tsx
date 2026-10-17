@@ -39,6 +39,7 @@ export default async function PaymentReceiptPage({ params }: Props) {
     <>
       <Link
         href="/dashboard/customer/payments"
+        transitionTypes={["nav-back"]}
         className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="size-3.5" aria-hidden />
@@ -52,7 +53,7 @@ export default async function PaymentReceiptPage({ params }: Props) {
       />
 
       <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
-        <div className="rounded-xl border bg-card p-4">
+        <div className="rounded-xl border bg-card p-4 shadow-xs">
           <h2 className="font-heading text-sm font-semibold">
             Payment details
           </h2>
@@ -101,7 +102,7 @@ export default async function PaymentReceiptPage({ params }: Props) {
           )}
         </div>
 
-        <div className="rounded-xl border bg-card p-4">
+        <div className="rounded-xl border bg-card p-4 shadow-xs">
           <h2 className="font-heading text-sm font-semibold">Rental order</h2>
 
           <div className="mt-3 flex flex-col items-start gap-3">

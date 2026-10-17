@@ -35,6 +35,7 @@ export function PayButton({
   return (
     <Button
       type="button"
+      variant="cta"
       size="lg"
       onClick={pay}
       disabled={isPending}
