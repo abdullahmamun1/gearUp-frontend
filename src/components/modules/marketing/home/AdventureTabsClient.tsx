@@ -1,6 +1,6 @@
 "use client"
 
-import Link from "next/link"
+import { Link } from "@/i18n/navigation"
 import { useState } from "react"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import { ArrowRight } from "lucide-react"
@@ -15,6 +15,8 @@ export type Adventure = {
   id: string
   name: string
   pitch: string
+  /** "See all camping" link text, already translated. */
+  seeAll: string
   gear: GearItem[]
 }
 
@@ -24,8 +26,11 @@ export type Adventure = {
  */
 export function AdventureTabsClient({
   adventures,
+  label,
 }: {
   adventures: Adventure[]
+  /** The tab list's accessible name. */
+  label: string
 }) {
   const [active, setActive] = useState(adventures[0]!.id)
   const reduced = useReducedMotion()
@@ -47,7 +52,7 @@ export function AdventureTabsClient({
     <div>
       <div
         role="tablist"
-        aria-label="Adventures"
+        aria-label={label}
         onKeyDown={onKeyDown}
         className="flex [scrollbar-width:none] gap-1 overflow-x-auto border-b"
       >
@@ -108,7 +113,7 @@ export function AdventureTabsClient({
                 href={`/gear?category=${current.id}`}
                 className="group mt-auto inline-flex items-center gap-1 pt-5 text-sm font-semibold text-primary"
               >
-                See all {current.name.toLowerCase()}
+                {current.seeAll}
                 <ArrowRight
                   className="size-4 transition-transform group-hover:translate-x-0.5"
                   aria-hidden

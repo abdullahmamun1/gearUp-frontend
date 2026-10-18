@@ -1,9 +1,10 @@
 "use client"
 
-import Link from "next/link"
+import { Link } from "@/i18n/navigation"
 import { useSearchParams } from "next/navigation"
 import { useCallback } from "react"
 import { CircleAlert, Loader2, MailX } from "lucide-react"
+import { useTranslations } from "@/i18n/translations"
 
 import { confirmNewsletter, unsubscribeNewsletter } from "@/api/newsletter"
 import { CenteredCard } from "@/components/shared/CenteredCard"
@@ -18,6 +19,7 @@ export function NewsletterResult({
 }: {
   mode: "confirm" | "unsubscribe"
 }) {
+  const t = useTranslations("pages.newsletter")
   const token = useSearchParams().get("token")
   const action = useCallback(
     () =>
@@ -29,7 +31,7 @@ export function NewsletterResult({
   const state = useRunOnce(token ? action : null)
 
   if (state.status === "running") {
-    return <CenteredCard icon={Loader2} busy title="One moment…" />
+    return <CenteredCard icon={Loader2} busy title={t("oneMoment")} />
   }
 
   if (state.status !== "done" || !state.result.success) {
@@ -37,12 +39,8 @@ export function NewsletterResult({
       <CenteredCard
         icon={CircleAlert}
         tone="error"
-        title={
-          mode === "confirm"
-            ? "We couldn't confirm this link"
-            : "We couldn't find that subscription"
-        }
-        description="The link may be incomplete. Open it from the email again."
+        title={mode === "confirm" ? t("confirmFailed") : t("unsubscribeFailed")}
+        description={t("failedDescription")}
       />
     )
   }
@@ -52,21 +50,21 @@ export function NewsletterResult({
     <CenteredCard
       illustration={<MailScene />}
       tone="success"
-      title="You're subscribed"
-      description={`We'll send news to ${email}. Every email has a one-click unsubscribe link.`}
+      title={t("subscribedTitle")}
+      description={t("subscribedDescription", { email: email ?? "" })}
     >
       <Link
         href="/gear"
         className={cn(buttonVariants({ size: "lg" }), "h-10 w-full text-sm")}
       >
-        Browse gear
+        {t("browseGear")}
       </Link>
     </CenteredCard>
   ) : (
     <CenteredCard
       icon={MailX}
-      title="You've been unsubscribed"
-      description={`${email} won't get GearUp news any more. Emails about your bookings are not affected.`}
+      title={t("unsubscribedTitle")}
+      description={t("unsubscribedDescription", { email: email ?? "" })}
     />
   )
 }

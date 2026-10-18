@@ -9,9 +9,9 @@ export function GearCardSkeleton() {
         <Skeleton className="h-3 w-1/2" />
         <Skeleton className="h-3 w-full" />
         <Skeleton className="h-3 w-4/5" />
-        <div className="flex items-center justify-between border-t border-dashed pt-3.5">
+        <div className="grid gap-3 border-t border-dashed pt-3.5">
           <Skeleton className="h-6 w-28" />
-          <Skeleton className="size-9 rounded-full" />
+          <Skeleton className="h-9 w-full rounded-full" />
         </div>
       </div>
     </div>

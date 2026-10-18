@@ -2,6 +2,9 @@
 
 import { useState } from "react"
 import type { DateRange } from "react-day-picker"
+import { bn } from "react-day-picker/locale"
+import { useLocale } from "next-intl"
+import { useTranslations } from "@/i18n/translations"
 import { CalendarDays, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -11,7 +14,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { formatDate } from "@/utils/format"
+import { useFormat } from "@/i18n/useFormat"
 import {
   addDays,
   fromDateValue,
@@ -30,6 +33,9 @@ export function DateRangePicker({
   to?: string
   onChange: (from?: string, to?: string) => void
 }) {
+  const t = useTranslations("common.dateRange")
+  const format = useFormat()
+  const isBangla = useLocale() === "bn"
   const [open, setOpen] = useState(false)
   const [draft, setDraft] = useState<DateRange | undefined>(
     from && to
@@ -62,8 +68,11 @@ export function DateRangePicker({
                 aria-hidden
               />
               {from && to
-                ? `${formatDate(from)} → ${formatDate(to)}`
-                : "Any dates"}
+                ? t("range", {
+                    from: format.date(from),
+                    to: format.date(to),
+                  })
+                : t("any")}
             </Button>
           }
         />
@@ -74,6 +83,8 @@ export function DateRangePicker({
             onSelect={select}
             numberOfMonths={1}
             autoFocus
+            locale={isBangla ? bn : undefined}
+            numerals={isBangla ? "beng" : undefined}
             max={RENTAL_POLICY.maxRentalDays}
             disabled={[
               { before: today },
@@ -81,7 +92,7 @@ export function DateRangePicker({
             ]}
           />
           <p className="border-t px-3 py-2 text-xs text-muted-foreground">
-            Shows only gear that&apos;s free for your whole trip.
+            {t("hint")}
           </p>
         </PopoverContent>
       </Popover>
@@ -91,7 +102,7 @@ export function DateRangePicker({
           variant="ghost"
           size="icon"
           className="size-9"
-          aria-label="Clear dates"
+          aria-label={t("clear")}
           onClick={() => {
             setDraft(undefined)
             onChange(undefined, undefined)

@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { Loader2, Trash2 } from "lucide-react"
+import { useTranslations } from "@/i18n/translations"
 import { toast } from "sonner"
 
 import { deleteCategory } from "@/api/categories"
@@ -25,6 +26,8 @@ export function DeleteCategoryDialog({ category }: { category: Category }) {
   const [error, setError] = useState<string | null>(null)
 
   const queryClient = useQueryClient()
+  const t = useTranslations("admin.categories")
+  const tc = useTranslations("common.actions")
 
   const listings = category._count?.gearItems ?? 0
 
@@ -36,14 +39,14 @@ export function DeleteCategoryDialog({ category }: { category: Category }) {
       const res = await deleteCategory(category.id)
 
       if (!res.success) {
-        const message = res.message || "Couldn't delete this category."
+        const message = res.message || t("deleteFailed")
         setError(message)
         toast.error(message)
         return
       }
       queryClient.invalidateQueries({ queryKey: categoriesKeys.all })
       setOpen(false)
-      toast.success(`"${category.name}" deleted.`)
+      toast.success(t("deleted", { name: category.name }))
     })
   }
 
@@ -60,7 +63,7 @@ export function DeleteCategoryDialog({ category }: { category: Category }) {
           <Button
             variant="ghost"
             size="icon"
-            aria-label={`Delete ${category.name}`}
+            aria-label={t("deleteAria", { name: category.name })}
             className="size-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
           >
             <Trash2 className="size-4" aria-hidden />
@@ -70,33 +73,21 @@ export function DeleteCategoryDialog({ category }: { category: Category }) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {blocked ? "Can't delete this category" : "Delete this category?"}
+            {blocked ? t("cantDeleteTitle") : t("deleteTitle")}
           </DialogTitle>
           <DialogDescription>
-            {blocked ? (
-              <>
-                <span className="font-medium text-foreground">
-                  {category.name}
-                </span>{" "}
-                is still in use.
-              </>
-            ) : (
-              <>
-                <span className="font-medium text-foreground">
-                  {category.name}
-                </span>{" "}
-                will be removed permanently. This can&apos;t be undone.
-              </>
-            )}
+            {t.rich(blocked ? "inUse" : "willRemove", {
+              name: category.name,
+              strong: (chunks) => (
+                <span className="font-medium text-foreground">{chunks}</span>
+              ),
+            })}
           </DialogDescription>
         </DialogHeader>
 
         {blocked && !error && (
           <p className="rounded-md border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
-            {listings === 1
-              ? "1 listing is filed under it."
-              : `${listings} listings are filed under it.`}{" "}
-            Move them to another category first.
+            {t("filedUnder", { count: listings })} {t("moveFirst")}
           </p>
         )}
 
@@ -117,7 +108,7 @@ export function DeleteCategoryDialog({ category }: { category: Category }) {
             disabled={isPending}
             className="h-9 text-sm"
           >
-            {blocked ? "Close" : "Keep it"}
+            {blocked ? tc("close") : t("keepIt")}
           </Button>
           {!blocked && (
             <Button
@@ -130,7 +121,7 @@ export function DeleteCategoryDialog({ category }: { category: Category }) {
               {isPending && (
                 <Loader2 className="size-4 animate-spin" aria-hidden />
               )}
-              {isPending ? "Deleting…" : "Delete category"}
+              {isPending ? t("deleting") : t("deleteCategory")}
             </Button>
           )}
         </DialogFooter>

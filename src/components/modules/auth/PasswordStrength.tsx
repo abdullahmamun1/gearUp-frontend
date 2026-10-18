@@ -1,12 +1,14 @@
+import { useTranslations } from "@/i18n/translations"
+
 import { cn } from "@/lib/utils"
 
 const LEVELS = [
-  { label: "Too short", bar: "bg-destructive", text: "text-destructive" },
-  { label: "Weak", bar: "bg-destructive", text: "text-destructive" },
-  { label: "Fair", bar: "bg-warning", text: "text-warning" },
-  { label: "Good", bar: "bg-lagoon", text: "text-lagoon" },
-  { label: "Strong", bar: "bg-success", text: "text-success" },
-]
+  { label: "tooShort", bar: "bg-destructive", text: "text-destructive" },
+  { label: "weak", bar: "bg-destructive", text: "text-destructive" },
+  { label: "fair", bar: "bg-warning", text: "text-warning" },
+  { label: "good", bar: "bg-lagoon", text: "text-lagoon" },
+  { label: "strong", bar: "bg-success", text: "text-success" },
+] as const
 
 /** 0 (too short) to 4: length first, then a mix of character kinds. */
 export function passwordScore(password: string) {
@@ -20,6 +22,7 @@ export function passwordScore(password: string) {
 
 /** A four-segment meter under the new-password field. Advisory only. */
 export function PasswordStrength({ password }: { password: string }) {
+  const t = useTranslations("auth.strength")
   if (!password) return null
   const score = passwordScore(password)
   const level = LEVELS[score]!
@@ -38,9 +41,11 @@ export function PasswordStrength({ password }: { password: string }) {
         ))}
       </div>
       <p className="text-xs text-muted-foreground">
-        Password strength:{" "}
-        <span className={cn("font-medium", level.text)}>{level.label}</span>
-        {score > 0 && score < 4 && " · mix cases, numbers and symbols"}
+        {t("label")}{" "}
+        <span className={cn("font-medium", level.text)}>
+          {t(`levels.${level.label}`)}
+        </span>
+        {score > 0 && score < 4 && t("hint")}
       </p>
     </div>
   )

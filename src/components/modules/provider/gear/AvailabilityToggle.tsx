@@ -1,11 +1,12 @@
 "use client"
 
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useTranslations } from "@/i18n/translations"
 import { toast } from "sonner"
 
 import { updateGear } from "@/api/gear"
 import { Switch } from "@/components/ui/switch"
-import { AVAILABILITY_LABEL, gearAvailability } from "@/utils/gearAvailability"
+import { gearAvailability } from "@/utils/gearAvailability"
 import type { ProviderGearFilters } from "@/utils/filters/providerGear"
 import { providerGearKeys } from "@/hooks/queries/providerGear"
 import { cn } from "@/lib/utils"
@@ -19,6 +20,7 @@ export function AvailabilityToggle({
   filters: ProviderGearFilters
 }) {
   const queryClient = useQueryClient()
+  const t = useTranslations("provider.availability")
   const queryKey = providerGearKeys.list(filters)
 
   const { mutate, isPending } = useMutation({
@@ -50,14 +52,14 @@ export function AvailabilityToggle({
       if (context?.previous) {
         queryClient.setQueryData(queryKey, context.previous)
       }
-      toast.error(error.message || "Couldn't change availability.")
+      toast.error(error.message || t("failed"))
     },
 
     onSuccess: (_data, next) => {
       toast.success(
         next
-          ? `"${gear.name}" is available to rent.`
-          : `"${gear.name}" is no longer rentable.`
+          ? t("nowAvailable", { name: gear.name })
+          : t("noLongerRentable", { name: gear.name })
       )
     },
 
@@ -65,7 +67,7 @@ export function AvailabilityToggle({
   })
 
   const available = gear.isAvailable
-  const label = AVAILABILITY_LABEL[gearAvailability(gear)]
+  const label = t(`label.${gearAvailability(gear)}`)
 
   return (
     <div className="flex items-center gap-2">
@@ -76,8 +78,8 @@ export function AvailabilityToggle({
         tone="status"
         aria-label={
           available
-            ? `Mark ${gear.name} unavailable`
-            : `Mark ${gear.name} available`
+            ? t("markUnavailable", { name: gear.name })
+            : t("markAvailable", { name: gear.name })
         }
       />
       <span

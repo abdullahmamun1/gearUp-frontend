@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useTranslations } from "@/i18n/translations"
 
 import { cn } from "@/lib/utils"
 
@@ -13,6 +14,7 @@ export function TocNav({
 }: {
   sections: { id: string; label: string }[]
 }) {
+  const t = useTranslations("common.toc")
   const [active, setActive] = useState(sections[0]?.id)
 
   useEffect(() => {
@@ -36,10 +38,10 @@ export function TocNav({
 
   return (
     <nav
-      aria-label="On this page"
-      className="rounded-xl border bg-card p-4 shadow-xs"
+      aria-label={t("title")}
+      className="rounded-2xl border bg-card p-4 shadow-xs"
     >
-      <p className="text-eyebrow text-muted-foreground">On this page</p>
+      <p className="text-eyebrow text-muted-foreground">{t("title")}</p>
       <ol className="mt-3 grid gap-0.5 text-sm">
         {sections.map((section, index) => (
           <li key={section.id}>

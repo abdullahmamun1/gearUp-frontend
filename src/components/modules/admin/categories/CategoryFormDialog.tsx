@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useQueryClient } from "@tanstack/react-query"
 import { Loader2, Pencil, Plus } from "lucide-react"
 import { useForm } from "react-hook-form"
+import { useTranslations } from "@/i18n/translations"
 import { toast } from "sonner"
 
 import { createCategory } from "@/api/categories"
@@ -23,6 +24,7 @@ import {
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { categoriesKeys } from "@/hooks/queries/adminTables"
+import { useErrorMessage } from "@/hooks/useErrorMessage"
 import {
   categoryFormSchema,
   emptyCategoryForm,
@@ -36,6 +38,7 @@ import type { Category } from "@/types"
 export function CategoryFormDialog({ category }: { category?: Category }) {
   const [open, setOpen] = useState(false)
   const editing = Boolean(category)
+  const t = useTranslations("admin.categories")
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -45,7 +48,7 @@ export function CategoryFormDialog({ category }: { category?: Category }) {
             <Button
               variant="ghost"
               size="icon"
-              aria-label={`Edit ${category?.name}`}
+              aria-label={t("editAria", { name: category?.name ?? "" })}
               className="size-8 text-muted-foreground hover:text-foreground"
             >
               <Pencil className="size-4" aria-hidden />
@@ -53,7 +56,7 @@ export function CategoryFormDialog({ category }: { category?: Category }) {
           ) : (
             <Button size="lg" className="h-9 text-sm">
               <Plus className="size-4" aria-hidden />
-              New category
+              {t("newCategory")}
             </Button>
           )
         }
@@ -61,11 +64,9 @@ export function CategoryFormDialog({ category }: { category?: Category }) {
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {editing ? "Edit category" : "New category"}
+            {editing ? t("editCategory") : t("newCategory")}
           </DialogTitle>
-          <DialogDescription>
-            Providers pick from these when listing gear.
-          </DialogDescription>
+          <DialogDescription>{t("dialogDescription")}</DialogDescription>
         </DialogHeader>
 
         {open && (
@@ -94,6 +95,9 @@ function CategoryForm({
   })
 
   const queryClient = useQueryClient()
+  const t = useTranslations("admin.categories")
+  const tc = useTranslations("common.actions")
+  const errorText = useErrorMessage()
 
   async function onSubmit(values: CategoryFormInput) {
     const res = category
@@ -102,12 +106,8 @@ function CategoryForm({
 
     if (!res.success) {
       const duplicate = /duplicate/i.test(res.message)
-      const fallback = category
-        ? "Couldn't save this category."
-        : "Couldn't create this category."
-      const message = duplicate
-        ? "A category with that name already exists."
-        : res.message || fallback
+      const fallback = category ? t("saveFailed") : t("createFailed")
+      const message = duplicate ? t("duplicate") : res.message || fallback
 
       setError(duplicate ? "name" : "root", { message })
       toast.error(message)
@@ -118,8 +118,8 @@ function CategoryForm({
 
     toast.success(
       category
-        ? `"${values.name.trim()}" updated.`
-        : `"${values.name.trim()}" added.`
+        ? t("updated", { name: values.name.trim() })
+        : t("added", { name: values.name.trim() })
     )
     onDone()
   }
@@ -131,40 +131,40 @@ function CategoryForm({
           role="alert"
           className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive"
         >
-          {errors.root.message}
+          {errorText(errors.root.message)}
         </p>
       )}
 
       <TextField
         id="category-name"
-        label="Name"
-        placeholder="Winter Sports"
+        label={t("nameLabel")}
+        placeholder={t("namePlaceholder")}
         error={errors.name?.message}
         {...register("name")}
       />
 
       <div className="grid gap-2">
         <Label htmlFor="category-description" className="text-sm">
-          Description{" "}
-          <span className="font-normal text-muted-foreground">(optional)</span>
+          {t("descriptionLabel")}{" "}
+          <span className="font-normal text-muted-foreground">
+            {t("optional")}
+          </span>
         </Label>
         <Textarea
           id="category-description"
           rows={3}
-          placeholder="Skis, boards, boots and cold-weather kit."
+          placeholder={t("descriptionPlaceholder")}
           aria-invalid={errors.description ? true : undefined}
           className="text-sm"
           {...register("description")}
         />
         {errors.description ? (
           <p className="text-xs text-destructive">
-            {errors.description.message}
+            {errorText(errors.description.message)}
           </p>
         ) : (
           category && (
-            <p className="text-xs text-muted-foreground">
-              Clear this field to remove the description.
-            </p>
+            <p className="text-xs text-muted-foreground">{t("clearHint")}</p>
           )
         )}
       </div>
@@ -178,7 +178,7 @@ function CategoryForm({
           disabled={isSubmitting}
           className="h-9 text-sm"
         >
-          Cancel
+          {tc("cancel")}
         </Button>
         <Button
           type="submit"
@@ -190,10 +190,10 @@ function CategoryForm({
             <Loader2 className="size-3.5 animate-spin" aria-hidden />
           )}
           {isSubmitting
-            ? "Saving…"
+            ? tc("saving")
             : category
-              ? "Save changes"
-              : "Create category"}
+              ? t("saveChanges")
+              : t("createCategory")}
         </Button>
       </DialogFooter>
     </form>

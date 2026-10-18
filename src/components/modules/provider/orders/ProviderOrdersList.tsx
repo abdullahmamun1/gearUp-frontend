@@ -1,5 +1,10 @@
 "use client"
 
+import { useTranslations } from "@/i18n/translations"
+
+import { Link } from "@/i18n/navigation"
+import { useFormat } from "@/i18n/useFormat"
+
 import { DataTable } from "@/components/shared/DataTable"
 import { EmptyState } from "@/components/shared/EmptyState"
 import { Pagination } from "@/components/shared/Pagination"
@@ -9,24 +14,14 @@ import {
   PROVIDER_ORDERS_PATH,
   type RentalTableFilters,
 } from "@/utils/filters/dashboard"
-import { formatDate, formatDateTime, formatPrice } from "@/utils/format"
+import { useUnreadMessages } from "@/hooks/queries/messages"
 import { useProviderOrders } from "@/hooks/queries/providerOrders"
-import { PROVIDER_NEXT_STATUS } from "@/utils/rental"
 import { buildHref } from "@/utils/searchParams"
 import type { Paginated, RentalOrder } from "@/types"
 
 import { DeclineOrderButton } from "./DeclineOrderButton"
 import { OrderStatusButton } from "./OrderStatusButton"
 import { ReturnOrderButton } from "./ReturnOrderButton"
-
-const HEADINGS = [
-  "Order",
-  "Customer",
-  "Gear & dates",
-  "Status",
-  { label: "Total", align: "right" },
-  { label: "Action", align: "right" },
-] as const
 
 export function ProviderOrdersList({
   filters,
@@ -36,34 +31,38 @@ export function ProviderOrdersList({
   initialData: Paginated<RentalOrder>
 }) {
   const { data, error, isFetching } = useProviderOrders(filters, initialData)
+  const unread = useUnreadMessages()
+  const t = useTranslations("provider.orders")
+  const format = useFormat()
+
+  const headings = [
+    t("headings.order"),
+    t("headings.customer"),
+    t("headings.gearDates"),
+    t("headings.status"),
+    { label: t("headings.total"), align: "right" },
+    { label: t("headings.action"), align: "right" },
+  ] as const
 
   if (error) {
-    return (
-      <EmptyState>{error.message || "Couldn't load your orders."}</EmptyState>
-    )
+    return <EmptyState>{error.message || t("loadFailed")}</EmptyState>
   }
 
   const orders = data?.data ?? []
   const meta = data?.meta
 
   if (orders.length === 0) {
-    return (
-      <EmptyState>
-        {filters.status
-          ? "No orders match that status."
-          : "No one has booked your gear yet."}
-      </EmptyState>
-    )
+    return <EmptyState>{filters.status ? t("noMatch") : t("none")}</EmptyState>
   }
 
   return (
     <>
       <DataTable
-        headings={HEADINGS}
+        headings={headings}
         count={{
           total: meta?.total ?? orders.length,
-          one: "order",
-          many: "orders",
+          one: t("countOne"),
+          many: t("countMany"),
         }}
         isFetching={isFetching}
       >
@@ -75,9 +74,24 @@ export function ProviderOrdersList({
           return (
             <TableRow key={order.id} className="hover:bg-transparent">
               <TableCell>
-                <span className="font-medium">{order.id.slice(0, 8)}</span>
+                <Link
+                  href={`${PROVIDER_ORDERS_PATH}/${order.id}`}
+                  className="inline-flex items-center gap-1.5 font-medium text-primary hover:underline"
+                >
+                  {order.id.slice(0, 8)}
+                  {unread.byOrder[order.id] ? (
+                    <span
+                      className="grid h-4.5 min-w-4.5 place-items-center rounded-full bg-ember px-1 text-[10px] font-bold text-ember-foreground"
+                      aria-label={t("unread", {
+                        count: format.number(unread.byOrder[order.id]),
+                      })}
+                    >
+                      {format.number(unread.byOrder[order.id])}
+                    </span>
+                  ) : null}
+                </Link>
                 <p className="text-xs whitespace-nowrap text-muted-foreground">
-                  {formatDate(order.createdAt)}
+                  {format.date(order.createdAt)}
                 </p>
               </TableCell>
               <TableCell>
@@ -89,17 +103,20 @@ export function ProviderOrdersList({
               <TableCell>
                 {first}
                 {extra > 0 && (
-                  <span className="text-muted-foreground"> +{extra} more</span>
+                  <span className="text-muted-foreground">
+                    {" "}
+                    {t("more", { count: format.number(extra) })}
+                  </span>
                 )}
                 <p className="text-xs whitespace-nowrap text-muted-foreground">
-                  {formatDate(order.startDate)} → {formatDate(order.endDate)}
+                  {format.date(order.startDate)} → {format.date(order.endDate)}
                 </p>
               </TableCell>
               <TableCell>
                 <RentalStatusBadge status={order.status} />
               </TableCell>
               <TableCell className="text-right tabular-nums">
-                {formatPrice(order.totalAmount)}
+                {format.price(order.totalAmount)}
               </TableCell>
               <TableCell className="text-right">
                 <OrderActions order={order} />
@@ -115,13 +132,18 @@ export function ProviderOrdersList({
         hrefFor={(page) =>
           buildHref(PROVIDER_ORDERS_PATH, { ...filters, page })
         }
-        label="Orders pagination"
+        label={t("pagination")}
       />
     </>
   )
 }
 
-function OrderActions({ order }: { order: RentalOrder }) {
+/** The next step a provider can take on an order (table and detail page). */
+export function OrderActions({ order }: { order: RentalOrder }) {
+  const t = useTranslations("provider.orders")
+  const tc = useTranslations("common.providerNextAction")
+  const format = useFormat()
+
   switch (order.status) {
     case "PLACED":
       return (
@@ -131,12 +153,12 @@ function OrderActions({ order }: { order: RentalOrder }) {
             <OrderStatusButton
               orderId={order.id}
               next="CONFIRMED"
-              label={PROVIDER_NEXT_STATUS.PLACED!.label}
+              label={tc("PLACED")}
             />
           </div>
           {order.respondBy && (
             <span className="text-xs text-muted-foreground">
-              Respond by {formatDateTime(order.respondBy)}
+              {t("respondBy", { date: format.dateTime(order.respondBy) })}
             </span>
           )}
         </div>
@@ -144,10 +166,10 @@ function OrderActions({ order }: { order: RentalOrder }) {
     case "CONFIRMED":
       return (
         <span className="text-xs text-muted-foreground">
-          Awaiting payment
+          {t("awaitingPayment")}
           {order.paymentDueAt && (
             <span className="block">
-              due {formatDateTime(order.paymentDueAt)}
+              {t("due", { date: format.dateTime(order.paymentDueAt) })}
             </span>
           )}
         </span>
@@ -157,7 +179,7 @@ function OrderActions({ order }: { order: RentalOrder }) {
         <OrderStatusButton
           orderId={order.id}
           next="PICKED_UP"
-          label={PROVIDER_NEXT_STATUS.PAID!.label}
+          label={tc("PAID")}
         />
       )
     case "PICKED_UP":

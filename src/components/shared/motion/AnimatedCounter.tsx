@@ -1,9 +1,10 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useMemo, useRef } from "react"
 import { animate, useReducedMotion } from "motion/react"
 
 import { EASE } from "@/constants/motion"
+import { useFormat } from "@/i18n/useFormat"
 
 /**
  * Counts up to `value` when it scrolls into view. The server renders the
@@ -12,7 +13,7 @@ import { EASE } from "@/constants/motion"
  */
 export function AnimatedCounter({
   value,
-  format = (n) => Math.round(n).toLocaleString("en-US"),
+  format: formatProp,
   duration = 1.2,
   className,
 }: {
@@ -23,6 +24,12 @@ export function AnimatedCounter({
 }) {
   const ref = useRef<HTMLSpanElement>(null)
   const reduced = useReducedMotion()
+  // Default: whole numbers in the page's digits (১২৩ on Bangla pages).
+  const local = useFormat()
+  const format = useMemo(
+    () => formatProp ?? ((n: number) => local.number(Math.round(n))),
+    [formatProp, local]
+  )
 
   useEffect(() => {
     const node = ref.current

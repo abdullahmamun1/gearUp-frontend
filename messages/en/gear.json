@@ -1,0 +1,208 @@
+{
+  "sort": {
+    "newest": "Newest first",
+    "priceAsc": "Price: low to high",
+    "priceDesc": "Price: high to low",
+    "nameAsc": "Name: A to Z"
+  },
+  "availability": {
+    "unavailable": "Unavailable",
+    "out-of-stock": "Out of stock",
+    "available": "Available"
+  },
+  "filters": {
+    "allBrands": "All brands",
+    "searchPlaceholder": "Search tents, kayaks, bikes…",
+    "searchLabel": "Search gear",
+    "sortLabel": "Sort results",
+    "toggle": "Filters",
+    "brand": "Brand",
+    "minPrice": "Min price / day",
+    "maxPrice": "Max price / day",
+    "anyPrice": "Any",
+    "availableNow": "Available now",
+    "apply": "Apply",
+    "clearAll": "Clear all filters",
+    "allGear": "All gear",
+    "categories": "Categories"
+  },
+  "location": {
+    "unsupported": "Your browser can't share its location.",
+    "failed": "Couldn't get your location. Pick a city instead.",
+    "list": "List",
+    "map": "Map",
+    "viewLabel": "Show results as",
+    "within": "Within",
+    "radiusLabel": "Search radius",
+    "km": "{km} km",
+    "ofYou": "of you",
+    "stopNearMe": "Stop searching near me",
+    "useMyLocation": "Use my location",
+    "city": "City",
+    "allCities": "All cities",
+    "updating": "Updating"
+  },
+  "results": {
+    "errorTitle": "Couldn't load gear",
+    "errorBody": "Please try again in a moment.",
+    "noMatchesTitle": "Nothing matches yet",
+    "emptyTitle": "No gear listed yet",
+    "clearAll": "Clear all filters",
+    "noMatchesBody": "Try other dates, widen your price range or clear a filter.",
+    "emptyBody": "Check back soon — providers are adding kit all the time.",
+    "count": "{count, plural, one {<strong>#</strong> item} other {<strong>#</strong> items}} available",
+    "mapMissing": "Some providers haven't set a pickup area, so their gear is only in the list view.",
+    "pagination": "Gear pagination"
+  },
+  "gallery": {
+    "photoAlt": "{name} — photo {index} of {total}",
+    "photos": "{name} photos",
+    "slide": "{index} of {total}",
+    "fullScreen": "View photos full screen",
+    "unavailable": "Unavailable",
+    "showPhoto": "Show photo {index} of {total}",
+    "previous": "Previous photo",
+    "next": "Next photo",
+    "counter": "{index} / {total}",
+    "close": "Close"
+  },
+  "rent": {
+    "tooLong": "Rentals can be at most {days} days.",
+    "tooFarAhead": "You can book up to {days} days ahead.",
+    "fullyBooked": "Some of those days are fully booked. Try other dates.",
+    "placeFailed": "Couldn't place your order.",
+    "title": "Rent this gear",
+    "dates": "Rental dates",
+    "pickDates": "Pick your dates",
+    "checking": "Checking availability…",
+    "availabilityFailed": "Couldn't load availability. Your dates are checked when you book.",
+    "calendarHint": "Greyed-out days are fully booked. Pick the day you'll return it as the end date.",
+    "quantity": "Quantity",
+    "decrease": "Decrease quantity",
+    "increase": "Increase quantity",
+    "unitsTotal": "{count, plural, one {# unit} other {# units}} in total",
+    "unitsLeft": "{count} left for these dates",
+    "pricePerDay": "Price per day",
+    "days": "Days",
+    "rental": "Rental",
+    "deposit": "Refundable deposit",
+    "dueAtPayment": "Due at payment",
+    "total": "Total",
+    "placing": "Placing order…",
+    "request": "Request to rent",
+    "respondNote": "The provider has up to {hours} hours to confirm. You pay only after they do.",
+    "pickToSeeTotal": "Pick a start and end date to see your total.",
+    "cancellation": "Free cancellation until you pay. Paid rentals are fully refunded up to {hours} hours before the start day.",
+    "cancellationWithDeposit": "Free cancellation until you pay. Paid rentals are fully refunded up to {hours} hours before the start day, and the deposit comes back when the gear is returned in good condition.",
+    "unavailable": "This gear is unavailable right now. Check back soon.",
+    "loginPrompt": "Log in to pick your dates and place an order.",
+    "loginCta": "Log in to rent",
+    "wrongRole": {
+      "CUSTOMER": "You're signed in as a customer. Renting is for customer accounts.",
+      "PROVIDER": "You're signed in as a provider. Renting is for customer accounts.",
+      "ADMIN": "You're signed in as an admin. Renting is for customer accounts."
+    },
+    "rentNow": "Rent now"
+  },
+  "card": {
+    "kmAway": "{km} km away",
+    "viewDetails": "View details"
+  },
+  "favorite": {
+    "remove": "Remove {name} from saved",
+    "save": "Save {name}",
+    "savedTitle": "Saved",
+    "saveTitle": "Save"
+  },
+  "reviews": {
+    "loadMoreFailed": "Couldn't load more reviews.",
+    "loading": "Loading…",
+    "showMore": "Show more reviews",
+    "anonymous": "A renter",
+    "loadFailed": "Couldn't load reviews. Please try again.",
+    "empty": "No reviews yet. Renters can leave one once they've returned this gear."
+  },
+  "related": {
+    "eyebrow": "More in {category}",
+    "title": "You might also like",
+    "viewAll": "View all {category}"
+  },
+  "map": {
+    "spotLabel": "{count} items · from {price}",
+    "more": "+{count} more in the list view"
+  },
+  "browse": {
+    "metaTitle": "Browse gear · GearUp",
+    "metaDescription": "Search tents, kayaks, bikes and more from local providers, and filter by category, price and availability.",
+    "eyebrow": "{count} items from local providers",
+    "eyebrowFallback": "Local providers",
+    "title": "Browse <accent>gear</accent>",
+    "description": "Rent by the day from providers near you. Filter by category, price and what's free on your dates."
+  },
+  "detail": {
+    "notFoundTitle": "Gear not found · GearUp",
+    "metaTitle": "{name} · GearUp",
+    "metaDescription": "Rent {name} by the day from {provider}.",
+    "metaDescriptionLocal": "Rent {name} by the day from a local provider.",
+    "loadFailed": "Couldn't load this gear. Please try again.",
+    "breadcrumbLabel": "Breadcrumb",
+    "breadcrumbHome": "Home",
+    "breadcrumbBrowse": "Browse",
+    "about": "About this gear",
+    "specifications": "Specifications",
+    "reviews": "Reviews",
+    "outOfStock": "Out of stock",
+    "stock": "{count, plural, one {# unit} other {# units}} · pick dates to check availability",
+    "perkConfirm": "The provider confirms within {hours} hours — you pay only after that",
+    "perkCancel": "Free cancellation until you pay, full refund up to {hours} hours before pickup",
+    "perkStripe": "Secure checkout with Stripe",
+    "digestTitle": "What renters say",
+    "digestNote": "AI summary of reviews",
+    "listedBy": "Listed by",
+    "profile": "Profile",
+    "approxArea": "Approximate pickup area — the exact point is shared once you pay.",
+    "specs": {
+      "brand": "Brand",
+      "category": "Category",
+      "pricePerDay": "Price per day",
+      "deposit": "Refundable deposit",
+      "none": "None",
+      "units": "Units",
+      "availability": "Availability",
+      "listed": "Listed"
+    }
+  },
+  "og": {
+    "fallbackTitle": "Gear for rent",
+    "listedBy": "Listed by",
+    "providerFallback": "GearUp provider"
+  },
+  "provider": {
+    "notFoundTitle": "Provider not found · GearUp",
+    "metaTitle": "{name} · GearUp",
+    "metaDescriptionCity": "Rent gear from {name} in {city} on GearUp.",
+    "metaDescription": "Rent gear from {name} on GearUp.",
+    "responseNew": "New provider",
+    "responseHour": "Within an hour",
+    "responseHours": "Within {count, plural, one {# hour} other {# hours}}",
+    "responseDays": "Within {count, plural, one {# day} other {# days}}",
+    "loadFailed": "Couldn't load this provider. Please try again.",
+    "listings": "Listings",
+    "completedRentals": "Completed rentals",
+    "rating": "Rating",
+    "noReviews": "No reviews yet",
+    "usuallyConfirms": "Usually confirms",
+    "eyebrow": "Provider",
+    "since": "On GearUp since {date}",
+    "about": "About",
+    "gearFrom": "Gear from {name}",
+    "noListings": "No listings right now.",
+    "reviewsTitle": "What renters said",
+    "approxArea": "Approximate area. The exact pickup point is shared once your booking is paid.",
+    "noArea": "This provider hasn't set a pickup area yet."
+  },
+  "aiSuggest": {
+    "label": "Try:",
+    "loading": "Finding better searches…"
+  }
+}

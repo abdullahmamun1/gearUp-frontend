@@ -1,8 +1,9 @@
 "use client"
 
-import Link from "next/link"
+import { Link } from "@/i18n/navigation"
 import { useTransition } from "react"
 import { Home, LayoutDashboard, LogOut, UserRound } from "lucide-react"
+import { useTranslations } from "@/i18n/translations"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -13,6 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { InstallAppMenuItem } from "@/components/shared/InstallAppMenuItem"
 import { useLogout } from "@/hooks/useSessionUser"
 import type { JwtUser } from "@/types"
 
@@ -35,6 +37,7 @@ export function AccountMenu({
   user: JwtUser
   links: AccountMenuLink[]
 }) {
+  const t = useTranslations("nav.account")
   const [isPending, startTransition] = useTransition()
   const logout = useLogout()
 
@@ -45,7 +48,7 @@ export function AccountMenu({
           <Button
             variant="ghost"
             className="h-11 gap-2 rounded-full pr-3 pl-1"
-            aria-label="Account menu"
+            aria-label={t("menu")}
           />
         }
       >
@@ -54,7 +57,7 @@ export function AccountMenu({
             {initials(user.name)}
           </AvatarFallback>
         </Avatar>
-        <span className="hidden text-sm sm:inline">{user.name}</span>
+        <span className="hidden text-sm 2xl:inline">{user.name}</span>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end" className="w-56">
@@ -80,6 +83,7 @@ export function AccountMenu({
             </DropdownMenuItem>
           )
         })}
+        <InstallAppMenuItem />
 
         <DropdownMenuSeparator />
 
@@ -94,7 +98,7 @@ export function AccountMenu({
           variant="destructive"
         >
           <LogOut aria-hidden />
-          {isPending ? "Logging out…" : "Log out"}
+          {isPending ? t("loggingOut") : t("logOut")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

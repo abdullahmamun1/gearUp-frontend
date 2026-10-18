@@ -40,12 +40,12 @@ export async function getGearById(id: string) {
   })
 }
 
+/** Admin-featured gear first, then the newest. */
 export async function getFeaturedGear(limit = 8) {
   return getGearList({
     limit: String(limit),
     isAvailable: "true",
-    sortBy: "createdAt",
-    sortOrder: "desc",
+    sortBy: "featured",
   })
 }
 

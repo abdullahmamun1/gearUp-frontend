@@ -7,12 +7,36 @@ import {
   CanvasTexture,
   DoubleSide,
   ExtrudeGeometry,
+  getConsoleFunction,
   LatheGeometry,
   RepeatWrapping,
+  setConsoleFunction,
   Shape,
   Vector2,
 } from "three"
 import type { Group, Mesh, MeshBasicMaterial, PointLight } from "three"
+
+/**
+ * React Three Fiber (9.8, the latest) still creates a THREE.Clock, which
+ * three r183+ reports as deprecated on every canvas. That's internal to the
+ * library, so drop just that one message (three's official console hook);
+ * everything else passes through unchanged.
+ */
+const previousConsole = getConsoleFunction()
+setConsoleFunction((type, message, ...params) => {
+  if (
+    typeof message === "string" &&
+    message.startsWith("THREE.Clock: This module has been deprecated")
+  ) {
+    return
+  }
+  if (previousConsole) previousConsole(type, message, ...params)
+  else
+    (console[type as "log" | "warn" | "error"] ?? console.log)(
+      message,
+      ...params
+    )
+})
 
 /**
  * The hero's 3D scene: a floating sky island with a camp on top, a pond
@@ -611,7 +635,9 @@ export default function IslandCanvas({
   return (
     <Canvas
       flat
-      shadows
+      // PCF shadows: three r183+ removed PCF-soft (it fell back to this
+      // anyway, with a console warning).
+      shadows="percentage"
       dpr={[1, 1.5]}
       camera={{ position: [0, 2.5, 7.1], fov: 34 }}
       frameloop={active && animate ? "always" : "demand"}

@@ -1,9 +1,10 @@
 "use client"
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { Link } from "@/i18n/navigation"
+import { usePathname } from "@/i18n/navigation"
 import { useTransition } from "react"
 import { ChevronsUpDown, Home, LogOut, Mountain, UserRound } from "lucide-react"
+import { useTranslations } from "@/i18n/translations"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
@@ -13,7 +14,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { InstallAppMenuItem } from "@/components/shared/InstallAppMenuItem"
+import { useAdminAttention } from "@/hooks/queries/adminModeration"
+import { useUnreadMessages } from "@/hooks/queries/messages"
 import { useLogout } from "@/hooks/useSessionUser"
+import { useFormat } from "@/i18n/useFormat"
 import { PROFILE_HOME } from "@/routes"
 
 import { useRequiredSession } from "@/providers/SessionProvider"
@@ -26,17 +31,32 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
 
-import { ROLE_LABEL, SIDEBAR_ITEMS } from "@/constants/sidebar"
+import { SIDEBAR_ITEMS } from "@/constants/sidebar"
+import type { SidebarItem } from "@/types"
 
 export function DashboardSidebar() {
+  const t = useTranslations("nav.sidebar")
+  const tCommon = useTranslations("common")
+  const format = useFormat()
   const pathname = usePathname()
   const { role } = useRequiredSession()
   const items = SIDEBAR_ITEMS[role]
+  const unread = useUnreadMessages()
+  const attention = useAdminAttention()
+  const badgeFor = (badge: SidebarItem["badge"]) =>
+    badge === "messages"
+      ? { count: unread.total, key: "messages" as const }
+      : badge === "claims"
+        ? { count: attention.claims, key: "claims" as const }
+        : badge === "inbox"
+          ? { count: attention.inbox, key: "inbox" as const }
+          : null
 
   return (
     <Sidebar collapsible="icon">
@@ -57,7 +77,7 @@ export function DashboardSidebar() {
               <div className="grid text-left leading-tight">
                 <span className="font-heading text-base font-bold">GearUp</span>
                 <span className="text-xs text-muted-foreground">
-                  {ROLE_LABEL[role]}
+                  {tCommon(`roleLong.${role}`)}
                 </span>
               </div>
             </SidebarMenuButton>
@@ -67,21 +87,37 @@ export function DashboardSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Menu</SidebarGroupLabel>
+          <SidebarGroupLabel>{t("menu")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    isActive={isActive(pathname, item.href, items)}
-                    tooltip={item.label}
-                    render={<Link href={item.href} />}
-                  >
-                    <item.icon aria-hidden />
-                    <span>{item.label}</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {items.map((item) => {
+                const badge = badgeFor(item.badge)
+                const label = t(`items.${item.label}`)
+                return (
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton
+                      isActive={isActive(pathname, item.href, items)}
+                      tooltip={label}
+                      render={<Link href={item.href} />}
+                    >
+                      <item.icon aria-hidden />
+                      <span>{label}</span>
+                    </SidebarMenuButton>
+                    {badge && badge.count > 0 && (
+                      <SidebarMenuBadge
+                        aria-label={t(`badges.${badge.key}`, {
+                          count: format.number(badge.count),
+                        })}
+                        className="rounded-full bg-ember px-1.5 text-[11px] text-ember-foreground"
+                      >
+                        {badge.count > 99
+                          ? `${format.number(99)}+`
+                          : format.number(badge.count)}
+                      </SidebarMenuBadge>
+                    )}
+                  </SidebarMenuItem>
+                )
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -98,6 +134,7 @@ export function DashboardSidebar() {
 
 /** The signed-in account, pinned to the bottom of the sidebar. */
 function SidebarAccount() {
+  const t = useTranslations("nav.account")
   const user = useRequiredSession()
   const logout = useLogout()
   const [isPending, startTransition] = useTransition()
@@ -116,7 +153,7 @@ function SidebarAccount() {
               <SidebarMenuButton
                 size="lg"
                 tooltip={user.name}
-                aria-label="Account menu"
+                aria-label={t("menu")}
                 className="data-popup-open:bg-sidebar-accent"
               />
             }
@@ -145,12 +182,13 @@ function SidebarAccount() {
             <DropdownMenuSeparator />
             <DropdownMenuItem render={<Link href={PROFILE_HOME[user.role]} />}>
               <UserRound aria-hidden />
-              Profile
+              {t("profile")}
             </DropdownMenuItem>
             <DropdownMenuItem render={<Link href="/" />}>
               <Home aria-hidden />
-              Back to site
+              {t("backToSite")}
             </DropdownMenuItem>
+            <InstallAppMenuItem />
             <DropdownMenuSeparator />
             <DropdownMenuItem
               variant="destructive"
@@ -159,7 +197,7 @@ function SidebarAccount() {
               onClick={() => startTransition(async () => await logout())}
             >
               <LogOut aria-hidden />
-              {isPending ? "Logging out…" : "Log out"}
+              {isPending ? t("loggingOut") : t("logOut")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

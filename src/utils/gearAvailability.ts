@@ -10,10 +10,25 @@ export function gearAvailability(gear: Rentable): GearAvailability {
   return "available"
 }
 
-export const AVAILABILITY_LABEL: Record<GearAvailability, string> = {
-  unavailable: "Unavailable",
-  "out-of-stock": "Out of stock",
-  available: "Available",
+/**
+ * Message keys in the `gear` namespace:
+ * `useTranslations("gear")(AVAILABILITY_LABEL[status])`.
+ */
+export const AVAILABILITY_LABEL = {
+  unavailable: "availability.unavailable",
+  "out-of-stock": "availability.out-of-stock",
+  available: "availability.available",
+} as const satisfies Record<
+  GearAvailability,
+  `availability.${GearAvailability}`
+>
+
+/** A star average with one decimal ("4.5" / "৪.৫"). */
+export function formatRating(locale: string, value: number) {
+  return new Intl.NumberFormat(locale === "bn" ? "bn-BD" : "en-GB", {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  }).format(value)
 }
 
 export function isRentable(gear: Rentable) {

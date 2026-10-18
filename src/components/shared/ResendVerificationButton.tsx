@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react"
 import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
+import { useTranslations } from "@/i18n/translations"
 
 import { Button } from "@/components/ui/button"
 import { resendVerification } from "@/api/auth"
@@ -13,6 +14,7 @@ export function ResendVerificationButton({
 }: {
   className?: string
 }) {
+  const t = useTranslations("common.verifyEmail")
   const [isPending, startTransition] = useTransition()
   const [sent, setSent] = useState(false)
 
@@ -20,11 +22,11 @@ export function ResendVerificationButton({
     startTransition(async () => {
       const res = await resendVerification()
       if (!res.success) {
-        toast.error(res.message || "Couldn't send the email. Try again.")
+        toast.error(res.message || t("failed"))
         return
       }
       setSent(true)
-      toast.success("Verification email sent. Check your inbox.")
+      toast.success(t("sent"))
     })
   }
 
@@ -38,7 +40,7 @@ export function ResendVerificationButton({
       className={cn("h-8 text-xs", className)}
     >
       {isPending && <Loader2 className="size-3.5 animate-spin" aria-hidden />}
-      {sent ? "Email sent" : isPending ? "Sending…" : "Resend email"}
+      {sent ? t("done") : isPending ? t("sending") : t("resend")}
     </Button>
   )
 }

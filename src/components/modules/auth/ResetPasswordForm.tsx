@@ -1,8 +1,9 @@
 "use client"
 
-import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { Link } from "@/i18n/navigation"
+import { useRouter } from "@/i18n/navigation"
 import { Loader2 } from "lucide-react"
+import { useTranslations } from "@/i18n/translations"
 import { useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 
@@ -14,6 +15,7 @@ import { resetPassword } from "@/api/auth"
 import { PasswordStrength } from "./PasswordStrength"
 
 export function ResetPasswordForm({ token }: { token: string }) {
+  const t = useTranslations("auth")
   const router = useRouter()
   const {
     register,
@@ -32,7 +34,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
     const res = await resetPassword(token, values.password)
     if (!res.success) {
       setError("root", {
-        message: res.message || "Couldn't reset your password. Try again.",
+        message: res.message || t("reset.failed"),
       })
       return
     }
@@ -48,22 +50,22 @@ export function ResetPasswordForm({ token }: { token: string }) {
         >
           {errors.root.message}{" "}
           <Link href="/forgot-password" className="font-medium underline">
-            Get a new link
+            {t("reset.getNewLink")}
           </Link>
         </p>
       )}
       <PasswordField
         id="password"
-        label="New password"
+        label={t("fields.newPassword")}
         autoComplete="new-password"
-        placeholder="At least 8 characters"
+        placeholder={t("fields.passwordPlaceholder")}
         error={errors.password?.message}
         {...register("password")}
       />
       {!errors.password && <PasswordStrength password={password ?? ""} />}
       <PasswordField
         id="confirmPassword"
-        label="Confirm new password"
+        label={t("fields.confirmNewPassword")}
         autoComplete="new-password"
         error={errors.confirmPassword?.message}
         {...register("confirmPassword")}
@@ -77,10 +79,10 @@ export function ResetPasswordForm({ token }: { token: string }) {
         {isSubmitting && (
           <Loader2 className="size-4 animate-spin" aria-hidden />
         )}
-        {isSubmitting ? "Saving…" : "Set new password"}
+        {isSubmitting ? t("reset.saving") : t("reset.submit")}
       </Button>
       <p className="text-center text-xs text-muted-foreground">
-        You&apos;ll be signed out on your other devices.
+        {t("reset.signedOutNote")}
       </p>
     </form>
   )

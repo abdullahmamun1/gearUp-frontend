@@ -1,3 +1,5 @@
+import { getTranslations } from "@/i18n/getTranslations"
+
 import { getTestimonials } from "@/api/reviews"
 
 import { Section } from "./Section"
@@ -9,13 +11,14 @@ export async function Testimonials() {
   if (reviews.length === 0) {
     return null
   }
+  const t = await getTranslations("home.testimonials")
 
   return (
     <Section
       tone="muted"
-      eyebrow="From renters"
-      title="What renters say"
-      description="Left by people after they returned the gear — nothing else counts."
+      eyebrow={t("eyebrow")}
+      title={t("title")}
+      description={t("description")}
     >
       <TestimonialSlider reviews={reviews} />
     </Section>

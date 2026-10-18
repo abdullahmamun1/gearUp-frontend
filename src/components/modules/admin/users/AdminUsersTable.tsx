@@ -1,3 +1,5 @@
+import { getTranslations } from "@/i18n/getTranslations"
+
 import { getAdminUsers } from "@/api/admin"
 import { EmptyState } from "@/components/shared/EmptyState"
 import type { AdminUsersFilters } from "@/utils/filters/admin"
@@ -12,11 +14,8 @@ export async function AdminUsersTable({
   const res = await getAdminUsers(filters)
 
   if (!res.success || !res.data) {
-    return (
-      <EmptyState>
-        {res.message || "Couldn't load users. Please try again."}
-      </EmptyState>
-    )
+    const t = await getTranslations("admin.users")
+    return <EmptyState>{res.message || t("loadErrorRetry")}</EmptyState>
   }
 
   return <AdminUsersList filters={filters} initialData={res.data} />

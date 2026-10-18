@@ -1,23 +1,34 @@
-import Link from "next/link"
+import { Link } from "@/i18n/navigation"
 import { Mail, MapPin, Mountain, Phone } from "lucide-react"
+import { getLocale } from "next-intl/server"
+import { getTranslations } from "@/i18n/getTranslations"
 
 import { SOCIAL_ICONS } from "@/components/shared/SocialIcons"
 import { SITE_CONTACT, SOCIAL_LINKS } from "@/constants/siteConfig"
 
 const EXPLORE_LINKS = [
-  { label: "Browse gear", href: "/gear" },
-  { label: "How it works", href: "/#how-it-works" },
-  { label: "Become a provider", href: "/register" },
-  { label: "Log in", href: "/login" },
-]
+  { label: "browseGear", href: "/gear" },
+  { label: "howItWorks", href: "/#how-it-works" },
+  { label: "becomeProvider", href: "/register" },
+  { label: "logIn", href: "/login" },
+] as const
 
 const COMPANY_LINKS = [
-  { label: "About", href: "/about" },
-  { label: "Contact", href: "/contact" },
-  { label: "Privacy & Terms", href: "/privacy" },
-]
+  { label: "about", href: "/about" },
+  { label: "help", href: "/help" },
+  { label: "contactLink", href: "/contact" },
+  { label: "privacy", href: "/privacy" },
+] as const
 
-export function Footer() {
+export async function Footer() {
+  const t = await getTranslations("nav.footer")
+  const tCompany = await getTranslations("nav.company")
+  const locale = await getLocale()
+  // A year has no thousands separator ("2026", "২০২৬").
+  const year = new Intl.NumberFormat(locale === "bn" ? "bn-BD" : "en-GB", {
+    useGrouping: false,
+  }).format(new Date().getFullYear())
+
   return (
     <footer className="border-t">
       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:grid-cols-2 lg:grid-cols-4">
@@ -27,8 +38,7 @@ export function Footer() {
             GearUp
           </p>
           <p className="mt-2 max-w-xs text-sm text-muted-foreground">
-            Rent sports &amp; outdoor gear instantly, by the day, from local
-            providers.
+            {t("tagline")}
           </p>
 
           <ul className="mt-5 flex gap-2">
@@ -41,7 +51,7 @@ export function Footer() {
                     href={social.href}
                     target="_blank"
                     rel="noreferrer noopener"
-                    aria-label={`GearUp on ${social.label}`}
+                    aria-label={t("social", { network: social.label })}
                     className="grid size-9 place-items-center rounded-md border text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
                   >
                     <Icon className="size-4" />
@@ -53,12 +63,12 @@ export function Footer() {
         </div>
 
         <div>
-          <h2 className="font-heading text-sm font-semibold">Explore</h2>
+          <h2 className="font-heading text-sm font-semibold">{t("explore")}</h2>
           <ul className="mt-4 grid gap-2.5 text-sm text-muted-foreground">
             {EXPLORE_LINKS.map((link) => (
               <li key={link.href}>
                 <Link href={link.href} className="hover:text-foreground">
-                  {link.label}
+                  {t(link.label)}
                 </Link>
               </li>
             ))}
@@ -66,12 +76,12 @@ export function Footer() {
         </div>
 
         <div>
-          <h2 className="font-heading text-sm font-semibold">Company</h2>
+          <h2 className="font-heading text-sm font-semibold">{t("company")}</h2>
           <ul className="mt-4 grid gap-2.5 text-sm text-muted-foreground">
             {COMPANY_LINKS.map((link) => (
               <li key={link.href}>
                 <Link href={link.href} className="hover:text-foreground">
-                  {link.label}
+                  {t(link.label)}
                 </Link>
               </li>
             ))}
@@ -79,12 +89,12 @@ export function Footer() {
         </div>
 
         <div>
-          <h2 className="font-heading text-sm font-semibold">Contact</h2>
+          <h2 className="font-heading text-sm font-semibold">{t("contact")}</h2>
           <ul className="mt-4 grid gap-2.5 text-sm text-muted-foreground">
             <li>
               <a
                 href={`mailto:${SITE_CONTACT.email}`}
-                className="inline-flex items-center gap-2 hover:text-foreground"
+                className="inline-flex min-w-0 items-center gap-2 break-all hover:text-foreground"
               >
                 <Mail className="size-4 shrink-0" aria-hidden />
                 {SITE_CONTACT.email}
@@ -101,7 +111,7 @@ export function Footer() {
             </li>
             <li className="inline-flex items-center gap-2">
               <MapPin className="size-4 shrink-0" aria-hidden />
-              {SITE_CONTACT.location}
+              {tCompany("location")}
             </li>
           </ul>
         </div>
@@ -109,7 +119,7 @@ export function Footer() {
 
       <div className="border-t">
         <p className="mx-auto max-w-6xl px-4 py-5 text-xs text-muted-foreground">
-          © {new Date().getFullYear()} GearUp. Built by Abdullah Mamun.
+          {t("copyright", { year })}
         </p>
       </div>
     </footer>

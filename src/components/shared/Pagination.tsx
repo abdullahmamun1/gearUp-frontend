@@ -1,4 +1,6 @@
-import Link from "next/link"
+import { useTranslations } from "@/i18n/translations"
+
+import { Link } from "@/i18n/navigation"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
 import { buttonVariants } from "@/components/ui/button"
@@ -17,6 +19,7 @@ export function Pagination({
   label: string
   className?: string
 }) {
+  const t = useTranslations("common")
   if (totalPages <= 1) return null
 
   return (
@@ -26,15 +29,15 @@ export function Pagination({
     >
       <PageLink href={hrefFor(page - 1)} disabled={page <= 1}>
         <ChevronLeft className="size-4" aria-hidden />
-        Previous
+        {t("actions.previous")}
       </PageLink>
 
       <p aria-live="polite" className="text-sm text-muted-foreground">
-        Page {page} of {totalPages}
+        {t("pagination.page", { page, total: totalPages })}
       </p>
 
       <PageLink href={hrefFor(page + 1)} disabled={page >= totalPages}>
-        Next
+        {t("actions.next")}
         <ChevronRight className="size-4" aria-hidden />
       </PageLink>
     </nav>

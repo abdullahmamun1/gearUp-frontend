@@ -1,9 +1,18 @@
 "use client"
 
-import Link from "next/link"
+import { Link } from "@/i18n/navigation"
 import { useState, useTransition } from "react"
-import { LayoutDashboard, LogOut, Menu, Search, UserRound } from "lucide-react"
+import { useTranslations } from "@/i18n/translations"
+import {
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  Search,
+  Sparkles,
+  UserRound,
+} from "lucide-react"
 
+import { LocaleSwitcher } from "@/components/shared/LocaleSwitcher"
 import { ThemeToggle } from "@/components/shared/ThemeToggle"
 import {
   Accordion,
@@ -20,31 +29,29 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { categoryIcon } from "@/constants/categoryIcons"
-import {
-  COMPANY_NAV,
-  PROVIDER_DASHBOARD_NAV,
-  PROVIDER_NAV,
-  QUICK_FILTERS,
-} from "@/constants/navigation"
+import { PUBLIC_LINKS, QUICK_FILTERS, ROLE_LINKS } from "@/constants/navigation"
+import { useFormat } from "@/i18n/useFormat"
 import { cn } from "@/lib/utils"
 import { DASHBOARD_HOME, PROFILE_HOME } from "@/routes"
 import { useLogout, useSessionUser } from "@/hooks/useSessionUser"
 
+import { openGearFinder } from "@/components/modules/ai/GearFinder"
+
 import { openCommandPalette } from "./CommandPalette"
 import type { NavCategory } from "./DesktopNav"
 import { Logo } from "./Logo"
+import { useQuickFilterLabel } from "./useQuickFilterLabel"
 
 /** Full-height menu for phones and small tablets. */
 export function MobileNav({ categories }: { categories: NavCategory[] }) {
+  const t = useTranslations("nav")
+  const format = useFormat()
+  const quickFilterLabel = useQuickFilterLabel()
   const { user } = useSessionUser()
   const logout = useLogout()
   const [open, setOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
   const close = () => setOpen(false)
-  const providerItems =
-    user?.role === "PROVIDER"
-      ? [PROVIDER_DASHBOARD_NAV, ...PROVIDER_NAV.slice(1)]
-      : PROVIDER_NAV
 
   const linkClass =
     "flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] transition-colors hover:bg-accent"
@@ -57,7 +64,7 @@ export function MobileNav({ categories }: { categories: NavCategory[] }) {
             variant="ghost"
             size="icon-lg"
             className="size-11 rounded-full md:hidden"
-            aria-label="Open menu"
+            aria-label={t("mobile.openMenu")}
           />
         }
       >
@@ -84,7 +91,21 @@ export function MobileNav({ categories }: { categories: NavCategory[] }) {
             className="mx-2 mb-3 flex h-11 w-[calc(100%-1rem)] items-center gap-2.5 rounded-xl border bg-card px-3.5 text-[15px] text-muted-foreground shadow-xs"
           >
             <Search className="size-4" aria-hidden />
-            Search gear, categories…
+            {t("search.mobile")}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              close()
+              openGearFinder()
+            }}
+            className={cn(linkClass, "w-full text-left font-semibold")}
+          >
+            <span className="grid size-7 place-items-center rounded-lg bg-(image:--gradient-brand) text-primary-foreground">
+              <Sparkles className="size-3.5" aria-hidden />
+            </span>
+            {t("browse.planTrip")}
           </button>
 
           <Link
@@ -92,13 +113,27 @@ export function MobileNav({ categories }: { categories: NavCategory[] }) {
             onClick={close}
             className={cn(linkClass, "font-semibold")}
           >
-            Browse all gear
+            {t("browse.browseAll")}
           </Link>
+
+          {/* The same direct routes as the desktop bar. */}
+          {[...(user ? ROLE_LINKS[user.role] : []), ...PUBLIC_LINKS].map(
+            (link) => (
+              <Link
+                key={link.key}
+                href={link.href}
+                onClick={close}
+                className={cn(linkClass, "font-semibold")}
+              >
+                {t(`links.${link.key}`)}
+              </Link>
+            )
+          )}
 
           <Accordion className="mt-1">
             <AccordionItem value="categories" className="border-b-0">
               <AccordionTrigger className="px-3 py-2.5 text-[15px] hover:no-underline">
-                Categories
+                {t("browse.categories")}
               </AccordionTrigger>
               <AccordionPanel>
                 <ul className="grid gap-0.5 pb-2">
@@ -117,7 +152,7 @@ export function MobileNav({ categories }: { categories: NavCategory[] }) {
                           />
                           <span className="flex-1">{category.name}</span>
                           <span className="text-xs text-muted-foreground">
-                            {category.count}
+                            {format.number(category.count)}
                           </span>
                         </Link>
                       </li>
@@ -134,57 +169,7 @@ export function MobileNav({ categories }: { categories: NavCategory[] }) {
                           className="size-[18px] text-lagoon"
                           aria-hidden
                         />
-                        {filter.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </AccordionPanel>
-            </AccordionItem>
-
-            <AccordionItem value="providers" className="border-b-0">
-              <AccordionTrigger className="px-3 py-2.5 text-[15px] hover:no-underline">
-                For providers
-              </AccordionTrigger>
-              <AccordionPanel>
-                <ul className="grid gap-0.5 pb-2">
-                  {providerItems.map((item) => (
-                    <li key={item.href}>
-                      <Link
-                        href={item.href}
-                        onClick={close}
-                        className={linkClass}
-                      >
-                        <item.icon
-                          className="size-[18px] text-primary"
-                          aria-hidden
-                        />
-                        {item.title}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </AccordionPanel>
-            </AccordionItem>
-
-            <AccordionItem value="company" className="border-b-0">
-              <AccordionTrigger className="px-3 py-2.5 text-[15px] hover:no-underline">
-                Company
-              </AccordionTrigger>
-              <AccordionPanel>
-                <ul className="grid gap-0.5 pb-2">
-                  {COMPANY_NAV.map((item) => (
-                    <li key={item.href}>
-                      <Link
-                        href={item.href}
-                        onClick={close}
-                        className={linkClass}
-                      >
-                        <item.icon
-                          className="size-[18px] text-primary"
-                          aria-hidden
-                        />
-                        {item.title}
+                        {quickFilterLabel(filter)}
                       </Link>
                     </li>
                   ))}
@@ -196,7 +181,8 @@ export function MobileNav({ categories }: { categories: NavCategory[] }) {
 
         <div className="grid gap-3 border-t px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
           <div className="flex items-center justify-between text-sm text-muted-foreground">
-            Appearance
+            {t("mobile.appearance")}
+            <LocaleSwitcher />
             <ThemeToggle />
           </div>
           {user ? (
@@ -210,7 +196,7 @@ export function MobileNav({ categories }: { categories: NavCategory[] }) {
                 )}
               >
                 <LayoutDashboard className="size-4" aria-hidden />
-                Dashboard
+                {t("account.dashboard")}
               </Link>
               <Link
                 href={PROFILE_HOME[user.role]}
@@ -221,7 +207,7 @@ export function MobileNav({ categories }: { categories: NavCategory[] }) {
                 )}
               >
                 <UserRound className="size-4" aria-hidden />
-                Profile
+                {t("account.profile")}
               </Link>
               <Button
                 type="button"
@@ -232,7 +218,7 @@ export function MobileNav({ categories }: { categories: NavCategory[] }) {
                 className="col-span-2 h-10 gap-2 text-sm text-muted-foreground"
               >
                 <LogOut className="size-4" aria-hidden />
-                Log out
+                {t("account.logOut")}
               </Button>
             </div>
           ) : (
@@ -245,7 +231,7 @@ export function MobileNav({ categories }: { categories: NavCategory[] }) {
                   "h-11 text-sm"
                 )}
               >
-                Log in
+                {t("account.logIn")}
               </Link>
               <Link
                 href="/register"
@@ -255,7 +241,7 @@ export function MobileNav({ categories }: { categories: NavCategory[] }) {
                   "h-11 text-sm"
                 )}
               >
-                Sign up
+                {t("account.signUp")}
               </Link>
             </div>
           )}

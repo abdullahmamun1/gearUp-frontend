@@ -1,9 +1,26 @@
 import { cookies } from "next/headers"
+import { getTranslations } from "@/i18n/getTranslations"
 
 import { ACCESS_TOKEN_COOKIE } from "@/lib/cookies"
 import type { ApiResponse } from "@/types"
 
 const BASE_URL = process.env.BACKEND_API_URL
+
+const FALLBACK_MESSAGES = {
+  unreachable: "Could not reach the server. Please check your connection.",
+  unexpected: "Unexpected response from the server.",
+  failed: "Request failed.",
+} as const
+
+/** Our own failure text, in the visitor's language (English if unknown). */
+async function failureMessage(key: keyof typeof FALLBACK_MESSAGES) {
+  try {
+    const t = await getTranslations("common.api")
+    return t(key)
+  } catch {
+    return FALLBACK_MESSAGES[key]
+  }
+}
 
 export type ApiFetchOptions = {
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
@@ -11,6 +28,8 @@ export type ApiFetchOptions = {
   auth?: boolean
   tags?: string[]
   revalidate?: number | false
+  /** Extra request headers, e.g. the visitor's IP for per-visitor limits. */
+  headers?: Record<string, string>
 }
 
 export async function apiFetch<T>(
@@ -19,7 +38,7 @@ export async function apiFetch<T>(
 ): Promise<ApiResponse<T>> {
   const { method = "GET", body, auth = true, tags, revalidate } = options
 
-  const headers: Record<string, string> = {}
+  const headers: Record<string, string> = { ...options.headers }
   if (body !== undefined) {
     headers["Content-Type"] = "application/json"
   }
@@ -46,7 +65,7 @@ export async function apiFetch<T>(
     return {
       success: false,
       statusCode: 503,
-      message: "Could not reach the server. Please check your connection.",
+      message: await failureMessage("unreachable"),
       data: null as T,
     }
   }
@@ -62,7 +81,7 @@ async function normalize<T>(res: Response): Promise<ApiResponse<T>> {
     return {
       success: false,
       statusCode: res.status,
-      message: res.statusText || "Unexpected response from the server.",
+      message: res.statusText || (await failureMessage("unexpected")),
       data: null as T,
     }
   }
@@ -73,7 +92,7 @@ async function normalize<T>(res: Response): Promise<ApiResponse<T>> {
     return {
       success: res.ok,
       statusCode: res.status,
-      message: body.message ?? (res.ok ? "OK" : "Request failed."),
+      message: body.message ?? (res.ok ? "OK" : await failureMessage("failed")),
       data: (body.data ?? null) as T,
     }
   }

@@ -1,11 +1,12 @@
 import type { LucideIcon } from "lucide-react"
 import { CreditCard, ShieldCheck, Undo2 } from "lucide-react"
+import { useTranslations } from "@/i18n/translations"
 
 const TRUST = [
-  { icon: CreditCard, label: "Stripe checkout" },
-  { icon: ShieldCheck, label: "Verified providers" },
-  { icon: Undo2, label: "Free cancellation until you pay" },
-]
+  { icon: CreditCard, key: "stripe" },
+  { icon: ShieldCheck, key: "verified" },
+  { icon: Undo2, key: "freeCancel" },
+] as const
 
 /**
  * Login and register: a full-screen split, the brand panel (desktop only)
@@ -34,6 +35,7 @@ export function AuthShell({
   footnote?: React.ReactNode
   children: React.ReactNode
 }) {
+  const t = useTranslations("auth.shell.trust")
   return (
     <section className="grid min-h-[calc(100svh-5rem)] lg:grid-cols-2">
       <aside className="relative isolate hidden overflow-hidden bg-(image:--gradient-brand) text-primary-foreground lg:flex lg:items-center lg:justify-center">
@@ -85,12 +87,9 @@ export function AuthShell({
             </div>
             <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-xs opacity-90">
               {TRUST.map((item) => (
-                <li
-                  key={item.label}
-                  className="inline-flex items-center gap-1.5"
-                >
+                <li key={item.key} className="inline-flex items-center gap-1.5">
                   <item.icon className="size-3.5" aria-hidden />
-                  {item.label}
+                  {t(item.key)}
                 </li>
               ))}
             </ul>

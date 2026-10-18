@@ -1,7 +1,8 @@
 "use client"
 
-import { useRouter } from "next/navigation"
+import { useRouter } from "@/i18n/navigation"
 import { useEffect, useState, useTransition } from "react"
+import { useTranslations } from "@/i18n/translations"
 import { SlidersHorizontal, X } from "lucide-react"
 
 import { DateRangePicker } from "@/components/shared/DateRangePicker"
@@ -29,6 +30,8 @@ export function GearFilterBar({
   filters: GearFilters
   brands: string[]
 }) {
+  const t = useTranslations("gear.filters")
+  const tGear = useTranslations("gear")
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [searchTerm, setSearchTerm] = useState(filters.searchTerm ?? "")
@@ -43,7 +46,7 @@ export function GearFilterBar({
       : brands
 
   const brandItems = [
-    { value: ALL_BRANDS, label: "All brands" },
+    { value: ALL_BRANDS, label: t("allBrands") },
     ...brandNames.map((brand) => ({ value: brand, label: brand })),
   ]
 
@@ -111,8 +114,8 @@ export function GearFilterBar({
         <SearchInput
           value={searchTerm}
           onChange={setSearchTerm}
-          placeholder="Search tents, kayaks, bikes…"
-          label="Search gear"
+          placeholder={t("searchPlaceholder")}
+          label={t("searchLabel")}
           isPending={isPending}
         />
 
@@ -125,12 +128,15 @@ export function GearFilterBar({
         </div>
 
         <SelectField
-          options={SORT_OPTIONS}
+          options={SORT_OPTIONS.map((option) => ({
+            value: option.value,
+            label: tGear(option.labelKey),
+          }))}
           value={filters.sort}
           onValueChange={(value) =>
             apply({ sort: (value as GearFilters["sort"]) || DEFAULT_SORT })
           }
-          aria-label="Sort results"
+          aria-label={t("sortLabel")}
           className="h-9 w-full text-sm"
         />
 
@@ -144,7 +150,7 @@ export function GearFilterBar({
           className="h-9 gap-2 text-sm"
         >
           <SlidersHorizontal className="size-4" aria-hidden />
-          Filters
+          {t("toggle")}
           {extraFilters > 0 && (
             <span className="grid size-5 place-items-center rounded-full bg-primary text-[11px] font-semibold text-primary-foreground">
               {extraFilters}
@@ -159,7 +165,7 @@ export function GearFilterBar({
           className="mt-3 grid animate-in gap-3 border-t pt-4 duration-300 fade-in slide-in-from-top-1 motion-reduce:animate-none sm:grid-cols-2 lg:grid-cols-[1fr_10rem_10rem_auto_auto] lg:items-end"
         >
           {brandNames.length > 0 && (
-            <FilterField label="Brand">
+            <FilterField label={t("brand")}>
               <SelectField
                 options={brandItems}
                 value={filters.brand ?? ALL_BRANDS}
@@ -171,7 +177,7 @@ export function GearFilterBar({
             </FilterField>
           )}
 
-          <FilterField label="Min price / day">
+          <FilterField label={t("minPrice")}>
             <Input
               value={minPrice}
               onChange={(event) => setMinPrice(event.target.value)}
@@ -181,12 +187,12 @@ export function GearFilterBar({
             />
           </FilterField>
 
-          <FilterField label="Max price / day">
+          <FilterField label={t("maxPrice")}>
             <Input
               value={maxPrice}
               onChange={(event) => setMaxPrice(event.target.value)}
               inputMode="decimal"
-              placeholder="Any"
+              placeholder={t("anyPrice")}
               className="h-9 text-sm"
             />
           </FilterField>
@@ -198,11 +204,11 @@ export function GearFilterBar({
                 apply({ availableOnly: Boolean(checked) })
               }
             />
-            Available now
+            {t("availableNow")}
           </label>
 
           <Button type="submit" size="lg" className="h-9 px-5 text-sm">
-            Apply
+            {t("apply")}
           </Button>
         </div>
       )}
@@ -218,7 +224,7 @@ export function GearFilterBar({
             className="h-8 gap-1.5 text-xs text-muted-foreground"
           >
             <X className="size-3.5" aria-hidden />
-            Clear all filters
+            {t("clearAll")}
           </Button>
         </div>
       )}

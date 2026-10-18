@@ -1,6 +1,9 @@
 "use client"
 
-import Link from "next/link"
+import { useTranslations } from "@/i18n/translations"
+
+import { Link } from "@/i18n/navigation"
+import { useFormat } from "@/i18n/useFormat"
 
 import { DataTable } from "@/components/shared/DataTable"
 import { EmptyState } from "@/components/shared/EmptyState"
@@ -12,19 +15,9 @@ import {
   CUSTOMER_PAYMENTS_PATH,
   type PaymentTableFilters,
 } from "@/utils/filters/dashboard"
-import { formatDate, formatPrice } from "@/utils/format"
 import { useMyPayments } from "@/hooks/queries/customer"
 import { buildHref } from "@/utils/searchParams"
 import type { Paginated, Payment } from "@/types"
-
-const HEADINGS = [
-  "Payment",
-  "Order",
-  "Gear",
-  "Status",
-  "Paid on",
-  { label: "Amount", align: "right" },
-] as const
 
 export function MyPaymentsList({
   filters,
@@ -33,37 +26,37 @@ export function MyPaymentsList({
   filters: PaymentTableFilters
   initialData: Paginated<Payment>
 }) {
+  const t = useTranslations("dashboard.customer.payments")
+  const format = useFormat()
   const { data, error, isFetching } = useMyPayments(filters, initialData)
+  const headings = [
+    t("headingPayment"),
+    t("headingOrder"),
+    t("headingGear"),
+    t("headingStatus"),
+    t("headingPaidOn"),
+    { label: t("headingAmount"), align: "right" },
+  ] as const
 
   if (error) {
-    return (
-      <EmptyState>
-        {error.message || "Couldn't load your payments. Please try again."}
-      </EmptyState>
-    )
+    return <EmptyState>{error.message || t("loadFailed")}</EmptyState>
   }
 
   const payments = data?.data ?? []
   const meta = data?.meta
 
   if (payments.length === 0) {
-    return (
-      <EmptyState>
-        {filters.status
-          ? "No payments match that status."
-          : "No payments yet. They appear here once you pay for a confirmed booking."}
-      </EmptyState>
-    )
+    return <EmptyState>{filters.status ? t("noMatch") : t("none")}</EmptyState>
   }
 
   return (
     <>
       <DataTable
-        headings={HEADINGS}
+        headings={headings}
         count={{
           total: meta?.total ?? payments.length,
-          one: "payment",
-          many: "payments",
+          one: t("countOne"),
+          many: t("countMany"),
         }}
         isFetching={isFetching}
       >
@@ -81,7 +74,7 @@ export function MyPaymentsList({
                 {payment.id.slice(0, 8)}
               </Link>
               <p className="text-xs text-muted-foreground">
-                {formatDate(payment.createdAt)}
+                {format.date(payment.createdAt)}
               </p>
             </TableCell>
             <TableCell className="tabular-nums">
@@ -96,13 +89,15 @@ export function MyPaymentsList({
               <PaymentStatusBadge status={payment.status} />
             </TableCell>
             <TableCell className="whitespace-nowrap">
-              {payment.paidAt ? formatDate(payment.paidAt) : "—"}
+              {payment.paidAt ? format.date(payment.paidAt) : "—"}
             </TableCell>
             <TableCell className="text-right tabular-nums">
-              {formatPrice(payment.amount)}
+              {format.price(payment.amount)}
               {Number(payment.refundedAmount ?? 0) > 0 && (
                 <p className="text-xs text-muted-foreground">
-                  {formatPrice(payment.refundedAmount!)} refunded
+                  {t("refunded", {
+                    amount: format.price(payment.refundedAmount!),
+                  })}
                 </p>
               )}
             </TableCell>
@@ -116,7 +111,7 @@ export function MyPaymentsList({
         hrefFor={(page) =>
           buildHref(CUSTOMER_PAYMENTS_PATH, { ...filters, page })
         }
-        label="Payments pagination"
+        label={t("pagination")}
       />
     </>
   )

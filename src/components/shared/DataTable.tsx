@@ -5,6 +5,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { LocalNumber } from "@/components/shared/LocalNumber"
 import { cn } from "@/lib/utils"
 
 export type Heading = string | { label: string; align: "right" }
@@ -24,13 +25,14 @@ export function DataTable({
     <>
       {count && (
         <p className="mb-3 text-sm text-muted-foreground">
-          {count.total} {count.total === 1 ? count.one : count.many}
+          <LocalNumber value={count.total} />{" "}
+          {count.total === 1 ? count.one : count.many}
         </p>
       )}
 
       <div
         className={cn(
-          "overflow-x-auto rounded-xl border bg-card shadow-xs transition-opacity",
+          "overflow-x-auto rounded-2xl border bg-card shadow-xs transition-opacity",
           isFetching && "opacity-60"
         )}
       >

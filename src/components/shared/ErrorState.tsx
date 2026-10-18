@@ -1,8 +1,9 @@
 "use client"
 
-import Link from "next/link"
+import { Link } from "@/i18n/navigation"
 import { useEffect } from "react"
 import { RotateCw, TriangleAlert } from "lucide-react"
+import { useTranslations } from "@/i18n/translations"
 
 import { Button, buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -20,12 +21,13 @@ type Props = {
 export function ErrorState({
   error,
   reset,
-  title = "Something went wrong",
-  description = "That request didn't go through. Trying again usually sorts it out.",
+  title,
+  description,
   homeHref = "/",
-  homeLabel = "Go home",
+  homeLabel,
   className,
 }: Props) {
+  const t = useTranslations("common")
   useEffect(() => {
     console.error(error)
   }, [error])
@@ -42,13 +44,17 @@ export function ErrorState({
         strokeWidth={1.25}
         aria-hidden
       />
-      <h1 className="mt-4 font-heading text-2xl font-bold">{title}</h1>
-      <p className="mt-2 text-sm text-muted-foreground">{description}</p>
+      <h1 className="mt-4 font-heading text-2xl font-bold">
+        {title ?? t("errorState.title")}
+      </h1>
+      <p className="mt-2 text-sm text-muted-foreground">
+        {description ?? t("errorState.description")}
+      </p>
 
       <div className="mt-6 flex justify-center gap-3">
         <Button size="lg" onClick={reset} className="h-9 text-sm">
           <RotateCw className="size-3.5" aria-hidden />
-          Try again
+          {t("actions.retry")}
         </Button>
         <Link
           href={homeHref}
@@ -57,13 +63,13 @@ export function ErrorState({
             "h-9 text-sm"
           )}
         >
-          {homeLabel}
+          {homeLabel ?? t("actions.goHome")}
         </Link>
       </div>
 
       {error.digest && (
         <p className="mt-6 font-mono text-xs text-muted-foreground">
-          Reference: {error.digest}
+          {t("errorState.reference", { digest: error.digest })}
         </p>
       )}
     </section>

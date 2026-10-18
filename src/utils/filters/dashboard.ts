@@ -50,8 +50,3 @@ export function toDashboardQuery(filters: { status?: string; page: number }) {
     limit: DASHBOARD_PAGE_SIZE,
   })
 }
-
-export function statusLabel(value: string) {
-  const spaced = value.toLowerCase().replace(/_/g, " ")
-  return spaced.charAt(0).toUpperCase() + spaced.slice(1)
-}

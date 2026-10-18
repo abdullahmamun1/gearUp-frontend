@@ -1,4 +1,6 @@
 import { Star } from "lucide-react"
+import { useLocale } from "next-intl"
+import { useTranslations } from "@/i18n/translations"
 
 import { cn } from "@/lib/utils"
 
@@ -9,13 +11,19 @@ export function Stars({
   rating: number
   className?: string
 }) {
+  const t = useTranslations("common.stars")
+  const locale = useLocale()
   const rounded = Math.round(rating)
+  const value = new Intl.NumberFormat(locale === "bn" ? "bn-BD" : "en-GB", {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  }).format(rating)
 
   return (
     <span
       className={cn("inline-flex items-center gap-0.5", className)}
       role="img"
-      aria-label={`${rating.toFixed(1)} out of 5`}
+      aria-label={t("label", { rating: value })}
     >
       {[1, 2, 3, 4, 5].map((star) => (
         <Star

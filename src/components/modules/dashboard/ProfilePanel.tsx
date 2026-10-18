@@ -1,4 +1,5 @@
-import Link from "next/link"
+import Image from "next/image"
+import { Link } from "@/i18n/navigation"
 import {
   BadgeCheck,
   CalendarDays,
@@ -8,29 +9,36 @@ import {
   ShieldAlert,
 } from "lucide-react"
 
+import { cookies } from "next/headers"
+import { getTranslations } from "@/i18n/getTranslations"
+
 import { getMe } from "@/api/auth"
+import { DIGITS_COOKIE } from "@/i18n/format"
+import { getDashboardFormat } from "@/i18n/getFormat"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
-import { formatDate } from "@/utils/format"
 
 import { EmailPreferences } from "./EmailPreferences"
+import { LanguageSettings } from "./LanguageSettings"
 import { PageHeader } from "./PageHeader"
 import { ProfileForm } from "./ProfileForm"
-
-const ROLE_LABEL = {
-  CUSTOMER: "Customer",
-  PROVIDER: "Provider",
-  ADMIN: "Administrator",
-} as const
+import { PublicProfileForm } from "./PublicProfileForm"
 
 export async function ProfilePanel() {
-  const res = await getMe()
+  const digits =
+    (await cookies()).get(DIGITS_COOKIE)?.value === "latin" ? "latin" : "native"
+  const [res, t, tc, format] = await Promise.all([
+    getMe(),
+    getTranslations("dashboard.profile"),
+    getTranslations("common"),
+    getDashboardFormat(),
+  ])
   const user = res.data
 
   if (!res.success || !user) {
     return (
       <>
-        <PageHeader title="Profile" />
+        <PageHeader title={t("title")} />
         <p className="rounded-lg border border-destructive/30 bg-destructive/8 px-3.5 py-3 text-sm text-destructive">
           {res.message}
         </p>
@@ -48,10 +56,7 @@ export async function ProfilePanel() {
 
   return (
     <>
-      <PageHeader
-        title="Profile"
-        description="Your account details, straight from the server."
-      />
+      <PageHeader title={t("title")} description={t("description")} />
 
       <section className="overflow-hidden rounded-2xl border bg-card shadow-xs">
         <div
@@ -63,8 +68,18 @@ export async function ProfilePanel() {
         </div>
         <div className="flex flex-wrap items-end gap-x-4 gap-y-3 px-5 pb-5 sm:px-6">
           <span className="relative z-10 -mt-8 grid size-20 shrink-0 place-items-center rounded-2xl bg-card font-heading text-2xl font-bold text-primary shadow-lg ring-4 ring-card">
-            <span className="grid size-full place-items-center rounded-2xl bg-primary/10">
-              {initials}
+            <span className="relative grid size-full place-items-center overflow-hidden rounded-2xl bg-primary/10">
+              {user.avatarUrl ? (
+                <Image
+                  src={user.avatarUrl}
+                  alt=""
+                  fill
+                  sizes="80px"
+                  className="object-cover"
+                />
+              ) : (
+                initials
+              )}
             </span>
           </span>
           <div className="min-w-0 flex-1">
@@ -74,11 +89,11 @@ export async function ProfilePanel() {
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Badge variant="secondary">{ROLE_LABEL[user.role]}</Badge>
+            <Badge variant="secondary">{tc(`roleLong.${user.role}`)}</Badge>
             <Badge
               variant={user.status === "ACTIVE" ? "success" : "destructive"}
             >
-              {user.status === "ACTIVE" ? "Active" : "Suspended"}
+              {tc(`userStatus.${user.status}`)}
             </Badge>
           </div>
         </div>
@@ -88,42 +103,44 @@ export async function ProfilePanel() {
         <div className="grid gap-4">
           <section className="rounded-2xl border bg-card shadow-xs">
             <h2 className="border-b px-5 py-4 font-heading font-semibold">
-              Account details
+              {t("accountDetails")}
             </h2>
             <dl className="divide-y">
-              <Row icon={Mail} label="Email">
+              <Row icon={Mail} label={t("email")}>
                 <span className="inline-flex flex-wrap items-center justify-end gap-2">
                   {user.email}
                   <Badge variant={verified ? "success" : "warning"}>
-                    {verified ? "Verified" : "Not verified"}
+                    {verified ? t("verified") : t("notVerified")}
                   </Badge>
                 </span>
               </Row>
-              <Row icon={Phone} label="Phone">
+              <Row icon={Phone} label={t("phone")}>
                 {user.phone || (
-                  <span className="text-muted-foreground">Not provided</span>
+                  <span className="text-muted-foreground">
+                    {t("notProvided")}
+                  </span>
                 )}
               </Row>
-              <Row icon={CalendarDays} label="Member since">
-                {formatDate(user.createdAt)}
+              <Row icon={CalendarDays} label={t("memberSince")}>
+                {format.date(user.createdAt)}
               </Row>
             </dl>
           </section>
           <ProfileForm user={user} />
+          {user.role !== "ADMIN" && <PublicProfileForm user={user} />}
         </div>
 
         <div className="grid gap-4">
+          <LanguageSettings digits={digits} />
           <EmailPreferences marketing={user.marketingEmails ?? true} />
 
           <section className="rounded-2xl border bg-card p-5 shadow-xs">
-            <h2 className="font-heading font-semibold">Security</h2>
+            <h2 className="font-heading font-semibold">{t("security")}</h2>
             <ul className="mt-3 grid gap-3 text-sm">
               <li className="flex items-start gap-3">
                 <Status ok={verified} />
                 <span>
-                  {verified
-                    ? "Your email is verified."
-                    : "Verify your email to pay for rentals and publish listings."}
+                  {verified ? t("emailVerified") : t("verifyToUnlock")}
                 </span>
               </li>
               <li className="flex items-start gap-3">
@@ -131,14 +148,16 @@ export async function ProfilePanel() {
                   <KeyRound className="size-3.5" aria-hidden />
                 </span>
                 <span>
-                  Need a new password?{" "}
-                  <Link
-                    href="/forgot-password"
-                    className="font-medium text-primary hover:underline"
-                  >
-                    Email yourself a reset link
-                  </Link>
-                  . Changing it signs you out everywhere else.
+                  {t.rich("newPassword", {
+                    link: (chunks) => (
+                      <Link
+                        href="/forgot-password"
+                        className="font-medium text-primary hover:underline"
+                      >
+                        {chunks}
+                      </Link>
+                    ),
+                  })}
                 </span>
               </li>
             </ul>

@@ -1,4 +1,4 @@
-import type { CancelReason, DepositStatus, RentalStatus } from "@/types"
+import type { RentalStatus } from "@/types"
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24
 
@@ -52,34 +52,6 @@ export const RENTAL_STATUSES: RentalStatus[] = [
   "CANCELLED",
 ]
 
-export const PROVIDER_NEXT_STATUS: Partial<
-  Record<RentalStatus, { next: RentalStatus; label: string }>
-> = {
-  PLACED: { next: "CONFIRMED", label: "Confirm order" },
-  PAID: { next: "PICKED_UP", label: "Mark picked up" },
-  PICKED_UP: { next: "RETURNED", label: "Mark returned" },
-}
-
-export const CANCEL_REASON_LABEL: Record<CancelReason, string> = {
-  CUSTOMER: "Cancelled by the customer",
-  PROVIDER_DECLINED: "Declined by the provider",
-  PAYMENT_EXPIRED: "Not paid in time",
-  NO_PROVIDER_RESPONSE: "The provider didn't respond in time",
-  ADMIN: "Cancelled by GearUp",
-}
-
-/**
- * NONE means "nothing held yet": an order with a deposit stays NONE until
- * it is paid, so describe it as a future charge, not as "no deposit".
- */
-export const DEPOSIT_STATUS_LABEL: Record<DepositStatus, string> = {
-  NONE: "Charged with payment, refunded on return",
-  HELD: "Held until return",
-  REFUNDED: "Refunded",
-  PARTIALLY_REFUNDED: "Partly refunded",
-  CLAIMED: "Damage claim under review",
-}
-
 /** The day starts at 00:00 in Dhaka (UTC+6, no daylight saving). */
 const DHAKA_OFFSET_MS = 6 * 60 * 60 * 1000
 
@@ -98,15 +70,6 @@ export function isFreeCancellationOpen(startDate: string) {
 export function canCancel(order: { status: RentalStatus; startDate: string }) {
   if (order.status === "PLACED" || order.status === "CONFIRMED") return true
   return order.status === "PAID" && isFreeCancellationOpen(order.startDate)
-}
-
-export const RENTAL_STATUS_SHORT_LABEL: Record<RentalStatus, string> = {
-  PLACED: "Placed",
-  CONFIRMED: "Confirmed",
-  PAID: "Paid",
-  PICKED_UP: "Picked up",
-  RETURNED: "Returned",
-  CANCELLED: "Cancelled",
 }
 
 export function startOfToday() {

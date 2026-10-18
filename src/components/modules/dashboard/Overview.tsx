@@ -1,11 +1,12 @@
 import Image from "next/image"
-import Link from "next/link"
+import { Link } from "@/i18n/navigation"
 import { ArrowRight, Backpack, ChevronRight } from "lucide-react"
+import { useTranslations } from "@/i18n/translations"
+import { getTranslations } from "@/i18n/getTranslations"
 
 import { RentalStatusBadge } from "@/components/shared/RentalStatusBadge"
 import { cn } from "@/lib/utils"
-import { statusLabel } from "@/utils/filters/dashboard"
-import { formatDate, formatPrice } from "@/utils/format"
+import { getDashboardFormat } from "@/i18n/getFormat"
 import type { RentalOrder, RentalStatus } from "@/types"
 
 /** The gradient greeting at the top of each overview. */
@@ -63,7 +64,7 @@ export function DashboardPanel({
   title,
   description,
   href,
-  hrefLabel = "View all",
+  hrefLabel,
   children,
   className,
 }: {
@@ -74,6 +75,7 @@ export function DashboardPanel({
   children: React.ReactNode
   className?: string
 }) {
+  const t = useTranslations("common.actions")
   return (
     <section
       className={cn(
@@ -97,7 +99,7 @@ export function DashboardPanel({
             href={href}
             className="group inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-primary"
           >
-            {hrefLabel}
+            {hrefLabel ?? t("viewAll")}
             <ArrowRight
               className="size-3.5 transition-transform group-hover:translate-x-0.5"
               aria-hidden
@@ -111,7 +113,7 @@ export function DashboardPanel({
 }
 
 /** One order in an overview list: photo, gear, dates, status and amount. */
-export function OrderRow({
+export async function OrderRow({
   order,
   href,
   note,
@@ -124,6 +126,10 @@ export function OrderRow({
   /** Who's on the other side of the order. */
   person?: string
 }) {
+  const [t, format] = await Promise.all([
+    getTranslations("dashboard.overview"),
+    getDashboardFormat(),
+  ])
   const items = order.items ?? []
   const first = items[0]?.gearItem
   const more = items.length - 1
@@ -152,13 +158,16 @@ export function OrderRow({
         </span>
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[15px] font-medium">
-            {first?.name ?? `Order ${order.id.slice(0, 8)}`}
+            {first?.name ?? t("orderFallback", { id: order.id.slice(0, 8) })}
             {more > 0 && (
-              <span className="text-muted-foreground"> +{more} more</span>
+              <span className="text-muted-foreground">
+                {" "}
+                {t("moreItems", { count: format.number(more) })}
+              </span>
             )}
           </span>
           <span className="mt-0.5 block truncate text-[13px] text-muted-foreground">
-            {formatDate(order.startDate)} → {formatDate(order.endDate)}
+            {format.date(order.startDate)} → {format.date(order.endDate)}
             {person && ` · ${person}`}
           </span>
           {note && (
@@ -170,7 +179,7 @@ export function OrderRow({
         <span className="hidden shrink-0 flex-col items-end gap-1 sm:flex">
           <RentalStatusBadge status={order.status} />
           <span className="text-sm font-semibold tabular-nums">
-            {formatPrice(order.totalAmount)}
+            {format.price(order.totalAmount)}
           </span>
         </span>
         <ChevronRight
@@ -212,13 +221,17 @@ const PIPELINE: { status: RentalStatus; bar: string }[] = [
 ]
 
 /** Orders by status as one stacked bar, with a legend that links to each list. */
-export function StatusPipeline({
+export async function StatusPipeline({
   counts,
   hrefFor,
 }: {
   counts: Record<RentalStatus, number>
   hrefFor: (status: RentalStatus) => string
 }) {
+  const [t, format] = await Promise.all([
+    getTranslations("common.rentalStatusShort"),
+    getDashboardFormat(),
+  ])
   const total = PIPELINE.reduce((sum, { status }) => sum + counts[status], 0)
 
   return (
@@ -227,7 +240,7 @@ export function StatusPipeline({
         className="flex h-3 overflow-hidden rounded-full bg-muted"
         role="img"
         aria-label={PIPELINE.map(
-          ({ status }) => `${statusLabel(status)}: ${counts[status]}`
+          ({ status }) => `${t(status)}: ${format.number(counts[status])}`
         ).join(", ")}
       >
         {total > 0 &&
@@ -249,11 +262,9 @@ export function StatusPipeline({
               className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-muted"
             >
               <span className={cn("size-2.5 rounded-full", bar)} aria-hidden />
-              <span className="flex-1 text-muted-foreground">
-                {statusLabel(status)}
-              </span>
+              <span className="flex-1 text-muted-foreground">{t(status)}</span>
               <span className="font-semibold tabular-nums">
-                {counts[status]}
+                {format.number(counts[status])}
               </span>
             </Link>
           </li>

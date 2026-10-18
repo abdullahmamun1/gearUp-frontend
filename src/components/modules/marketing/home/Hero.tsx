@@ -1,5 +1,6 @@
-import Link from "next/link"
+import { Link } from "@/i18n/navigation"
 import { ArrowRight, BadgeCheck, CreditCard, Star } from "lucide-react"
+import { getTranslations } from "@/i18n/getTranslations"
 
 import { Magnetic } from "@/components/shared/motion/Magnetic"
 import { RotatingWord } from "@/components/shared/motion/RotatingWord"
@@ -19,7 +20,9 @@ const ENTER =
 const ENTER_NO_FADE =
   "animate-in slide-in-from-bottom-4 fill-mode-backwards ease-out motion-reduce:animate-none"
 
-export function Hero({
+const HERO_WORDS = ["tents", "kayaks", "bikes", "boards", "ropes"] as const
+
+export async function Hero({
   gearCount,
   providers,
   reviews,
@@ -28,24 +31,34 @@ export function Hero({
   providers: number
   reviews: number
 }) {
+  const t = await getTranslations("home.hero")
   const trust = [
-    reviews > 0 && { icon: Star, text: `${reviews} verified reviews` },
-    providers > 0 && { icon: BadgeCheck, text: `${providers} local providers` },
-    { icon: CreditCard, text: "Secure Stripe checkout" },
+    reviews > 0 && {
+      icon: Star,
+      text: t("trustReviews", { count: reviews }),
+    },
+    providers > 0 && {
+      icon: BadgeCheck,
+      text: t("trustProviders", { count: providers }),
+    },
+    { icon: CreditCard, text: t("trustStripe") },
   ].filter(Boolean) as { icon: typeof Star; text: string }[]
 
   return (
-    <section className="relative isolate overflow-hidden border-b">
+    // The hero takes 60–70% of the screen at every size (a requirement): on
+    // desktop the box is ~66svh and the headline scales with the height; on
+    // phones the visual and trust row drop out so the essentials fit.
+    <section className="relative isolate flex min-h-[62svh] items-center overflow-hidden border-b lg:h-[66svh] lg:max-h-[760px] lg:min-h-[440px]">
       <div aria-hidden className="absolute inset-0 -z-20 bg-mesh" />
       <div aria-hidden className="absolute inset-0 -z-10 bg-grid opacity-60" />
       <div aria-hidden className="absolute inset-0 -z-10 bg-noise opacity-50" />
 
-      <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 pt-12 pb-14 sm:pt-16 lg:grid-cols-[1.08fr_1fr] lg:gap-6 lg:pt-14 lg:pb-16">
+      <div className="mx-auto grid w-full max-w-6xl items-center gap-10 px-4 py-8 sm:py-10 lg:grid-cols-[1.08fr_1fr] lg:gap-6 lg:py-6 lg:[@media(max-height:820px)]:py-2">
         <div className="text-center lg:text-left">
           <p
             className={cn(
               ENTER,
-              "mb-5 inline-flex items-center gap-2 rounded-full border bg-card/80 px-3 py-1 text-xs text-muted-foreground shadow-xs backdrop-blur-sm duration-700"
+              "mb-4 inline-flex items-center gap-2 rounded-full border bg-card/80 px-3 py-1 text-xs text-muted-foreground shadow-xs backdrop-blur-sm duration-700 lg:mb-5"
             )}
           >
             <span className="relative flex size-2" aria-hidden>
@@ -53,36 +66,45 @@ export function Hero({
               <span className="relative inline-flex size-2 rounded-full bg-success" />
             </span>
             {gearCount > 0
-              ? `${gearCount} items ready to rent`
-              : "New gear added weekly"}
+              ? t("readyCount", { count: gearCount })
+              : t("newWeekly")}
           </p>
 
-          <h1 className={cn(ENTER_NO_FADE, "text-display duration-700")}>
-            Rent{" "}
-            <RotatingWord
-              // Similar lengths keep the line balanced: the slot is as wide
-              // as the longest word.
-              words={["tents", "kayaks", "bikes", "boards", "ropes"]}
-              className="text-gradient"
-            />
-            <br />
-            by the day, instantly
+          <h1
+            className={cn(
+              ENTER_NO_FADE,
+              // Scales with the viewport height on desktop so short screens
+              // (1280×720) still fit the hero in ~66% of the height.
+              "text-display duration-700 lg:text-[clamp(2.2rem,5.9svh,4.5rem)]"
+            )}
+          >
+            {t.rich("headline", {
+              word: () => (
+                <RotatingWord
+                  // Similar lengths keep the line balanced: the slot is as
+                  // wide as the longest word.
+                  words={HERO_WORDS.map((word) => t(`words.${word}`))}
+                  className="text-gradient"
+                />
+              ),
+              br: () => <br />,
+            })}
           </h1>
 
           <p
             className={cn(
               ENTER_NO_FADE,
-              "mx-auto mt-5 max-w-lg text-pretty text-muted-foreground duration-700 sm:text-lg lg:mx-0"
+              // Two lines on phones and short desktops; hidden on short phones.
+              "mx-auto mt-4 line-clamp-2 max-w-lg text-pretty text-muted-foreground duration-700 sm:text-lg lg:mx-0 lg:mt-5 lg:line-clamp-none max-lg:[@media(max-height:780px)]:hidden lg:[@media(max-height:820px)]:line-clamp-2"
             )}
           >
-            Tents, kayaks, bikes and more from local providers across
-            Bangladesh. No storage, no upkeep — just pick your dates and go.
+            {t("intro")}
           </p>
 
           <div
             className={cn(
               ENTER,
-              "mx-auto mt-8 max-w-xl delay-300 duration-1000 lg:mx-0"
+              "mx-auto mt-6 max-w-xl delay-300 duration-1000 lg:mx-0 lg:mt-7 lg:[@media(max-height:820px)]:mt-5"
             )}
           >
             <HeroSearch />
@@ -91,7 +113,8 @@ export function Hero({
           <div
             className={cn(
               ENTER,
-              "mt-6 flex flex-wrap items-center justify-center gap-3 delay-500 duration-1000 lg:justify-start"
+              // The search card has its own button, so short phones skip these.
+              "mt-5 flex flex-wrap items-center justify-center gap-3 delay-500 duration-1000 lg:mt-6 lg:justify-start max-lg:[@media(max-height:780px)]:hidden"
             )}
           >
             <Magnetic>
@@ -102,7 +125,7 @@ export function Hero({
                   "group h-11 gap-1.5 px-6 text-sm"
                 )}
               >
-                Browse all gear
+                {t("browseAll")}
                 <ArrowRight
                   className="size-4 transition-transform group-hover:translate-x-0.5"
                   aria-hidden
@@ -117,7 +140,7 @@ export function Hero({
                   "h-11 px-6 text-sm"
                 )}
               >
-                List your gear
+                {t("listGear")}
               </Link>
             </Magnetic>
           </div>
@@ -125,7 +148,8 @@ export function Hero({
           <ul
             className={cn(
               ENTER,
-              "mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm text-muted-foreground delay-700 duration-1000 lg:justify-start"
+              // Desktop only, and only when there's height to spare.
+              "mt-6 hidden flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm text-muted-foreground delay-700 duration-1000 lg:flex lg:justify-start [@media(max-height:820px)]:lg:hidden"
             )}
           >
             {trust.map((item) => (
@@ -137,7 +161,7 @@ export function Hero({
           </ul>
         </div>
 
-        <HeroVisual className="mx-auto w-full max-w-sm sm:max-w-md lg:max-w-none" />
+        <HeroVisual className="mx-auto hidden w-full lg:block lg:max-h-[60svh] lg:max-w-none" />
       </div>
     </section>
   )

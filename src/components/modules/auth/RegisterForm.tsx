@@ -1,6 +1,8 @@
 "use client"
 
-import { useRouter, useSearchParams } from "next/navigation"
+import { useEffect } from "react"
+
+import { useRouter } from "@/i18n/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   ArrowRight,
@@ -12,13 +14,17 @@ import {
   Store,
   User,
 } from "lucide-react"
+import { useLocale } from "next-intl"
+import { useTranslations } from "@/i18n/translations"
 import { useForm, useWatch } from "react-hook-form"
 import { toast } from "sonner"
 
 import { PasswordField } from "@/components/shared/PasswordField"
 import { TextField } from "@/components/shared/TextField"
 import { Button } from "@/components/ui/button"
+import { useErrorMessage } from "@/hooks/useErrorMessage"
 import { registerSchema, type RegisterInput } from "@/validation/auth"
+import type { Locale } from "@/types"
 import { loginUser, registerUser } from "@/api/auth"
 
 import { FormError } from "./FormError"
@@ -29,14 +35,10 @@ const ROLES = [
   {
     value: "CUSTOMER",
     icon: Backpack,
-    title: "I want to rent",
-    body: "Browse and book gear for your trips.",
   },
   {
     value: "PROVIDER",
     icon: Store,
-    title: "I want to list",
-    body: "Rent out gear you already own.",
   },
 ] as const
 
@@ -45,14 +47,18 @@ export function RegisterForm({
 }: {
   defaultRole?: "CUSTOMER" | "PROVIDER"
 }) {
+  const t = useTranslations("auth")
+  const errorText = useErrorMessage()
+  const locale = useLocale() as Locale
   const router = useRouter()
 
   const {
     register,
     handleSubmit,
     setError,
+    setValue,
     control,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, dirtyFields },
   } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -65,6 +71,19 @@ export function RegisterForm({
     },
   })
 
+  // "List your gear" links send ?role=PROVIDER. Read after mount (the form
+  // renders statically, outside Suspense, so typed input survives
+  // hydration) and only if the visitor hasn't picked a role yet.
+  const roleTouched = Boolean(dirtyFields.role)
+  useEffect(() => {
+    if (roleTouched) return
+    if (
+      new URLSearchParams(window.location.search).get("role") === "PROVIDER"
+    ) {
+      setValue("role", "PROVIDER")
+    }
+  }, [roleTouched, setValue])
+
   const role = useWatch({ control, name: "role" })
   const password = useWatch({ control, name: "password" })
 
@@ -75,6 +94,7 @@ export function RegisterForm({
       password: values.password,
       phone: values.phone ? values.phone : undefined,
       role: values.role,
+      locale,
     })
 
     if (!res.success) {
@@ -89,12 +109,12 @@ export function RegisterForm({
     })
 
     if (!login.success) {
-      toast.success("Account created. Please log in.")
+      toast.success(t("register.createdLogIn"))
       router.replace("/login")
       return
     }
 
-    toast.success("Account created — you're all set.")
+    toast.success(t("register.createdDone"))
     router.replace("/")
     router.refresh()
   }
@@ -109,13 +129,13 @@ export function RegisterForm({
 
       <fieldset className="grid gap-2">
         <legend className="mb-2 text-sm font-medium">
-          How will you use GearUp?
+          {t("register.roleLegend")}
         </legend>
         <div className="grid grid-cols-2 gap-3">
           {ROLES.map((option) => (
             <label
               key={option.value}
-              className="group/role relative cursor-pointer rounded-xl border bg-card p-3.5 transition-all hover:border-primary/40 has-checked:border-primary has-checked:bg-primary/5 has-checked:shadow-glow-primary has-focus-visible:ring-2 has-focus-visible:ring-ring"
+              className="group/role relative cursor-pointer rounded-2xl border bg-card p-3.5 transition-all hover:border-primary/40 has-checked:border-primary has-checked:bg-primary/5 has-checked:shadow-glow-primary has-focus-visible:ring-2 has-focus-visible:ring-ring"
             >
               <input
                 type="radio"
@@ -127,10 +147,10 @@ export function RegisterForm({
                 <option.icon className="size-[18px]" aria-hidden />
               </span>
               <span className="mt-3 block text-sm font-semibold">
-                {option.title}
+                {t(`register.roles.${option.value}.title`)}
               </span>
               <span className="mt-0.5 block text-xs text-muted-foreground">
-                {option.body}
+                {t(`register.roles.${option.value}.body`)}
               </span>
               <span
                 aria-hidden
@@ -142,31 +162,33 @@ export function RegisterForm({
           ))}
         </div>
         {errors.role ? (
-          <p className="text-xs text-destructive">{errors.role.message}</p>
+          <p className="text-xs text-destructive">
+            {errorText(errors.role.message)}
+          </p>
         ) : null}
       </fieldset>
 
       <GoogleButton
-        label="Sign up with Google"
+        label={t("google.signUp")}
         role={role}
         disabled={isSubmitting}
       />
-      <AuthDivider label="or sign up with email" />
+      <AuthDivider label={t("register.divider")} />
 
       <TextField
         id="name"
-        label="Full name"
+        label={t("fields.fullName")}
         icon={User}
         type="text"
         autoComplete="name"
-        placeholder="Abdullah Mamun"
+        placeholder={t("fields.namePlaceholder")}
         error={errors.name?.message}
         {...register("name")}
       />
 
       <TextField
         id="email"
-        label="Email"
+        label={t("fields.email")}
         icon={Mail}
         type="email"
         autoComplete="email"
@@ -179,9 +201,9 @@ export function RegisterForm({
         id="phone"
         label={
           <>
-            Phone
+            {t("fields.phone")}
             <span className="font-normal text-muted-foreground">
-              (optional)
+              {t("fields.optional")}
             </span>
           </>
         }
@@ -195,9 +217,9 @@ export function RegisterForm({
 
       <PasswordField
         id="password"
-        label="Password"
+        label={t("fields.password")}
         autoComplete="new-password"
-        placeholder="At least 8 characters"
+        placeholder={t("fields.passwordPlaceholder")}
         error={errors.password?.message}
         {...register("password")}
       />
@@ -205,9 +227,9 @@ export function RegisterForm({
 
       <PasswordField
         id="confirmPassword"
-        label="Confirm password"
+        label={t("fields.confirmPassword")}
         autoComplete="new-password"
-        placeholder="Type it again"
+        placeholder={t("fields.confirmPlaceholder")}
         error={errors.confirmPassword?.message}
         {...register("confirmPassword")}
       />
@@ -222,11 +244,13 @@ export function RegisterForm({
         {isSubmitting ? (
           <>
             <Loader2 className="size-4 animate-spin" aria-hidden />
-            Creating account…
+            {t("register.submitting")}
           </>
         ) : (
           <>
-            {role === "PROVIDER" ? "Create provider account" : "Create account"}
+            {role === "PROVIDER"
+              ? t("register.submitProvider")
+              : t("register.submit")}
             <ArrowRight
               className="size-4 transition-transform group-hover:translate-x-0.5"
               aria-hidden
@@ -235,13 +259,5 @@ export function RegisterForm({
         )}
       </Button>
     </form>
-  )
-}
-
-/** "List your gear" links send ?role=PROVIDER to preselect the provider form. */
-export function RegisterFormFromUrl() {
-  const role = useSearchParams().get("role")
-  return (
-    <RegisterForm defaultRole={role === "PROVIDER" ? "PROVIDER" : "CUSTOMER"} />
   )
 }

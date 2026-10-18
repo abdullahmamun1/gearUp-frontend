@@ -9,58 +9,51 @@ const WHOLE = /^\d+$/
 
 const optionalUrl = z.union([
   z.literal(""),
-  z.url("Enter a valid URL, starting with https://"),
+  z.url("provider.validation.urlInvalid"),
 ])
 
 export const gearFormSchema = z.object({
   name: z
     .string()
     .trim()
-    .min(2, "Name must be at least 2 characters.")
-    .max(120, "Name must be at most 120 characters."),
-  categoryId: z.uuid("Choose a category."),
+    .min(2, "provider.validation.nameMin")
+    .max(120, "provider.validation.nameMax"),
+  categoryId: z.uuid("provider.validation.categoryRequired"),
   pricePerDay: z
     .string()
     .trim()
-    .min(1, "Enter a price per day.")
-    .regex(DECIMAL, "Enter a number, like 450 or 450.50.")
-    .refine((value) => Number(value) > 0, "Price must be greater than 0.")
+    .min(1, "provider.validation.priceRequired")
+    .regex(DECIMAL, "provider.validation.priceNumber")
+    .refine((value) => Number(value) > 0, "provider.validation.pricePositive")
     .refine(
       (value) => Number(value) <= 1000000,
-      "Price per day is unrealistically high."
+      "provider.validation.priceTooHigh"
     ),
   depositAmount: z
     .string()
     .trim()
-    .regex(DECIMAL, "Enter a number, like 1000.")
+    .regex(DECIMAL, "provider.validation.depositNumber")
     .refine(
       (value) => Number(value) <= 1000000,
-      "Deposit is unrealistically high."
+      "provider.validation.depositTooHigh"
     )
     .or(z.literal(""))
     .optional(),
   stock: z
     .string()
     .trim()
-    .min(1, "Enter how many you have.")
-    .regex(WHOLE, "Stock must be a whole number, 0 or more."),
-  brand: z
-    .string()
-    .trim()
-    .max(80, "Brand must be at most 80 characters.")
-    .optional(),
+    .min(1, "provider.validation.stockRequired")
+    .regex(WHOLE, "provider.validation.stockWhole"),
+  brand: z.string().trim().max(80, "provider.validation.brandMax").optional(),
   description: z
     .string()
     .trim()
-    .max(2000, "Description must be at most 2000 characters.")
+    .max(2000, "provider.validation.descriptionMax")
     .optional(),
   imageUrl: optionalUrl.optional(),
   images: z
     .array(z.object({ url: optionalUrl }))
-    .max(
-      MAX_GALLERY_IMAGES,
-      `A listing can have at most ${MAX_GALLERY_IMAGES} gallery images.`
-    )
+    .max(MAX_GALLERY_IMAGES, "provider.validation.galleryMax")
     .optional(),
 })
 

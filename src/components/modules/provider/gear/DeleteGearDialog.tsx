@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { Loader2, Trash2 } from "lucide-react"
+import { useTranslations } from "@/i18n/translations"
 import { toast } from "sonner"
 
 import { deleteGear } from "@/api/gear"
@@ -24,6 +25,7 @@ export function DeleteGearDialog({ gear }: { gear: GearItem }) {
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const queryClient = useQueryClient()
+  const t = useTranslations("provider.delete")
 
   const orderCount = gear._count?.orderItems ?? 0
 
@@ -33,13 +35,13 @@ export function DeleteGearDialog({ gear }: { gear: GearItem }) {
       const res = await deleteGear(gear.id)
 
       if (!res.success) {
-        setError(res.message || "Couldn't delete this listing.")
-        toast.error(res.message || "Couldn't delete this listing.")
+        setError(res.message || t("failed"))
+        toast.error(res.message || t("failed"))
         return
       }
       queryClient.invalidateQueries({ queryKey: providerGearKeys.all })
       setOpen(false)
-      toast.success(`"${gear.name}" deleted.`)
+      toast.success(t("deleted", { name: gear.name }))
     })
   }
 
@@ -56,7 +58,7 @@ export function DeleteGearDialog({ gear }: { gear: GearItem }) {
           <Button
             variant="ghost"
             size="icon"
-            aria-label={`Delete ${gear.name}`}
+            aria-label={t("aria", { name: gear.name })}
             className="size-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
           >
             <Trash2 className="size-4" aria-hidden />
@@ -65,19 +67,20 @@ export function DeleteGearDialog({ gear }: { gear: GearItem }) {
       />
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete this listing?</DialogTitle>
+          <DialogTitle>{t("title")}</DialogTitle>
           <DialogDescription>
-            <span className="font-medium text-foreground">{gear.name}</span>{" "}
-            will be removed permanently. This can&apos;t be undone.
+            {t.rich("description", {
+              name: gear.name,
+              strong: (chunks) => (
+                <span className="font-medium text-foreground">{chunks}</span>
+              ),
+            })}
           </DialogDescription>
         </DialogHeader>
 
         {orderCount > 0 && !error && (
           <p className="rounded-md border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
-            {orderCount === 1
-              ? "1 order references this listing."
-              : `${orderCount} orders reference this listing.`}{" "}
-            Deleting is only possible once none of them are still running.
+            {t("orderRefs", { count: orderCount })} {t("runningNote")}
           </p>
         )}
 
@@ -98,7 +101,7 @@ export function DeleteGearDialog({ gear }: { gear: GearItem }) {
             disabled={isPending}
             className="h-9 text-sm"
           >
-            Keep it
+            {t("keep")}
           </Button>
           <Button
             variant="destructive"
@@ -110,7 +113,7 @@ export function DeleteGearDialog({ gear }: { gear: GearItem }) {
             {isPending && (
               <Loader2 className="size-4 animate-spin" aria-hidden />
             )}
-            {isPending ? "Deleting…" : "Delete listing"}
+            {isPending ? t("deleting") : t("confirm")}
           </Button>
         </DialogFooter>
       </DialogContent>

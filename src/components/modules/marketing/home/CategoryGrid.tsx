@@ -1,5 +1,6 @@
-import Link from "next/link"
+import { Link } from "@/i18n/navigation"
 import { ArrowUpRight } from "lucide-react"
+import { getTranslations } from "@/i18n/getTranslations"
 
 import { getCategories } from "@/api/categories"
 import { CategoryScene } from "@/components/shared/illustrations/scenes"
@@ -23,6 +24,10 @@ const DEFAULT_TONE = "from-ember/16 to-ember/3 hover:border-ember/40"
 export async function CategoryGrid() {
   const res = await getCategories()
   if (!res.success || !res.data?.length) return null
+  const [t, tCommon] = await Promise.all([
+    getTranslations("home.categories"),
+    getTranslations("common.units"),
+  ])
 
   const categories = [...res.data].sort(
     (a, b) => (b._count?.gearItems ?? 0) - (a._count?.gearItems ?? 0)
@@ -30,9 +35,9 @@ export async function CategoryGrid() {
 
   return (
     <Section
-      eyebrow="Start here"
-      title="Browse by adventure"
-      description={`${categories.length} kinds of kit, all rented by the day.`}
+      eyebrow={t("eyebrow")}
+      title={t("title")}
+      description={t("description", { count: categories.length })}
     >
       <div className="reveal-stagger grid auto-rows-[minmax(10rem,auto)] gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {categories.map((category, index) => {
@@ -68,7 +73,7 @@ export async function CategoryGrid() {
                       {category.name}
                     </h3>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      {count} {count === 1 ? "listing" : "listings"}
+                      {tCommon("listings", { count })}
                     </p>
                   </div>
                   <span className="grid size-9 shrink-0 place-items-center rounded-full border bg-card/80 text-foreground/70 transition-[transform,color] group-hover:-rotate-12 group-hover:text-foreground">

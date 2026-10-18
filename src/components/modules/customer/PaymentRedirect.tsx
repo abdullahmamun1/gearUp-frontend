@@ -1,8 +1,10 @@
 "use client"
 
-import { useRouter, useSearchParams } from "next/navigation"
+import { useSearchParams } from "next/navigation"
+import { useRouter } from "@/i18n/navigation"
 import { useEffect } from "react"
 import { Loader2 } from "lucide-react"
+import { useTranslations } from "@/i18n/translations"
 
 import { CenteredCard } from "@/components/shared/CenteredCard"
 
@@ -26,12 +28,13 @@ export function PaymentRedirect({ flag }: { flag: "paid" | "cancelled" }) {
 }
 
 export function PaymentRedirectCard() {
+  const t = useTranslations("dashboard.customer.redirect")
   return (
     <CenteredCard
       icon={Loader2}
       busy
-      title="Taking you to your order…"
-      description="Hang on a second."
+      title={t("title")}
+      description={t("description")}
     />
   )
 }

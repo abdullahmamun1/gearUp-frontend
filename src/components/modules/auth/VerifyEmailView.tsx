@@ -1,9 +1,10 @@
 "use client"
 
-import Link from "next/link"
+import { Link } from "@/i18n/navigation"
 import { useSearchParams } from "next/navigation"
 import { useCallback } from "react"
 import { CircleAlert, Loader2 } from "lucide-react"
+import { useTranslations } from "@/i18n/translations"
 
 import { verifyEmail } from "@/api/auth"
 import { CenteredCard } from "@/components/shared/CenteredCard"
@@ -17,6 +18,7 @@ import { DASHBOARD_HOME } from "@/routes"
 
 /** Verifies the emailed token once, in the browser, so the page is static. */
 export function VerifyEmailView() {
+  const t = useTranslations("auth.verify")
   const token = useSearchParams().get("token")
   const { user } = useSessionUser()
   const verify = useCallback(() => verifyEmail(token!), [token])
@@ -30,14 +32,14 @@ export function VerifyEmailView() {
       <CenteredCard
         illustration={<MailScene />}
         tone="success"
-        title="Your email is verified"
-        description="Thanks! You can now pay for rentals and publish listings."
+        title={t("successTitle")}
+        description={t("successDescription")}
       >
         <Link
           href={next}
           className={cn(buttonVariants({ size: "lg" }), "h-10 w-full text-sm")}
         >
-          {user ? "Go to your dashboard" : "Log in"}
+          {user ? t("goToDashboard") : t("logIn")}
         </Link>
       </CenteredCard>
     )
@@ -47,31 +49,29 @@ export function VerifyEmailView() {
     <CenteredCard
       icon={CircleAlert}
       tone="error"
-      title="We couldn't verify this link"
+      title={t("errorTitle")}
       description={
-        state.status === "done"
-          ? state.result.message
-          : "The link is incomplete. Open it from your email again."
+        state.status === "done" ? state.result.message : t("incomplete")
       }
     >
       <div className="grid gap-3 text-sm text-muted-foreground">
-        <p>
-          Already clicked it once? Then you&apos;re probably verified already —
-          links only work one time.
-        </p>
+        <p>{t("alreadyClicked")}</p>
         {user ? (
           <div className="flex items-center gap-3">
             <ResendVerificationButton />
             <Link href={next} className="text-primary hover:underline">
-              Go to your dashboard
+              {t("goToDashboard")}
             </Link>
           </div>
         ) : (
           <p>
-            <Link href="/login" className="text-primary hover:underline">
-              Log in
-            </Link>{" "}
-            to send yourself a new link.
+            {t.rich("logInToResend", {
+              link: (chunks) => (
+                <Link href="/login" className="text-primary hover:underline">
+                  {chunks}
+                </Link>
+              ),
+            })}
           </p>
         )}
       </div>
@@ -80,12 +80,13 @@ export function VerifyEmailView() {
 }
 
 export function VerifyingCard() {
+  const t = useTranslations("auth.verify")
   return (
     <CenteredCard
       icon={Loader2}
       busy
-      title="Checking your link…"
-      description="This only takes a moment."
+      title={t("checkingTitle")}
+      description={t("checkingDescription")}
     />
   )
 }

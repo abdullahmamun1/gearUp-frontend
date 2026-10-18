@@ -1,11 +1,13 @@
 "use client"
 
+import { useTranslations } from "@/i18n/translations"
+
 import { DataTable } from "@/components/shared/DataTable"
 import { EmptyState } from "@/components/shared/EmptyState"
 import { GearCell } from "@/components/shared/GearCell"
 import { Pagination } from "@/components/shared/Pagination"
 import { TableCell, TableRow } from "@/components/ui/table"
-import { formatDate, formatPrice } from "@/utils/format"
+import { useFormat } from "@/i18n/useFormat"
 import {
   buildProviderGearHref,
   hasActiveProviderGearFilters,
@@ -18,16 +20,6 @@ import { AvailabilityToggle } from "./AvailabilityToggle"
 import { DeleteGearDialog } from "./DeleteGearDialog"
 import { GearFormDialog } from "./GearFormDialog"
 
-const HEADINGS = [
-  "Item",
-  "Category",
-  { label: "Price / day", align: "right" },
-  { label: "Stock", align: "right" },
-  "Status",
-  "Added",
-  { label: "Actions", align: "right" },
-] as const
-
 export function ProviderGearList({
   filters,
   categories,
@@ -38,11 +30,21 @@ export function ProviderGearList({
   initialData: Paginated<GearItem>
 }) {
   const { data, error, isFetching } = useProviderGear(filters, initialData)
+  const t = useTranslations("provider.list")
+  const format = useFormat()
+
+  const headings = [
+    t("headings.item"),
+    t("headings.category"),
+    { label: t("headings.pricePerDay"), align: "right" },
+    { label: t("headings.stock"), align: "right" },
+    t("headings.status"),
+    t("headings.added"),
+    { label: t("headings.actions"), align: "right" },
+  ] as const
 
   if (error) {
-    return (
-      <EmptyState>{error.message || "Couldn't load your listings."}</EmptyState>
-    )
+    return <EmptyState>{error.message || t("loadFailed")}</EmptyState>
   }
 
   const gear = data?.data ?? []
@@ -51,9 +53,7 @@ export function ProviderGearList({
   if (gear.length === 0) {
     return (
       <EmptyState>
-        {hasActiveProviderGearFilters(filters)
-          ? "No listings match those filters. Try clearing one."
-          : "You haven't listed any gear yet."}
+        {hasActiveProviderGearFilters(filters) ? t("noMatch") : t("none")}
       </EmptyState>
     )
   }
@@ -61,11 +61,11 @@ export function ProviderGearList({
   return (
     <>
       <DataTable
-        headings={HEADINGS}
+        headings={headings}
         count={{
           total: meta?.total ?? gear.length,
-          one: "listing",
-          many: "listings",
+          one: t("countOne"),
+          many: t("countMany"),
         }}
         isFetching={isFetching}
       >
@@ -78,16 +78,16 @@ export function ProviderGearList({
               {item.category?.name ?? "—"}
             </TableCell>
             <TableCell className="text-right tabular-nums">
-              {formatPrice(item.pricePerDay)}
+              {format.price(item.pricePerDay)}
             </TableCell>
             <TableCell className="text-right tabular-nums">
-              {item.stock}
+              {format.number(item.stock)}
             </TableCell>
             <TableCell>
               <AvailabilityToggle gear={item} filters={filters} />
             </TableCell>
             <TableCell className="whitespace-nowrap text-muted-foreground">
-              {item.createdAt ? formatDate(item.createdAt) : "—"}
+              {item.createdAt ? format.date(item.createdAt) : "—"}
             </TableCell>
             <TableCell>
               <div className="flex justify-end gap-1">
@@ -103,7 +103,7 @@ export function ProviderGearList({
         page={filters.page}
         totalPages={meta?.totalPages ?? 1}
         hrefFor={(page) => buildProviderGearHref({ ...filters, page })}
-        label="Listings pagination"
+        label={t("pagination")}
       />
     </>
   )

@@ -1,9 +1,11 @@
 "use client"
 
-import { useRouter } from "next/navigation"
+import { useRouter } from "@/i18n/navigation"
 import { useMemo, useState, useTransition } from "react"
 import type { DateRange } from "react-day-picker"
+import { bn } from "react-day-picker/locale"
 import { useQueryClient } from "@tanstack/react-query"
+import { useTranslations } from "@/i18n/translations"
 import { toast } from "sonner"
 import { CalendarDays, Loader2, Minus, Plus, ShieldCheck } from "lucide-react"
 
@@ -17,7 +19,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { Separator } from "@/components/ui/separator"
-import { formatDate, formatPrice } from "@/utils/format"
+import { useFormat } from "@/i18n/useFormat"
 import { gearAvailabilityKeys, useGearAvailability } from "@/hooks/queries/gear"
 import {
   addDays,
@@ -39,6 +41,9 @@ export function RentPanel({
   depositAmount: number
   stock: number
 }) {
+  const t = useTranslations("gear.rent")
+  const tCommon = useTranslations("common")
+  const format = useFormat()
   const router = useRouter()
   const queryClient = useQueryClient()
   const [isPending, startTransition] = useTransition()
@@ -82,11 +87,11 @@ export function RentPanel({
 
   const problem =
     days > RENTAL_POLICY.maxRentalDays
-      ? `Rentals can be at most ${RENTAL_POLICY.maxRentalDays} days.`
+      ? t("tooLong", { days: RENTAL_POLICY.maxRentalDays })
       : range?.from && range.from > lastStart
-        ? `You can book up to ${RENTAL_POLICY.maxDaysAhead} days ahead.`
+        ? t("tooFarAhead", { days: RENTAL_POLICY.maxDaysAhead })
         : freeForRange === 0
-          ? "Some of those days are fully booked. Try other dates."
+          ? t("fullyBooked")
           : null
 
   const canSubmit =
@@ -111,7 +116,7 @@ export function RentPanel({
       })
 
       if (!res.success) {
-        toast.error(res.message || "Couldn't place your order.")
+        toast.error(res.message || t("placeFailed"))
         // Someone may have just booked the last unit.
         queryClient.invalidateQueries({
           queryKey: gearAvailabilityKeys.gear(gearId),
@@ -124,12 +129,12 @@ export function RentPanel({
   }
 
   return (
-    <div className="rounded-xl border bg-card p-4 shadow-xs">
-      <p className="font-heading text-sm font-semibold">Rent this gear</p>
+    <div className="rounded-2xl border bg-card p-4 shadow-xs">
+      <p className="font-heading text-sm font-semibold">{t("title")}</p>
 
       <div className="mt-4 grid gap-3">
         <div className="grid gap-1.5">
-          <Label className="text-xs text-muted-foreground">Rental dates</Label>
+          <Label className="text-xs text-muted-foreground">{t("dates")}</Label>
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger
               render={
@@ -143,13 +148,15 @@ export function RentPanel({
                     aria-hidden
                   />
                   {range?.from && range?.to
-                    ? `${formatDate(range.from.toISOString())} → ${formatDate(range.to.toISOString())}`
-                    : "Pick your dates"}
+                    ? `${format.date(range.from.toISOString())} → ${format.date(range.to.toISOString())}`
+                    : t("pickDates")}
                 </Button>
               }
             />
             <PopoverContent className="w-min p-0" align="start">
               <Calendar
+                locale={format.locale === "bn" ? bn : undefined}
+                numerals={format.locale === "bn" ? "beng" : undefined}
                 mode="range"
                 selected={range}
                 onSelect={setRange}
@@ -160,24 +167,26 @@ export function RentPanel({
               />
               <p className="border-t px-3 py-2 text-xs text-muted-foreground">
                 {availability.isPending
-                  ? "Checking availability…"
+                  ? t("checking")
                   : availability.isError
-                    ? "Couldn't load availability. Your dates are checked when you book."
-                    : "Greyed-out days are fully booked. Pick the day you'll return it as the end date."}
+                    ? t("availabilityFailed")
+                    : t("calendarHint")}
               </p>
             </PopoverContent>
           </Popover>
         </div>
 
         <div className="grid gap-1.5">
-          <Label className="text-xs text-muted-foreground">Quantity</Label>
+          <Label className="text-xs text-muted-foreground">
+            {t("quantity")}
+          </Label>
           <div className="flex items-center gap-2">
             <Button
               type="button"
               variant="outline"
               size="icon"
               className="size-9"
-              aria-label="Decrease quantity"
+              aria-label={t("decrease")}
               disabled={effectiveQuantity <= 1}
               onClick={() => setQuantity(Math.max(1, effectiveQuantity - 1))}
             >
@@ -187,14 +196,14 @@ export function RentPanel({
               className="w-8 text-center text-sm tabular-nums"
               aria-live="polite"
             >
-              {effectiveQuantity}
+              {format.number(effectiveQuantity)}
             </span>
             <Button
               type="button"
               variant="outline"
               size="icon"
               className="size-9"
-              aria-label="Increase quantity"
+              aria-label={t("increase")}
               disabled={effectiveQuantity >= maxQuantity}
               onClick={() =>
                 setQuantity(Math.min(maxQuantity, effectiveQuantity + 1))
@@ -204,8 +213,8 @@ export function RentPanel({
             </Button>
             <span className="text-xs text-muted-foreground" aria-live="polite">
               {freeForRange === null
-                ? `${stock} ${stock === 1 ? "unit" : "units"} in total`
-                : `${freeForRange} left for these dates`}
+                ? t("unitsTotal", { count: stock })
+                : t("unitsLeft", { count: freeForRange })}
             </span>
           </div>
         </div>
@@ -214,20 +223,27 @@ export function RentPanel({
       <Separator className="my-4" />
 
       <dl className="grid gap-1.5 text-sm">
-        <Row label="Price per day" value={formatPrice(pricePerDay)} muted />
+        <Row label={t("pricePerDay")} value={format.price(pricePerDay)} muted />
         <Row
-          label="Days"
-          value={days > 0 ? `${days} ${days === 1 ? "day" : "days"}` : "—"}
+          label={t("days")}
+          value={days > 0 ? tCommon("units.days", { count: days }) : "—"}
           muted
         />
-        <Row label="Quantity" value={String(effectiveQuantity)} muted />
-        <Row label="Rental" value={days > 0 ? formatPrice(rental) : "—"} />
+        <Row
+          label={t("quantity")}
+          value={format.number(effectiveQuantity)}
+          muted
+        />
+        <Row
+          label={t("rental")}
+          value={days > 0 ? format.price(rental) : "—"}
+        />
         {depositAmount > 0 && (
-          <Row label="Refundable deposit" value={formatPrice(deposit)} muted />
+          <Row label={t("deposit")} value={format.price(deposit)} muted />
         )}
         <Row
-          label={depositAmount > 0 ? "Due at payment" : "Total"}
-          value={days > 0 ? formatPrice(rental + deposit) : "—"}
+          label={depositAmount > 0 ? t("dueAtPayment") : t("total")}
+          value={days > 0 ? format.price(rental + deposit) : "—"}
           emphasis
         />
       </dl>
@@ -247,23 +263,25 @@ export function RentPanel({
         className="mt-4 h-11 w-full cursor-pointer text-sm"
       >
         {isPending && <Loader2 className="size-4 animate-spin" aria-hidden />}
-        {isPending ? "Placing order…" : "Request to rent"}
+        {isPending ? t("placing") : t("request")}
       </Button>
 
       <div className="mt-3 grid gap-1.5 text-xs text-muted-foreground">
         <p>
           {days > 0
-            ? `The provider has up to ${RENTAL_POLICY.respondWithinHours} hours to confirm. You pay only after they do.`
-            : "Pick a start and end date to see your total."}
+            ? t("respondNote", { hours: RENTAL_POLICY.respondWithinHours })
+            : t("pickToSeeTotal")}
         </p>
         <p className="flex items-start gap-1.5">
           <ShieldCheck className="mt-px size-3.5 shrink-0" aria-hidden />
           <span>
-            Free cancellation until you pay. Paid rentals are fully refunded up
-            to {RENTAL_POLICY.freeCancellationHours} hours before the start day
-            {depositAmount > 0 &&
-              ", and the deposit comes back when the gear is returned in good condition"}
-            .
+            {depositAmount > 0
+              ? t("cancellationWithDeposit", {
+                  hours: RENTAL_POLICY.freeCancellationHours,
+                })
+              : t("cancellation", {
+                  hours: RENTAL_POLICY.freeCancellationHours,
+                })}
           </span>
         </p>
       </div>

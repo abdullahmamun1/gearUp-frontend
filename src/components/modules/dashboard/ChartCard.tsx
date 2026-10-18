@@ -1,4 +1,8 @@
+import { useTranslations } from "@/i18n/translations"
+
 import type { ChartSeries } from "@/api/admin"
+
+import { FormattedNumber } from "./Formatted"
 
 export function ChartCard({
   title,
@@ -13,22 +17,21 @@ export function ChartCard({
   series: ChartSeries
   children: React.ReactNode
 }) {
+  const t = useTranslations("dashboard.chart")
   const total = series.data.reduce((sum, row) => sum + row.value, 0)
 
   return (
-    <section className="rounded-xl border bg-card p-4 shadow-xs">
+    <section className="rounded-2xl border bg-card p-4 shadow-xs">
       <h2 className="font-heading text-sm font-semibold">{title}</h2>
       <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
 
       {series.failed && (
-        <p className="mt-3 text-xs text-destructive">
-          Some of this chart could not be loaded.
-        </p>
+        <p className="mt-3 text-xs text-destructive">{t("partialFailed")}</p>
       )}
 
       {total === 0 ? (
         <p className="py-10 text-center text-sm text-muted-foreground">
-          Nothing to chart yet.
+          {t("empty")}
         </p>
       ) : (
         <>
@@ -36,8 +39,8 @@ export function ChartCard({
 
           <details className="group mt-2">
             <summary className="cursor-pointer list-none text-xs text-muted-foreground underline-offset-4 hover:underline">
-              <span className="group-open:hidden">View as table</span>
-              <span className="hidden group-open:inline">Hide table</span>
+              <span className="group-open:hidden">{t("viewTable")}</span>
+              <span className="hidden group-open:inline">{t("hideTable")}</span>
             </summary>
 
             <table className="mt-2 w-full text-xs">
@@ -59,7 +62,7 @@ export function ChartCard({
                       {row.label}
                     </th>
                     <td className="py-1.5 text-right tabular-nums">
-                      {row.value}
+                      <FormattedNumber value={row.value} />
                     </td>
                   </tr>
                 ))}

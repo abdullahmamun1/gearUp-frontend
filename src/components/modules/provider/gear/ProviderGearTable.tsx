@@ -1,3 +1,5 @@
+import { getTranslations } from "@/i18n/getTranslations"
+
 import { getProviderGear } from "@/api/gear"
 import { EmptyState } from "@/components/shared/EmptyState"
 import {
@@ -16,13 +18,10 @@ export async function ProviderGearTable({
   categories: Category[]
 }) {
   const res = await getProviderGear(toProviderGearQuery(filters))
+  const t = await getTranslations("provider.list")
 
   if (!res.success || !res.data) {
-    return (
-      <EmptyState>
-        {res.message || "Couldn't load your listings. Please try again."}
-      </EmptyState>
-    )
+    return <EmptyState>{res.message || t("loadFailedRetry")}</EmptyState>
   }
 
   return (

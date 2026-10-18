@@ -1,3 +1,5 @@
+import { getTranslations } from "@/i18n/getTranslations"
+
 import { getCategories } from "@/api/categories"
 import { EmptyState } from "@/components/shared/EmptyState"
 import type { AdminCategoriesFilters } from "@/utils/filters/admin"
@@ -12,11 +14,8 @@ export async function CategoriesTable({
   const res = await getCategories()
 
   if (!res.success || !res.data) {
-    return (
-      <EmptyState>
-        {res.message || "Couldn't load categories. Please try again."}
-      </EmptyState>
-    )
+    const t = await getTranslations("admin.categories")
+    return <EmptyState>{res.message || t("loadErrorRetry")}</EmptyState>
   }
 
   return <CategoriesList filters={filters} initialData={res.data} />

@@ -1,6 +1,9 @@
 "use client"
 
-import Link from "next/link"
+import { useTranslations } from "@/i18n/translations"
+
+import { Link } from "@/i18n/navigation"
+import { useFormat } from "@/i18n/useFormat"
 
 import { DataTable } from "@/components/shared/DataTable"
 import { EmptyState } from "@/components/shared/EmptyState"
@@ -12,18 +15,10 @@ import {
   CUSTOMER_ORDERS_PATH,
   type RentalTableFilters,
 } from "@/utils/filters/dashboard"
-import { formatDate, formatPrice } from "@/utils/format"
+import { useUnreadMessages } from "@/hooks/queries/messages"
 import { useMyRentals } from "@/hooks/queries/customer"
 import { buildHref } from "@/utils/searchParams"
 import type { Paginated, RentalOrder } from "@/types"
-
-const HEADINGS = [
-  "Order",
-  "Gear",
-  "Dates",
-  "Status",
-  { label: "Total", align: "right" },
-] as const
 
 export function MyRentalsList({
   filters,
@@ -32,37 +27,37 @@ export function MyRentalsList({
   filters: RentalTableFilters
   initialData: Paginated<RentalOrder>
 }) {
+  const t = useTranslations("dashboard.customer.orders")
+  const format = useFormat()
   const { data, error, isFetching } = useMyRentals(filters, initialData)
+  const headings = [
+    t("headingOrder"),
+    t("headingGear"),
+    t("headingDates"),
+    t("headingStatus"),
+    { label: t("headingTotal"), align: "right" },
+  ] as const
+  const unread = useUnreadMessages()
 
   if (error) {
-    return (
-      <EmptyState>
-        {error.message || "Couldn't load your rentals. Please try again."}
-      </EmptyState>
-    )
+    return <EmptyState>{error.message || t("loadFailed")}</EmptyState>
   }
 
   const orders = data?.data ?? []
   const meta = data?.meta
 
   if (orders.length === 0) {
-    return (
-      <EmptyState>
-        {filters.status
-          ? "No rentals match that status."
-          : "You haven't rented anything yet."}
-      </EmptyState>
-    )
+    return <EmptyState>{filters.status ? t("noMatch") : t("none")}</EmptyState>
   }
 
   return (
     <>
       <DataTable
-        headings={HEADINGS}
+        headings={headings}
         count={{
           total: meta?.total ?? orders.length,
-          one: "rental",
-          many: "rentals",
+          one: t("countOne"),
+          many: t("countMany"),
         }}
         isFetching={isFetching}
       >
@@ -79,21 +74,31 @@ export function MyRentalsList({
               >
                 {order.id.slice(0, 8)}
               </Link>
+              {unread.byOrder[order.id] ? (
+                <span
+                  className="ml-1.5 inline-grid h-4.5 min-w-4.5 place-items-center rounded-full bg-ember px-1 align-middle text-[10px] font-bold text-ember-foreground"
+                  aria-label={t("unread", {
+                    count: format.number(unread.byOrder[order.id]!),
+                  })}
+                >
+                  {format.number(unread.byOrder[order.id]!)}
+                </span>
+              ) : null}
               <p className="text-xs text-muted-foreground">
-                {formatDate(order.createdAt)}
+                {format.date(order.createdAt)}
               </p>
             </TableCell>
             <TableCell>
               <OrderItemsSummary items={order.items ?? []} />
             </TableCell>
             <TableCell className="whitespace-nowrap">
-              {formatDate(order.startDate)} → {formatDate(order.endDate)}
+              {format.date(order.startDate)} → {format.date(order.endDate)}
             </TableCell>
             <TableCell>
               <RentalStatusBadge status={order.status} />
             </TableCell>
             <TableCell className="text-right tabular-nums">
-              {formatPrice(order.totalAmount)}
+              {format.price(order.totalAmount)}
             </TableCell>
           </TableRow>
         ))}
@@ -105,7 +110,7 @@ export function MyRentalsList({
         hrefFor={(page) =>
           buildHref(CUSTOMER_ORDERS_PATH, { ...filters, page })
         }
-        label="Rentals pagination"
+        label={t("pagination")}
       />
     </>
   )

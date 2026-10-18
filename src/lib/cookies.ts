@@ -1,5 +1,7 @@
 import { cookies } from "next/headers"
 
+import { LOCALE_COOKIE } from "@/i18n/routing"
+
 export const ACCESS_TOKEN_COOKIE = "accessToken"
 export const REFRESH_TOKEN_COOKIE = "refreshToken"
 
@@ -30,6 +32,16 @@ export async function setAuthCookies(tokens: {
       maxAge: REFRESH_TOKEN_MAX_AGE,
     })
   }
+}
+
+/** Remembers the language for the proxy's redirects (same as next-intl's). */
+export async function setLocaleCookie(locale: "en" | "bn") {
+  const cookieStore = await cookies()
+  cookieStore.set(LOCALE_COOKIE, locale, {
+    path: "/",
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 365,
+  })
 }
 
 export async function clearAuthCookies() {

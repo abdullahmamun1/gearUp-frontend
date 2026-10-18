@@ -3,14 +3,17 @@
 import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQueryClient } from "@tanstack/react-query"
-import { ImagePlus, Loader2, Pencil, Plus, X } from "lucide-react"
-import { Controller, useFieldArray, useForm } from "react-hook-form"
+import { Loader2, Pencil, Plus } from "lucide-react"
+import { useTranslations } from "@/i18n/translations"
+import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form"
 import { toast } from "sonner"
 
 import { createGear } from "@/api/gear"
 import { updateGear } from "@/api/gear"
+import { ImageGalleryEditor } from "@/components/shared/ImageGalleryEditor"
 import { SelectField } from "@/components/shared/SelectField"
 import { TextField } from "@/components/shared/TextField"
+import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -21,10 +24,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { providerGearKeys } from "@/hooks/queries/providerGear"
+import { useErrorMessage } from "@/hooks/useErrorMessage"
+import { useFormat } from "@/i18n/useFormat"
 import {
   emptyGearForm,
   gearFormSchema,
@@ -34,7 +38,9 @@ import {
   toGearUpdatePayload,
   type GearFormInput,
 } from "@/validation/gear"
-import type { Category, GearItem } from "@/types"
+import type { Category, GearItem, ListingDraft } from "@/types"
+
+import { ListingWriter } from "./ListingWriter"
 
 export function GearFormDialog({
   categories,
@@ -44,6 +50,7 @@ export function GearFormDialog({
   gear?: GearItem
 }) {
   const [open, setOpen] = useState(false)
+  const t = useTranslations("provider.form")
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -53,7 +60,7 @@ export function GearFormDialog({
             <Button
               variant="ghost"
               size="icon"
-              aria-label={`Edit ${gear.name}`}
+              aria-label={t("editAria", { name: gear.name })}
               className="size-8 text-muted-foreground hover:text-foreground"
             >
               <Pencil className="size-4" aria-hidden />
@@ -61,18 +68,16 @@ export function GearFormDialog({
           ) : (
             <Button size="lg" className="h-9 text-sm">
               <Plus className="size-4" aria-hidden />
-              Add gear
+              {t("addGear")}
             </Button>
           )
         }
       />
       <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{gear ? "Edit listing" : "Add gear"}</DialogTitle>
+          <DialogTitle>{gear ? t("editTitle") : t("addGear")}</DialogTitle>
           <DialogDescription>
-            {gear
-              ? "Changes go live as soon as you save. Clearing an optional field removes it."
-              : "List a new item. It goes live as soon as you save."}
+            {gear ? t("editDescription") : t("addDescription")}
           </DialogDescription>
         </DialogHeader>
 
@@ -97,19 +102,61 @@ function GearForm({
   gear?: GearItem
   onDone: () => void
 }) {
+  const t = useTranslations("provider.form")
+  const tc = useTranslations("common.actions")
+  const format = useFormat()
+  const errorText = useErrorMessage()
   const {
     register,
     control,
     handleSubmit,
     setError,
+    getValues,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<GearFormInput>({
     resolver: zodResolver(gearFormSchema),
     defaultValues: gear ? toGearFormValues(gear) : emptyGearForm,
   })
 
-  const { fields, append, remove } = useFieldArray({ control, name: "images" })
+  const { replace } = useFieldArray({ control, name: "images" })
+  // The editor works with one ordered list; the form keeps cover + gallery.
+  const cover = useWatch({ control, name: "imageUrl" })
+  const gallery = useWatch({ control, name: "images" })
+  const photos = [cover, ...(gallery ?? []).map((image) => image.url)].filter(
+    (url): url is string => Boolean(url && url.trim())
+  )
+  function setPhotos(urls: string[]) {
+    setValue("imageUrl", urls[0] ?? "", { shouldDirty: true })
+    replace(urls.slice(1).map((url) => ({ url })))
+  }
   const queryClient = useQueryClient()
+  // Fields the AI just filled glow for a moment, so the change is noticed.
+  const [aiFilled, setAiFilled] = useState<string[]>([])
+  const [priceNote, setPriceNote] = useState<string | null>(null)
+  const flash = (field: string) =>
+    aiFilled.includes(field) &&
+    "ring-2 ring-primary/40 bg-primary/5 transition-shadow duration-700"
+
+  function applyDraft(draft: ListingDraft) {
+    const highlights = draft.highlights.length
+      ? `\n\n${draft.highlights.map((line) => `• ${line}`).join("\n")}`
+      : ""
+    const options = { shouldDirty: true, shouldValidate: true }
+    setValue("description", `${draft.description}${highlights}`, options)
+    if (categories.some((category) => category.id === draft.categoryId)) {
+      setValue("categoryId", draft.categoryId, options)
+    }
+    setValue("pricePerDay", String(draft.suggestedPricePerDay), options)
+    setPriceNote(
+      t("priceNote", {
+        amount: format.number(draft.suggestedPricePerDay),
+        reason: draft.priceReason,
+      })
+    )
+    setAiFilled(["description", "categoryId", "pricePerDay"])
+    setTimeout(() => setAiFilled([]), 2400)
+  }
 
   async function onSubmit(values: GearFormInput) {
     const res = gear
@@ -122,12 +169,7 @@ function GearForm({
         setError("categoryId", { message: res.message })
       }
       setError("root", { message: res.message })
-      toast.error(
-        res.message ||
-          (gear
-            ? "Couldn't save your changes."
-            : "Couldn't create this listing.")
-      )
+      toast.error(res.message || (gear ? t("saveFailed") : t("createFailed")))
       return
     }
 
@@ -135,8 +177,8 @@ function GearForm({
 
     toast.success(
       gear
-        ? `"${values.name.trim()}" updated.`
-        : `"${values.name.trim()}" is now listed.`
+        ? t("updated", { name: values.name.trim() })
+        : t("created", { name: values.name.trim() })
     )
     onDone()
   }
@@ -148,21 +190,35 @@ function GearForm({
           role="alert"
           className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive"
         >
-          {errors.root.message}
+          {errorText(errors.root.message)}
         </p>
       )}
 
       <TextField
         id="gear-name"
-        label="Name"
-        placeholder="4-Person Dome Tent"
+        label={t("name")}
+        placeholder={t("namePlaceholder")}
         error={errors.name?.message}
         {...register("name")}
       />
 
+      <ListingWriter
+        read={() => {
+          const values = getValues()
+          return {
+            name: values.name,
+            brand: values.brand,
+            categoryId: values.categoryId,
+            notes: values.description,
+            imageUrl: values.imageUrl,
+          }
+        }}
+        onDraft={applyDraft}
+      />
+
       <div className="grid gap-2">
         <Label htmlFor="gear-category" className="text-sm">
-          Category
+          {t("category")}
         </Label>
         <Controller
           control={control}
@@ -176,15 +232,15 @@ function GearForm({
               value={field.value}
               onValueChange={field.onChange}
               id="gear-category"
-              placeholder="Choose a category"
+              placeholder={t("categoryPlaceholder")}
               invalid={Boolean(errors.categoryId)}
-              className="h-10 w-full text-sm"
+              className={cn("h-10 w-full text-sm", flash("categoryId"))}
             />
           )}
         />
         {errors.categoryId && (
           <p className="text-xs text-destructive">
-            {errors.categoryId.message}
+            {errorText(errors.categoryId.message)}
           </p>
         )}
       </div>
@@ -192,18 +248,20 @@ function GearForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <TextField
           id="gear-price"
-          label="Price per day (৳)"
+          label={t("price")}
           inputMode="decimal"
           placeholder="450"
+          hint={priceNote ?? undefined}
           error={errors.pricePerDay?.message}
+          className={cn(flash("pricePerDay"))}
           {...register("pricePerDay")}
         />
         <TextField
           id="gear-stock"
-          label="Stock"
+          label={t("stock")}
           inputMode="numeric"
           placeholder="4"
-          hint="Units you own. Bookings are checked date by date."
+          hint={t("stockHint")}
           error={errors.stock?.message}
           {...register("stock")}
         />
@@ -213,15 +271,15 @@ function GearForm({
         id="gear-deposit"
         label={
           <>
-            Refundable deposit per unit (৳){" "}
+            {t("deposit")}{" "}
             <span className="font-normal text-muted-foreground">
-              (optional)
+              {t("optional")}
             </span>
           </>
         }
         inputMode="decimal"
         placeholder="0"
-        hint="Charged with the rental and refunded when it comes back in good condition."
+        hint={t("depositHint")}
         error={errors.depositAmount?.message}
         {...register("depositAmount")}
       />
@@ -230,9 +288,9 @@ function GearForm({
         id="gear-brand"
         label={
           <>
-            Brand{" "}
+            {t("brand")}{" "}
             <span className="font-normal text-muted-foreground">
-              (optional)
+              {t("optional")}
             </span>
           </>
         }
@@ -243,92 +301,43 @@ function GearForm({
 
       <div className="grid gap-2">
         <Label htmlFor="gear-description" className="text-sm">
-          Description{" "}
-          <span className="font-normal text-muted-foreground">(optional)</span>
+          {t("description")}{" "}
+          <span className="font-normal text-muted-foreground">
+            {t("optional")}
+          </span>
         </Label>
         <Textarea
           id="gear-description"
-          rows={3}
-          placeholder="Sleeps four, taped seams, packs to 55cm."
+          rows={aiFilled.includes("description") || priceNote ? 6 : 3}
+          placeholder={t("descriptionPlaceholder")}
           aria-invalid={errors.description ? true : undefined}
-          className="text-sm"
+          className={cn("text-sm", flash("description"))}
           {...register("description")}
         />
         {errors.description && (
           <p className="text-xs text-destructive">
-            {errors.description.message}
+            {errorText(errors.description.message)}
           </p>
         )}
       </div>
 
-      <TextField
-        id="gear-image"
-        label={
-          <>
-            Cover image URL{" "}
-            <span className="font-normal text-muted-foreground">
-              (optional)
-            </span>
-          </>
-        }
-        icon={ImagePlus}
-        placeholder="https://res.cloudinary.com/…"
-        hint={gear ? "Clear this field to remove the cover image." : undefined}
-        error={errors.imageUrl?.message}
-        {...register("imageUrl")}
-      />
-
       <div className="grid gap-2">
         <Label className="text-sm">
-          Gallery images{" "}
-          <span className="font-normal text-muted-foreground">(optional)</span>
+          {t("photos")}{" "}
+          <span className="font-normal text-muted-foreground">
+            {t("optional")}
+          </span>
         </Label>
-
-        {fields.map((item, index) => (
-          <div key={item.id} className="flex items-start gap-2">
-            <div className="flex-1">
-              <Input
-                placeholder="https://…"
-                aria-label={`Gallery image ${index + 1}`}
-                aria-invalid={errors.images?.[index]?.url ? true : undefined}
-                className="h-9 text-sm"
-                {...register(`images.${index}.url` as const)}
-              />
-              {errors.images?.[index]?.url && (
-                <p className="mt-1 text-xs text-destructive">
-                  {errors.images[index]?.url?.message}
-                </p>
-              )}
-            </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={() => remove(index)}
-              aria-label={`Remove gallery image ${index + 1}`}
-              className="size-9 shrink-0 text-muted-foreground"
-            >
-              <X className="size-4" aria-hidden />
-            </Button>
-          </div>
-        ))}
-
-        <div>
-          <Button
-            type="button"
-            variant="outline"
-            size="lg"
-            onClick={() => append({ url: "" })}
-            disabled={fields.length >= MAX_GALLERY_IMAGES}
-            className="h-8 gap-1.5 text-xs"
-          >
-            <Plus className="size-3.5" aria-hidden />
-            Add image
-          </Button>
-          <p className="mt-1.5 text-xs text-muted-foreground">
-            {fields.length}/{MAX_GALLERY_IMAGES} added. Blank rows are ignored.
+        <ImageGalleryEditor
+          value={photos}
+          onChange={setPhotos}
+          max={MAX_GALLERY_IMAGES + 1}
+        />
+        {(errors.imageUrl || errors.images) && (
+          <p className="text-xs text-destructive">
+            {errorText(errors.imageUrl?.message) ?? t("photoInvalid")}
           </p>
-        </div>
+        )}
       </div>
 
       <DialogFooter>
@@ -340,7 +349,7 @@ function GearForm({
           disabled={isSubmitting}
           className="h-9 text-sm"
         >
-          Cancel
+          {tc("cancel")}
         </Button>
         <Button
           type="submit"
@@ -351,7 +360,11 @@ function GearForm({
           {isSubmitting && (
             <Loader2 className="size-3.5 animate-spin" aria-hidden />
           )}
-          {isSubmitting ? "Saving…" : gear ? "Save changes" : "Create listing"}
+          {isSubmitting
+            ? tc("saving")
+            : gear
+              ? t("saveChanges")
+              : t("createListing")}
         </Button>
       </DialogFooter>
     </form>

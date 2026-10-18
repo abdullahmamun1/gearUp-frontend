@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Loader2 } from "lucide-react"
+import { useTranslations } from "@/i18n/translations"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -23,11 +24,12 @@ export function DeclineOrderButton({ orderId }: { orderId: string }) {
   const [open, setOpen] = useState(false)
   const [note, setNote] = useState("")
   const { run, isPending } = useOrderAction(orderId)
+  const t = useTranslations("provider.decline")
 
   function decline() {
     run(
       { status: "CANCELLED", note: note.trim() || undefined },
-      "Order declined. The customer has been told.",
+      t("done"),
       () => setOpen(false)
     )
   }
@@ -41,35 +43,32 @@ export function DeclineOrderButton({ orderId }: { orderId: string }) {
             size="lg"
             className="h-8 text-xs text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
           >
-            Decline
+            {t("trigger")}
           </Button>
         }
       />
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Decline this request?</DialogTitle>
-          <DialogDescription>
-            The dates are released and the customer sees your reason. Nothing
-            has been charged yet.
-          </DialogDescription>
+          <DialogTitle>{t("title")}</DialogTitle>
+          <DialogDescription>{t("description")}</DialogDescription>
         </DialogHeader>
         <div className="grid gap-1.5">
           <Label htmlFor={`decline-${orderId}`} className="text-xs">
-            Reason (optional)
+            {t("reason")}
           </Label>
           <Textarea
             id={`decline-${orderId}`}
             value={note}
             onChange={(event) => setNote(event.target.value)}
             maxLength={500}
-            placeholder="e.g. The kayak is being repaired that week."
+            placeholder={t("placeholder")}
           />
         </div>
         <DialogFooter>
           <DialogClose
             render={
               <Button variant="outline" size="lg" className="h-9 text-sm">
-                Keep it
+                {t("keep")}
               </Button>
             }
           />
@@ -83,7 +82,7 @@ export function DeclineOrderButton({ orderId }: { orderId: string }) {
             {isPending && (
               <Loader2 className="size-4 animate-spin" aria-hidden />
             )}
-            {isPending ? "Declining…" : "Decline request"}
+            {isPending ? t("declining") : t("confirm")}
           </Button>
         </DialogFooter>
       </DialogContent>

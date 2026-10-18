@@ -1,0 +1,159 @@
+{
+  "menus": {
+    "browse": "Browse",
+    "company": "Company"
+  },
+  "items": {
+    "about": {
+      "title": "About GearUp",
+      "description": "Why we built a rental marketplace for Bangladesh."
+    },
+    "howItWorks": {
+      "title": "How it works",
+      "description": "From browsing to the trailhead in three steps."
+    },
+    "faq": {
+      "title": "FAQ",
+      "description": "Deposits, cancellations, pickups and more."
+    },
+    "contact": {
+      "title": "Contact",
+      "description": "Questions, group bookings or feedback."
+    }
+  },
+  "quickFilters": {
+    "availableToday": "Available today",
+    "underPrice": "Under {price} / day"
+  },
+  "browse": {
+    "categories": "Categories",
+    "browseAll": "Browse all gear",
+    "popularBrands": "Popular brands",
+    "quickFilters": "Quick filters",
+    "planTrip": "Plan a trip with AI",
+    "planTripHint": "Describe it, get a ready-made kit",
+    "newIn": "New in",
+    "pricePerDay": "{price} / day"
+  },
+  "company": {
+    "talkTitle": "Talk to a person",
+    "talkBody": "Group bookings, provider questions or problems with a rental — we reply within a day.",
+    "location": "Sylhet, Bangladesh"
+  },
+  "search": {
+    "label": "Search",
+    "button": "Search gear…",
+    "mobile": "Search gear, categories…"
+  },
+  "account": {
+    "logIn": "Log in",
+    "signUp": "Sign up",
+    "dashboard": "Dashboard",
+    "profile": "Profile",
+    "backToSite": "Back to site",
+    "logOut": "Log out",
+    "loggingOut": "Logging out…",
+    "menu": "Account menu",
+    "saved": "Saved gear",
+    "messages": "Messages",
+    "counter": "{label} ({count})"
+  },
+  "mobile": {
+    "openMenu": "Open menu",
+    "appearance": "Appearance"
+  },
+  "logo": {
+    "home": "GearUp home"
+  },
+  "footer": {
+    "tagline": "Rent sports & outdoor gear instantly, by the day, from local providers.",
+    "social": "GearUp on {network}",
+    "explore": "Explore",
+    "company": "Company",
+    "contact": "Contact",
+    "browseGear": "Browse gear",
+    "howItWorks": "How it works",
+    "becomeProvider": "Become a provider",
+    "logIn": "Log in",
+    "about": "About",
+    "contactLink": "Contact",
+    "privacy": "Privacy & Terms",
+    "copyright": "© {year} GearUp. Built by Abdullah Mamun.",
+    "help": "Help & support"
+  },
+  "palette": {
+    "title": "Search GearUp",
+    "placeholder": "Search gear, categories, pages…",
+    "searching": "Searching…",
+    "empty": "Nothing found. Try a different word.",
+    "groups": {
+      "gear": "Gear",
+      "ai": "AI",
+      "categories": "Categories",
+      "dashboard": "Your dashboard",
+      "pages": "Pages",
+      "actions": "Actions"
+    },
+    "perDay": "/day",
+    "seeAll": "See all results for “{term}”",
+    "askPlanner": "Ask the trip planner: “{query}”",
+    "planTrip": "Plan a trip with AI",
+    "browseAll": "Browse all gear",
+    "switchToLight": "Switch to light mode",
+    "switchToDark": "Switch to dark mode",
+    "logOut": "Log out",
+    "logIn": "Log in",
+    "createAccount": "Create an account",
+    "toMove": "to move",
+    "toOpen": "to open"
+  },
+  "sidebar": {
+    "menu": "Menu",
+    "items": {
+      "overview": "Overview",
+      "myRentals": "My rentals",
+      "saved": "Saved",
+      "payments": "Payments",
+      "profile": "Profile",
+      "myGear": "My gear",
+      "orders": "Orders",
+      "analytics": "Analytics",
+      "users": "Users",
+      "gear": "Gear",
+      "rentals": "Rentals",
+      "damageClaims": "Damage claims",
+      "reviews": "Reviews",
+      "inbox": "Inbox",
+      "subscribers": "Subscribers",
+      "categories": "Categories"
+    },
+    "badges": {
+      "messages": "{count} unread messages",
+      "claims": "{count} open damage claims",
+      "inbox": "{count} unread contact messages"
+    }
+  },
+  "errors": {
+    "publicDescription": "We couldn't load this page. Trying again usually sorts it out.",
+    "dashboardDescription": "We couldn't load this part of your dashboard. Trying again usually sorts it out.",
+    "browseGear": "Browse gear",
+    "backToSite": "Back to site"
+  },
+  "notFound": {
+    "eyebrow": "Error {code}",
+    "title": "Looks like you're off the trail",
+    "description": "That page doesn't exist, or you don't have access to it. Let's get you back to the good stuff.",
+    "browseGear": "Browse gear",
+    "goHome": "Go home"
+  },
+  "links": {
+    "about": "About",
+    "help": "Help",
+    "contact": "Contact",
+    "dashboard": "Dashboard",
+    "myRentals": "My rentals",
+    "orders": "Orders",
+    "analytics": "Analytics",
+    "more": "More"
+  }
+}

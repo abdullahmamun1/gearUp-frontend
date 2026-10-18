@@ -12,6 +12,7 @@ import {
 } from "recharts"
 
 import type { ChartDatum } from "@/api/admin"
+import { useFormat } from "@/i18n/useFormat"
 import { ChartTooltip } from "./ChartTooltip"
 
 const AXIS_TICK = { fill: "var(--muted-foreground)", fontSize: 11 }
@@ -26,6 +27,7 @@ export function BarChartPanel({
   data: ChartDatum[]
   measure: string
 }) {
+  const format = useFormat()
   return (
     <ResponsiveContainer width="100%" height={data.length * ROW_HEIGHT}>
       <BarChart
@@ -68,6 +70,11 @@ export function BarChartPanel({
             offset={8}
             fill="var(--muted-foreground)"
             fontSize={11}
+            formatter={(value) =>
+              typeof value === "number" && format.locale !== "en"
+                ? format.number(value)
+                : value
+            }
           />
         </Bar>
       </BarChart>

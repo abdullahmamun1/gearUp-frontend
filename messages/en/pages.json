@@ -1,0 +1,332 @@
+{
+  "validation": {
+    "nameRequired": "Enter your name.",
+    "emailInvalid": "Enter a valid email address.",
+    "subjectMin": "Add a short subject.",
+    "subjectMax": "Subject must be at most 120 characters.",
+    "messageMin": "Tell us a bit more — at least 20 characters.",
+    "messageMax": "Message must be at most 2000 characters.",
+    "checkForm": "Please check the form."
+  },
+  "about": {
+    "meta": {
+      "title": "About · GearUp",
+      "description": "GearUp is a rental marketplace for sports and outdoor gear — rent by the day from local providers, or earn from kit you already own."
+    },
+    "hero": {
+      "eyebrow": "Our story",
+      "title": "Good gear sits unused far more often than it <accent>gets used</accent>",
+      "description": "A tent gets three weekends a year. A kayak, maybe two. GearUp exists to close that gap — so the people who own equipment can earn from it between trips, and the people who need it for one weekend don't have to buy it outright.",
+      "browse": "Browse the catalogue",
+      "list": "List your gear"
+    },
+    "stats": {
+      "gear": "items listed",
+      "categories": "categories",
+      "providers": "local providers",
+      "reviews": "verified reviews"
+    },
+    "roles": {
+      "eyebrow": "Who it's for",
+      "title": "One marketplace, three points of view",
+      "description": "Renting only works if it's straightforward on both sides of the transaction — and if somebody is keeping an eye on the whole thing.",
+      "renters": {
+        "title": "For renters",
+        "body": "Find gear that's free on your dates, book it by the day, and pay securely online. Every booking tracks its own status, from placed through to returned.",
+        "link": "Browse gear"
+      },
+      "providers": {
+        "title": "For providers",
+        "body": "List the kit you already own, set a daily price and stock count, and confirm bookings as they arrive. Toggle a listing unavailable the moment it needs a repair.",
+        "link": "Start listing"
+      },
+      "admins": {
+        "title": "For our admins",
+        "body": "Moderate every listing and rental, manage categories, and suspend accounts that break the rules — with the change taking effect on that user's very next request.",
+        "link": "Report a problem"
+      }
+    },
+    "trust": {
+      "eyebrow": "Trust",
+      "title": "How we handle the awkward parts",
+      "description": "The rules that make renting from a stranger feel safe.",
+      "payment": {
+        "title": "Payment only opens once a provider agrees",
+        "body": "A booking starts as placed, not paid. Nobody is charged for kit that hasn't been accepted, and a booking can be cancelled freely up until that point."
+      },
+      "cards": {
+        "title": "Card details never touch our servers",
+        "body": "Checkout is handled entirely by Stripe. We store a payment status and an amount — never a card number."
+      },
+      "reviews": {
+        "title": "Reviews come from real rentals",
+        "body": "A review can only be left against a completed order, and only once. Ratings on a listing reflect people who actually rented it."
+      },
+      "stock": {
+        "title": "Stock is respected, not assumed",
+        "body": "Availability is checked against every overlapping booking, so a provider's units can never be double-booked for the same days."
+      }
+    },
+    "cta": {
+      "title": "Got a question first?",
+      "description": "We'd rather answer it before you book than after.",
+      "primary": "Get in touch",
+      "secondary": "Read the FAQ"
+    }
+  },
+  "contact": {
+    "meta": {
+      "title": "Contact · GearUp",
+      "description": "Questions about renting, listing your gear, or an order? Get in touch with the GearUp team."
+    },
+    "hero": {
+      "eyebrow": "We're here to help",
+      "title": "Talk to a <accent>real person</accent>",
+      "description": "Questions about an order, listing your own gear, or something that doesn't look right? Send us a message and we'll get back to you."
+    },
+    "channels": {
+      "email": "Email",
+      "phone": "Phone",
+      "location": "Where we are",
+      "reply": "When we reply",
+      "replyValue": "Within one working day, Sunday to Thursday"
+    },
+    "order": {
+      "title": "Already have an order?",
+      "body": "Include the order reference from your rentals page — it's the first eight characters shown next to each booking. It saves us asking."
+    },
+    "shortcuts": {
+      "title": "Maybe it's already answered",
+      "faq": "Read the FAQ",
+      "earn": "How providers earn"
+    },
+    "form": {
+      "title": "Send us a message",
+      "subtitle": "Every field is required. We reply by email.",
+      "name": "Your name",
+      "namePlaceholder": "Abdullah Mamun",
+      "email": "Email",
+      "subject": "Subject",
+      "subjectPlaceholder": "A question about renting",
+      "message": "Message",
+      "messagePlaceholder": "Tell us what you need — the more detail, the better we can help.",
+      "messageHint": "At least 20 characters.",
+      "sending": "Sending…",
+      "submit": "Send message",
+      "sentBody": "We read everything that comes in. If it's urgent, the phone number on the left is the fastest way to reach us.",
+      "sendAnother": "Send another message"
+    },
+    "result": {
+      "failed": "We couldn't send your message. Please try again in a moment.",
+      "sent": "Thanks, {name} — your message is with us. We've emailed you a copy."
+    }
+  },
+  "privacy": {
+    "meta": {
+      "title": "Privacy & Terms · GearUp",
+      "description": "What GearUp collects, how rentals and payments work, and the terms that apply when you book or list gear."
+    },
+    "hero": {
+      "eyebrow": "Last updated October 2026",
+      "title": "Privacy & <accent>Terms</accent>",
+      "description": "Plain language, no boilerplate. This describes what GearUp actually stores and the rules that apply when you rent or list equipment."
+    },
+    "sections": {
+      "what-we-collect": "What we collect",
+      "how-we-use-it": "How we use it",
+      "cookies": "Cookies",
+      "payments": "Payments",
+      "ai": "AI features",
+      "retention": "Keeping and deleting data",
+      "terms": "Rental terms",
+      "contact": "Contact"
+    },
+    "collect": {
+      "p1": "When you create an account we store your name, email address and — if you give one — a phone number. Your password is never stored as text; it is hashed before it reaches the database, and there is no way for us to read it back.",
+      "p2": "Once you start using the site we also hold your rentals, the dates and quantities you booked, payment records, and any reviews you leave. Providers additionally have the listings they create."
+    },
+    "use": {
+      "p1": "Your details are used to run the service and nothing else: showing a provider who has booked their gear, showing you your own rental history, and letting our admins moderate the platform.",
+      "p2": "We do not sell your information, and we do not send marketing you did not ask for."
+    },
+    "cookies": {
+      "p1": "GearUp sets two cookies, both strictly necessary: a short-lived access token and a longer-lived refresh token that keeps you signed in without asking for your password again.",
+      "p2": "Both are <strong>httpOnly</strong>, which means JavaScript in your browser cannot read them — including any script that managed to get onto the page. There are no advertising or analytics cookies."
+    },
+    "payments": {
+      "p1": "Card payments are handled entirely by <strong>Stripe</strong>. When you pay, you are on Stripe's own checkout page — your card number is never entered into GearUp and never reaches our servers.",
+      "p2": "What we keep is the outcome: an amount, a status, and a reference that lets us match the payment to your order."
+    },
+    "ai": {
+      "p1": "The trip planner, the listing writer and the “What renters say” summaries use <strong>Google Gemini</strong> on its free tier. What you type into the planner, a provider's listing notes, and the text and star ratings of reviews are sent to Google to produce an answer. Names, email addresses and phone numbers are never included.",
+      "p2": "Google may use content sent to its free tier to improve its products, so don't type personal details into the planner. AI suggestions can be wrong — check a listing before you book. Your chat stays in this browser tab only and disappears when you close it."
+    },
+    "retention": {
+      "p1": "Rental and payment records are kept while your account is open, because both you and the provider may need to refer back to them.",
+      "p2": "If you want your account removed, email us and we will confirm before deleting anything."
+    },
+    "terms": {
+      "booking": "<strong>Booking.</strong> A booking is a request until the provider confirms it. Payment only becomes available after that confirmation, so nothing is charged for gear nobody has accepted.",
+      "cancelling": "<strong>Cancelling.</strong> You can cancel a booking yourself while it is still placed. Once it has been paid, contact the provider or us directly.",
+      "condition": "<strong>Condition.</strong> Renters are expected to return gear in the condition it went out in, allowing for ordinary wear. Providers are expected to list equipment that is safe and works as described.",
+      "accounts": "<strong>Accounts.</strong> Accounts that misrepresent gear or abuse the platform can be suspended. Suspension takes effect immediately, on the next request that account makes."
+    },
+    "contact": {
+      "p1": "Questions about any of this, or a request about your own data, should go to <mail>{email}</mail> — or use the <link>contact form</link>."
+    }
+  },
+  "newsletter": {
+    "meta": {
+      "confirmTitle": "Newsletter · GearUp",
+      "unsubscribeTitle": "Unsubscribe · GearUp"
+    },
+    "oneMoment": "One moment…",
+    "confirmFailed": "We couldn't confirm this link",
+    "unsubscribeFailed": "We couldn't find that subscription",
+    "failedDescription": "The link may be incomplete. Open it from the email again.",
+    "subscribedTitle": "You're subscribed",
+    "subscribedDescription": "We'll send news to {email}. Every email has a one-click unsubscribe link.",
+    "browseGear": "Browse gear",
+    "unsubscribedTitle": "You've been unsubscribed",
+    "unsubscribedDescription": "{email} won't get GearUp news any more. Emails about your bookings are not affected.",
+    "signupFailed": "We couldn't sign you up right now. Please try again.",
+    "alreadySubscribed": "You're already on the list.",
+    "checkInbox": "Almost there — check your inbox to confirm."
+  },
+  "help": {
+    "meta": {
+      "title": "Help & support · GearUp",
+      "description": "Answers about renting, payments, deposits, cancellations, listing your gear and your account on GearUp."
+    },
+    "hero": {
+      "eyebrow": "Help centre",
+      "title": "How can we <accent>help</accent>?",
+      "description": "Quick answers about renting, paying, cancelling and listing gear. Can't find yours? We're one message away."
+    },
+    "searchLabel": "Search help",
+    "searchPlaceholder": "Search for deposit, cancel, pickup…",
+    "noResults": "Nothing matches “{query}”. Try another word, or ask us directly.",
+    "results": "{count, plural, one {# answer} other {# answers}}",
+    "stuck": {
+      "title": "Still stuck?",
+      "body": "Send us a message and we'll reply by email, usually within one working day.",
+      "contact": "Contact us",
+      "askAi": "Ask the trip planner"
+    },
+    "topics": {
+      "renting": {
+        "title": "Renting gear",
+        "items": {
+          "how": {
+            "q": "How does renting work?",
+            "a": "Pick the gear and your dates, then send a request. The provider has {respondHours} hours to confirm it. Once they do, you pay by card and the dates are yours. You collect the gear on the start day and return it on the end day."
+          },
+          "dates": {
+            "q": "How long can I rent for, and how far ahead?",
+            "a": "A rental can last up to {maxDays} days and can start up to {aheadDays} days from today. The end day is the return day, so the next renter can pick the gear up that day."
+          },
+          "several": {
+            "q": "Can I rent several items in one order?",
+            "a": "Yes, as long as they come from the same provider. Gear from different providers needs separate orders, because each provider confirms and hands over their own gear."
+          },
+          "pickup": {
+            "q": "Where do I collect the gear?",
+            "a": "Every listing shows the provider's area. The exact pickup point appears on your order once it's paid. Use the messages on the order page to agree a time."
+          },
+          "check": {
+            "q": "What if something is wrong with the gear at pickup?",
+            "a": "Check everything before you leave and tell the provider straight away in the order messages. If you can't sort it out together, contact us and we'll help."
+          }
+        }
+      },
+      "payments": {
+        "title": "Payments & deposits",
+        "items": {
+          "when": {
+            "q": "When do I pay?",
+            "a": "Only after the provider confirms. You then have {payHours} hours to pay securely by card through Stripe, or the order is cancelled and the dates are released. Nothing is charged before that."
+          },
+          "minimum": {
+            "q": "Is there a minimum order?",
+            "a": "Yes, card payments need at least {minOrder}. Prices are in Bangladeshi taka (BDT), per day."
+          },
+          "deposit": {
+            "q": "How does the security deposit work?",
+            "a": "Some listings have a refundable deposit. It's charged together with the rental and refunded to your card when the provider records the return with the gear in good condition."
+          },
+          "damage": {
+            "q": "What happens if gear comes back damaged?",
+            "a": "The provider can report damage and claim part or all of the deposit, never more. GearUp reviews every claim before any of the deposit is kept, and emails you the decision. Whatever isn't kept is refunded."
+          },
+          "refundTime": {
+            "q": "How long do refunds take?",
+            "a": "Refunds go back to the card you paid with. They usually arrive within 5–10 business days, depending on your bank."
+          }
+        }
+      },
+      "cancellations": {
+        "title": "Cancellations & refunds",
+        "items": {
+          "beforePay": {
+            "q": "Can I cancel before paying?",
+            "a": "Yes, any time and free of charge, while the order is waiting for the provider or waiting for your payment."
+          },
+          "afterPay": {
+            "q": "Can I cancel after paying?",
+            "a": "Yes, with a full refund, until {cancelHours} hours before the start day begins. After that the rental can't be cancelled online; contact the provider through the order messages."
+          },
+          "declined": {
+            "q": "What if the provider declines or doesn't answer?",
+            "a": "The order is cancelled automatically and nothing is charged. You'll get an email, and you can book other gear for the same dates."
+          },
+          "late": {
+            "q": "What if my payment goes through after the deadline?",
+            "a": "If a payment lands after the payment window, or for an order that was already cancelled, it's refunded automatically in full."
+          }
+        }
+      },
+      "providers": {
+        "title": "Listing your gear",
+        "items": {
+          "start": {
+            "q": "How do I start listing gear?",
+            "a": "Create a provider account, verify your email address, then add listings from your dashboard with photos, a daily price, how many units you own and an optional deposit. The AI listing writer can draft the description and suggest a price from your notes."
+          },
+          "requests": {
+            "q": "How do I handle booking requests?",
+            "a": "New requests appear in your orders and by email. Confirm or decline within {respondHours} hours, or the request expires. After the customer pays, mark the order picked up at handover and returned when the gear comes back."
+          },
+          "stock": {
+            "q": "How is availability calculated?",
+            "a": "You set how many units you own. GearUp only offers the units that aren't already booked for the chosen dates, so two renters can never book the same unit."
+          },
+          "damage": {
+            "q": "What if gear is returned damaged?",
+            "a": "When you mark the order returned, choose “Report damage”, describe what happened and enter the amount to claim, up to the deposit. GearUp reviews the claim and emails both of you the decision."
+          }
+        }
+      },
+      "account": {
+        "title": "Account & security",
+        "items": {
+          "verify": {
+            "q": "Why do I need to verify my email?",
+            "a": "A verified email is needed before you can pay for a rental or publish a listing. The link we send works for 48 hours; you can resend it from your dashboard. Google sign-ins are verified automatically."
+          },
+          "password": {
+            "q": "I forgot my password.",
+            "a": "Use “Forgot password” on the login page. The reset link works once, for 30 minutes. After a reset you're signed out on your other devices."
+          },
+          "language": {
+            "q": "Can I use GearUp in Bangla?",
+            "a": "Yes. Switch the language from the top bar or your profile. Signed in, your choice is saved, and our emails to you use it too."
+          },
+          "data": {
+            "q": "What do you do with my data?",
+            "a": "Only what's needed to run rentals: your account details, orders and messages. Read the details on our Privacy & Terms page."
+          }
+        }
+      }
+    }
+  }
+}

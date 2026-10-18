@@ -1,16 +1,18 @@
+import { useTranslations } from "@/i18n/translations"
+
 import { Badge } from "@/components/ui/badge"
 import type { PaymentStatus } from "@/types"
 
-const STATUS: Record<
+const VARIANT: Record<
   PaymentStatus,
-  { label: string; variant: React.ComponentProps<typeof Badge>["variant"] }
+  React.ComponentProps<typeof Badge>["variant"]
 > = {
-  PENDING: { label: "Awaiting payment", variant: "warning" },
-  COMPLETED: { label: "Paid", variant: "success" },
-  FAILED: { label: "Failed", variant: "destructive" },
+  PENDING: "warning",
+  COMPLETED: "success",
+  FAILED: "destructive",
 }
 
 export function PaymentStatusBadge({ status }: { status: PaymentStatus }) {
-  const { label, variant } = STATUS[status]
-  return <Badge variant={variant}>{label}</Badge>
+  const t = useTranslations("common.paymentStatus")
+  return <Badge variant={VARIANT[status]}>{t(status)}</Badge>
 }

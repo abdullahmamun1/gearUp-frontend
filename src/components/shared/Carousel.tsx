@@ -5,6 +5,7 @@ import useEmblaCarousel from "embla-carousel-react"
 import Autoplay from "embla-carousel-autoplay"
 import { useReducedMotion } from "motion/react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
+import { useTranslations } from "@/i18n/translations"
 
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -39,6 +40,7 @@ export function Carousel({
   slideClassName?: string
   className?: string
 }) {
+  const t = useTranslations("common")
   const reduced = useReducedMotion()
   const [plugins] = useState(() =>
     autoplay
@@ -107,7 +109,10 @@ export function Carousel({
               key={index}
               role="group"
               aria-roledescription="slide"
-              aria-label={`${index + 1} of ${slides.length}`}
+              aria-label={t("carousel.slide", {
+                index: index + 1,
+                total: slides.length,
+              })}
               className={cn("min-w-0 shrink-0 grow-0 pl-5", slideClassName)}
             >
               {slide}
@@ -122,7 +127,7 @@ export function Carousel({
             <div
               className="flex flex-wrap gap-1.5"
               role="tablist"
-              aria-label={`${label} pages`}
+              aria-label={t("carousel.pages", { label })}
             >
               {snaps.map((_, index) => (
                 <button
@@ -130,7 +135,7 @@ export function Carousel({
                   type="button"
                   role="tab"
                   aria-selected={index === selected}
-                  aria-label={`Go to slide ${index + 1}`}
+                  aria-label={t("carousel.goTo", { index: index + 1 })}
                   onClick={() => api?.scrollTo(index)}
                   className={cn(
                     "h-1.5 cursor-pointer rounded-full transition-all duration-300 outline-none focus-visible:ring-2 focus-visible:ring-ring",
@@ -154,7 +159,7 @@ export function Carousel({
                 className="size-9 rounded-full"
                 onClick={() => api?.scrollPrev()}
                 disabled={!canPrev}
-                aria-label="Previous"
+                aria-label={t("actions.previous")}
               >
                 <ChevronLeft aria-hidden />
               </Button>
@@ -165,7 +170,7 @@ export function Carousel({
                 className="size-9 rounded-full"
                 onClick={() => api?.scrollNext()}
                 disabled={!canNext}
-                aria-label="Next"
+                aria-label={t("actions.next")}
               >
                 <ChevronRight aria-hidden />
               </Button>

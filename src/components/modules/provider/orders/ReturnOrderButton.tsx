@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Loader2 } from "lucide-react"
+import { useTranslations } from "@/i18n/translations"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -17,7 +18,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { formatPrice } from "@/utils/format"
+import { useFormat } from "@/i18n/useFormat"
 import { cn } from "@/lib/utils"
 
 import { OrderStatusButton } from "./OrderStatusButton"
@@ -40,13 +41,16 @@ export function ReturnOrderButton({
   const [amount, setAmount] = useState("")
   const [note, setNote] = useState("")
   const { run, isPending } = useOrderAction(orderId)
+  const t = useTranslations("provider.return")
+  const tc = useTranslations("common")
+  const format = useFormat()
 
   if (deposit <= 0) {
     return (
       <OrderStatusButton
         orderId={orderId}
         next="RETURNED"
-        label="Mark returned"
+        label={tc("providerNextAction.PICKED_UP")}
       />
     )
   }
@@ -63,14 +67,14 @@ export function ReturnOrderButton({
           damageAmount: claim,
           note: note.trim(),
         },
-        "Return recorded. Your damage claim is with GearUp for review.",
+        t("claimDone"),
         () => setOpen(false)
       )
       return
     }
     run(
       { status: "RETURNED", condition: "OK" },
-      `Return recorded. ${formatPrice(deposit)} deposit refunded to the customer.`,
+      t("okDone", { amount: format.price(deposit) }),
       () => setOpen(false)
     )
   }
@@ -84,30 +88,34 @@ export function ReturnOrderButton({
             size="lg"
             className="h-8 text-xs hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
           >
-            Mark returned
+            {tc("providerNextAction.PICKED_UP")}
           </Button>
         }
       />
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>How did it come back?</DialogTitle>
+          <DialogTitle>{t("title")}</DialogTitle>
           <DialogDescription>
-            This order holds a {formatPrice(deposit)} refundable deposit.
+            {t("description", { amount: format.price(deposit) })}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-2" role="radiogroup" aria-label="Condition">
+        <div
+          className="grid gap-2"
+          role="radiogroup"
+          aria-label={t("condition")}
+        >
           <Choice
             selected={!damaged}
             onSelect={() => setDamaged(false)}
-            title="Good condition"
-            body={`Refund the full ${formatPrice(deposit)} deposit now.`}
+            title={t("good")}
+            body={t("goodBody", { amount: format.price(deposit) })}
           />
           <Choice
             selected={damaged}
             onSelect={() => setDamaged(true)}
-            title="Damaged or missing parts"
-            body="Claim part or all of the deposit. GearUp reviews it first."
+            title={t("damaged")}
+            body={t("damagedBody")}
           />
         </div>
 
@@ -115,7 +123,7 @@ export function ReturnOrderButton({
           <div className="grid gap-3">
             <div className="grid gap-1.5">
               <Label htmlFor={`claim-${orderId}`} className="text-xs">
-                Amount to claim (max {formatPrice(deposit)})
+                {t("claimLabel", { amount: format.price(deposit) })}
               </Label>
               <Input
                 id={`claim-${orderId}`}
@@ -128,14 +136,14 @@ export function ReturnOrderButton({
             </div>
             <div className="grid gap-1.5">
               <Label htmlFor={`damage-${orderId}`} className="text-xs">
-                What&apos;s damaged?
+                {t("damageLabel")}
               </Label>
               <Textarea
                 id={`damage-${orderId}`}
                 value={note}
                 onChange={(event) => setNote(event.target.value)}
                 maxLength={500}
-                placeholder="e.g. Paddle blade cracked, needs replacing."
+                placeholder={t("damagePlaceholder")}
               />
             </div>
           </div>
@@ -145,7 +153,7 @@ export function ReturnOrderButton({
           <DialogClose
             render={
               <Button variant="outline" size="lg" className="h-9 text-sm">
-                Cancel
+                {tc("actions.cancel")}
               </Button>
             }
           />
@@ -159,10 +167,10 @@ export function ReturnOrderButton({
               <Loader2 className="size-4 animate-spin" aria-hidden />
             )}
             {isPending
-              ? "Saving…"
+              ? tc("actions.saving")
               : damaged
-                ? "Submit claim"
-                : "Confirm return"}
+                ? t("submitClaim")
+                : t("confirmReturn")}
           </Button>
         </DialogFooter>
       </DialogContent>

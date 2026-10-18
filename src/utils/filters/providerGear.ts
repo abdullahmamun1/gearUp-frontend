@@ -11,13 +11,14 @@ export type { RawSearchParams }
 
 export const PROVIDER_GEAR_PAGE_SIZE = 10
 
+/** `labelKey` is under `provider.filters.sort`. */
 export const PROVIDER_GEAR_SORT_OPTIONS = [
-  { value: "createdAt:desc", label: "Newest first" },
-  { value: "createdAt:asc", label: "Oldest first" },
-  { value: "name:asc", label: "Name: A to Z" },
-  { value: "pricePerDay:desc", label: "Price: high to low" },
-  { value: "pricePerDay:asc", label: "Price: low to high" },
-  { value: "stock:asc", label: "Stock: low to high" },
+  { value: "createdAt:desc", labelKey: "newest" },
+  { value: "createdAt:asc", labelKey: "oldest" },
+  { value: "name:asc", labelKey: "nameAsc" },
+  { value: "pricePerDay:desc", labelKey: "priceDesc" },
+  { value: "pricePerDay:asc", labelKey: "priceAsc" },
+  { value: "stock:asc", labelKey: "stockAsc" },
 ] as const
 
 export type ProviderGearSort =
@@ -26,10 +27,11 @@ export type ProviderGearSort =
 const DEFAULT_PROVIDER_GEAR_SORT: ProviderGearSort =
   PROVIDER_GEAR_SORT_OPTIONS[0].value
 
+/** `labelKey` is under `provider.filters.availabilityOption`. */
 export const AVAILABILITY_OPTIONS = [
-  { value: "all", label: "All listings" },
-  { value: "true", label: "Available" },
-  { value: "false", label: "Unavailable" },
+  { value: "all", labelKey: "all" },
+  { value: "true", labelKey: "available" },
+  { value: "false", labelKey: "unavailable" },
 ] as const
 
 export type Availability = (typeof AVAILABILITY_OPTIONS)[number]["value"]

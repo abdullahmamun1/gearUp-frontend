@@ -4,6 +4,7 @@ import Image from "next/image"
 import { useCallback, useEffect, useState, ViewTransition } from "react"
 import useEmblaCarousel from "embla-carousel-react"
 import { Backpack, ChevronLeft, ChevronRight, Expand, X } from "lucide-react"
+import { useTranslations } from "@/i18n/translations"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -32,6 +33,7 @@ export function GearGallery({
   name: string
   outOfStock: boolean
 }) {
+  const t = useTranslations("gear.gallery")
   const [mainRef, main] = useEmblaCarousel({ loop: images.length > 1 })
   const [thumbsRef, thumbs] = useEmblaCarousel({
     containScroll: "keepSnaps",
@@ -57,7 +59,7 @@ export function GearGallery({
 
   const alt = (index: number) =>
     images.length > 1
-      ? `${name} — photo ${index + 1} of ${images.length}`
+      ? t("photoAlt", { name, index: index + 1, total: images.length })
       : name
 
   return (
@@ -66,8 +68,8 @@ export function GearGallery({
         <div
           role="region"
           aria-roledescription="carousel"
-          aria-label={`${name} photos`}
-          className="group relative aspect-4/3 overflow-hidden rounded-xl border bg-muted shadow-xs"
+          aria-label={t("photos", { name })}
+          className="group relative aspect-4/3 overflow-hidden rounded-2xl border bg-muted shadow-xs"
           onKeyDown={(event) => {
             if (event.key === "ArrowLeft") main?.scrollPrev()
             if (event.key === "ArrowRight") main?.scrollNext()
@@ -83,14 +85,18 @@ export function GearGallery({
                     key={image}
                     role="group"
                     aria-roledescription="slide"
-                    aria-label={`${index + 1} of ${images.length}`}
+                    aria-label={t("slide", {
+                      index: index + 1,
+                      total: images.length,
+                    })}
                     className="relative h-full min-w-0 shrink-0 grow-0 basis-full"
                   >
                     <Image
                       src={image}
                       alt={alt(index)}
                       fill
-                      priority={index === 0}
+                      loading={index === 0 ? "eager" : "lazy"}
+                      fetchPriority={index === 0 ? "high" : "auto"}
                       sizes="(min-width: 1024px) 55vw, 100vw"
                       className="object-cover"
                     />
@@ -114,7 +120,7 @@ export function GearGallery({
               size="icon-lg"
               className="absolute right-3 bottom-3 size-9 rounded-full"
               onClick={() => setLightbox(true)}
-              aria-label="View photos full screen"
+              aria-label={t("fullScreen")}
             >
               <Expand aria-hidden />
             </Button>
@@ -122,7 +128,7 @@ export function GearGallery({
 
           {outOfStock && (
             <div className="absolute inset-0 grid place-items-center bg-background/70">
-              <Badge variant="secondary">Unavailable</Badge>
+              <Badge variant="secondary">{t("unavailable")}</Badge>
             </div>
           )}
         </div>
@@ -136,7 +142,10 @@ export function GearGallery({
                 key={image}
                 type="button"
                 onClick={() => main?.scrollTo(index)}
-                aria-label={`Show photo ${index + 1} of ${images.length}`}
+                aria-label={t("showPhoto", {
+                  index: index + 1,
+                  total: images.length,
+                })}
                 aria-current={index === selected}
                 className={cn(
                   "relative size-16 shrink-0 cursor-pointer overflow-hidden rounded-lg ring-1 transition-all outline-none focus-visible:ring-2 focus-visible:ring-ring",
@@ -178,6 +187,7 @@ function GalleryArrow({
   side: "left" | "right"
   onClick: () => void
 }) {
+  const t = useTranslations("gear.gallery")
   const Icon = side === "left" ? ChevronLeft : ChevronRight
   return (
     <Button
@@ -185,7 +195,7 @@ function GalleryArrow({
       variant="glass"
       size="icon-lg"
       onClick={onClick}
-      aria-label={side === "left" ? "Previous photo" : "Next photo"}
+      aria-label={side === "left" ? t("previous") : t("next")}
       className={cn(
         "absolute top-1/2 size-9 -translate-y-1/2 rounded-full opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 max-md:opacity-100",
         side === "left" ? "left-3" : "right-3"
@@ -217,6 +227,7 @@ function Lightbox({
   name: string
   onIndexChange: (index: number) => void
 }) {
+  const t = useTranslations("gear.gallery")
   const [ref, api] = useEmblaCarousel({
     loop: images.length > 1,
     startIndex: start,
@@ -246,7 +257,7 @@ function Lightbox({
           if (event.key === "ArrowRight") api?.scrollNext()
         }}
       >
-        <DialogTitle className="sr-only">{name} photos</DialogTitle>
+        <DialogTitle className="sr-only">{t("photos", { name })}</DialogTitle>
         <div ref={ref} className="h-full overflow-hidden">
           <div className="flex h-full">
             {images.map((image, index) => (
@@ -267,7 +278,7 @@ function Lightbox({
         </div>
 
         <p className="absolute top-4 left-4 rounded-full bg-white/10 px-3 py-1 font-mono text-xs tabular-nums">
-          {selected + 1} / {images.length}
+          {t("counter", { index: selected + 1, total: images.length })}
         </p>
         <DialogClose
           render={
@@ -276,7 +287,7 @@ function Lightbox({
               variant="ghost"
               size="icon-lg"
               className="absolute top-3 right-3 size-10 rounded-full text-white hover:bg-white/10 hover:text-white"
-              aria-label="Close"
+              aria-label={t("close")}
             />
           }
         >
@@ -289,7 +300,7 @@ function Lightbox({
               variant="ghost"
               size="icon-lg"
               onClick={() => api?.scrollPrev()}
-              aria-label="Previous photo"
+              aria-label={t("previous")}
               className="absolute top-1/2 left-3 size-11 -translate-y-1/2 rounded-full text-white hover:bg-white/10 hover:text-white"
             >
               <ChevronLeft aria-hidden />
@@ -299,7 +310,7 @@ function Lightbox({
               variant="ghost"
               size="icon-lg"
               onClick={() => api?.scrollNext()}
-              aria-label="Next photo"
+              aria-label={t("next")}
               className="absolute top-1/2 right-3 size-11 -translate-y-1/2 rounded-full text-white hover:bg-white/10 hover:text-white"
             >
               <ChevronRight aria-hidden />

@@ -1,8 +1,10 @@
-import Link from "next/link"
+import { Link } from "@/i18n/navigation"
 import type { LucideIcon } from "lucide-react"
 import { ArrowUpRight } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+
+import { FormattedNumber } from "./Formatted"
 
 export function PageHeader({
   title,
@@ -37,7 +39,10 @@ const TONES = {
 
 export type StatTone = keyof typeof TONES
 
-/** A headline number. With `href`, the whole card links to the list behind it. */
+/**
+ * A headline number (plain numbers get the locale's digits). With `href`,
+ * the whole card links to the list behind it.
+ */
 export function StatCard({
   label,
   value,
@@ -69,7 +74,7 @@ export function StatCard({
         )}
       </div>
       <p className="mt-2 font-heading text-2xl font-bold tracking-tight sm:text-3xl">
-        {value}
+        {typeof value === "number" ? <FormattedNumber value={value} /> : value}
       </p>
       {hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
       {href && (
@@ -82,11 +87,14 @@ export function StatCard({
   )
 
   return href ? (
-    <Link href={href} className="group relative block card-elevated p-4 sm:p-5">
+    <Link
+      href={href}
+      className="group relative block h-full card-elevated p-4 sm:p-5"
+    >
       {body}
     </Link>
   ) : (
-    <div className="relative rounded-xl border bg-card p-4 shadow-xs sm:p-5">
+    <div className="relative h-full rounded-2xl border bg-card p-4 shadow-xs sm:p-5">
       {body}
     </div>
   )

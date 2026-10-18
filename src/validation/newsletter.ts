@@ -1,7 +1,7 @@
 import { z } from "zod"
 
 export const newsletterSchema = z.object({
-  email: z.email("Enter a valid email address."),
+  email: z.email("pages.validation.emailInvalid"),
 })
 
 export type NewsletterInput = z.infer<typeof newsletterSchema>

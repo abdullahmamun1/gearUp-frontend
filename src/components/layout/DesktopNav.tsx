@@ -1,25 +1,36 @@
 "use client"
 
 import Image from "next/image"
-import NextLink from "next/link"
+import { Link as NextLink, usePathname } from "@/i18n/navigation"
 import { useState } from "react"
 import { NavigationMenu } from "@base-ui/react/navigation-menu"
 import { motion } from "motion/react"
-import { ArrowRight, Backpack, ChevronDown, MapPin, Mail } from "lucide-react"
+import { useTranslations } from "@/i18n/translations"
+import {
+  ArrowRight,
+  Backpack,
+  ChevronDown,
+  Mail,
+  MapPin,
+  Sparkles,
+} from "lucide-react"
 
+import { openGearFinder } from "@/components/modules/ai/GearFinder"
 import { categoryIcon } from "@/constants/categoryIcons"
 import {
   COMPANY_NAV,
-  PROVIDER_DASHBOARD_NAV,
-  PROVIDER_NAV,
+  PUBLIC_LINKS,
   QUICK_FILTERS,
+  ROLE_LINKS,
   type NavItem,
+  type NavLink,
 } from "@/constants/navigation"
 import { SITE_CONTACT } from "@/constants/siteConfig"
 import { useSessionUser } from "@/hooks/useSessionUser"
+import { useFormat } from "@/i18n/useFormat"
 import { cn } from "@/lib/utils"
-import { formatPrice } from "@/utils/format"
-import type { Role } from "@/types"
+
+import { useQuickFilterLabel } from "./useQuickFilterLabel"
 
 export type NavCategory = { id: string; name: string; count: number }
 export type NavFeatured = {
@@ -30,11 +41,9 @@ export type NavFeatured = {
   category?: string
 }
 
-const MENUS = [
-  { key: "browse", label: "Browse" },
-  { key: "providers", label: "For providers" },
-  { key: "company", label: "Company" },
-] as const
+/** "company" is the "More" menu: shown only below `lg` (tablets), where
+ *  the About, Help and Contact links don't fit as direct links. */
+const MENUS = ["browse", "company"] as const
 
 /**
  * Desktop mega menu on Base UI's NavigationMenu: hover or click a trigger to
@@ -50,6 +59,8 @@ export function DesktopNav({
   brands: string[]
   featured: NavFeatured | null
 }) {
+  const t = useTranslations("nav.menus")
+  const tLinks = useTranslations("nav.links")
   const role = useSessionUser().user?.role ?? null
   const [open, setOpen] = useState<string | null>(null)
   const [hovered, setHovered] = useState<string | null>(null)
@@ -69,41 +80,57 @@ export function DesktopNav({
       >
         {MENUS.map((menu) => (
           <NavigationMenu.Item
-            key={menu.key}
-            value={menu.key}
-            onPointerEnter={() => setHovered(menu.key)}
+            key={menu}
+            value={menu}
+            onPointerEnter={() => setHovered(menu)}
+            className={cn(menu === "company" && "lg:hidden")}
           >
             <NavigationMenu.Trigger
-              className="relative isolate flex h-11 cursor-pointer items-center gap-1 rounded-full px-4 text-base font-medium text-foreground/80 transition-colors outline-none select-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring data-popup-open:text-foreground"
-              onFocus={() => setHovered(menu.key)}
+              className="relative isolate flex h-11 cursor-pointer items-center gap-1 rounded-full px-3.5 text-base font-medium whitespace-nowrap text-foreground/80 transition-colors outline-none select-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring data-popup-open:text-foreground"
+              onFocus={() => setHovered(menu)}
               onBlur={() => setHovered(null)}
             >
-              {highlighted === menu.key && (
+              {highlighted === menu && (
                 <motion.span
                   layoutId="nav-pill"
                   className="absolute inset-0 -z-10 rounded-full bg-accent"
                   transition={{ type: "spring", stiffness: 420, damping: 34 }}
                 />
               )}
-              {menu.label}
+              {menu === "company" ? tLinks("more") : t(menu)}
               <NavigationMenu.Icon className="transition-transform duration-200 data-popup-open:rotate-180">
                 <ChevronDown className="size-4 opacity-60" aria-hidden />
               </NavigationMenu.Icon>
             </NavigationMenu.Trigger>
 
             <NavigationMenu.Content className={contentClass}>
-              {menu.key === "browse" && (
+              {menu === "browse" && (
                 <BrowsePanel
                   categories={categories}
                   brands={brands}
                   featured={featured}
                 />
               )}
-              {menu.key === "providers" && <ProvidersPanel role={role} />}
-              {menu.key === "company" && <CompanyPanel />}
+              {menu === "company" && <CompanyPanel />}
             </NavigationMenu.Content>
           </NavigationMenu.Item>
         ))}
+        {PUBLIC_LINKS.map((link) => (
+          <TopLink key={link.key} link={link} className="hidden lg:flex" />
+        ))}
+        {/* After the public links, so they don't move when the session loads.
+            Customers also get the saved/messages counters, which leave no
+            room for these at lg; the account menu links there anyway. */}
+        {role &&
+          ROLE_LINKS[role].map((link) => (
+            <TopLink
+              key={link.key}
+              link={link}
+              className={
+                role === "CUSTOMER" ? "hidden xl:flex" : "hidden lg:flex"
+              }
+            />
+          ))}
       </NavigationMenu.List>
 
       <NavigationMenu.Portal>
@@ -152,6 +179,31 @@ function MenuLink({
   )
 }
 
+/** A direct link in the bar (no panel), highlighted on its own pages. */
+function TopLink({ link, className }: { link: NavLink; className?: string }) {
+  const t = useTranslations("nav.links")
+  const pathname = usePathname()
+  const active =
+    pathname === link.href ||
+    (link.href !== "/" && pathname.startsWith(`${link.href}/`))
+
+  return (
+    <NavigationMenu.Item className={cn("flex", className)}>
+      <NavigationMenu.Link
+        render={<NextLink href={link.href} />}
+        active={active}
+        aria-current={active ? "page" : undefined}
+        className={cn(
+          "flex h-11 items-center rounded-full px-3.5 text-base font-medium whitespace-nowrap text-foreground/80 transition-colors outline-none hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring",
+          active && "text-primary hover:text-primary"
+        )}
+      >
+        {t(link.key)}
+      </NavigationMenu.Link>
+    </NavigationMenu.Item>
+  )
+}
+
 function Heading({ children }: { children: React.ReactNode }) {
   return (
     <p className="mb-2 px-2 text-eyebrow text-muted-foreground">{children}</p>
@@ -167,10 +219,14 @@ function BrowsePanel({
   brands: string[]
   featured: NavFeatured | null
 }) {
+  const t = useTranslations("nav.browse")
+  const format = useFormat()
+  const quickFilterLabel = useQuickFilterLabel()
+
   return (
     <div className="grid gap-6 md:grid-cols-[1.25fr_1fr_0.95fr]">
       <div>
-        <Heading>Categories</Heading>
+        <Heading>{t("categories")}</Heading>
         <ul className="grid gap-0.5">
           {categories.map((category) => {
             const Icon = categoryIcon(category.name)
@@ -187,7 +243,7 @@ function BrowsePanel({
                     {category.name}
                   </span>
                   <span className="text-xs text-muted-foreground tabular-nums">
-                    {category.count}
+                    {format.number(category.count)}
                   </span>
                 </MenuLink>
               </li>
@@ -198,7 +254,7 @@ function BrowsePanel({
           href="/gear"
           className="group mt-2 inline-flex items-center gap-1 px-2 py-1 text-sm font-medium text-primary"
         >
-          Browse all gear
+          {t("browseAll")}
           <ArrowRight
             className="size-3.5 transition-transform group-hover:translate-x-0.5"
             aria-hidden
@@ -207,7 +263,7 @@ function BrowsePanel({
       </div>
 
       <div>
-        <Heading>Popular brands</Heading>
+        <Heading>{t("popularBrands")}</Heading>
         <div className="flex flex-wrap gap-1.5 px-2">
           {brands.slice(0, 10).map((brand) => (
             <MenuLink
@@ -220,7 +276,7 @@ function BrowsePanel({
           ))}
         </div>
         <div className="mt-5">
-          <Heading>Quick filters</Heading>
+          <Heading>{t("quickFilters")}</Heading>
           <ul className="grid gap-0.5">
             {QUICK_FILTERS.map((filter) => (
               <li key={filter.href}>
@@ -229,12 +285,30 @@ function BrowsePanel({
                   className="flex items-center gap-2.5 px-2 py-2 text-sm transition-colors hover:bg-accent"
                 >
                   <filter.icon className="size-4 text-lagoon" aria-hidden />
-                  {filter.label}
+                  {quickFilterLabel(filter)}
                 </MenuLink>
               </li>
             ))}
           </ul>
         </div>
+        <button
+          type="button"
+          onClick={() => openGearFinder()}
+          className="group mt-4 flex w-full cursor-pointer items-center gap-3 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2.5 text-left transition-colors hover:border-primary/40 hover:bg-primary/10"
+        >
+          <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-(image:--gradient-brand) text-primary-foreground shadow-glow-primary">
+            <Sparkles
+              className="size-4 transition-transform group-hover:rotate-12"
+              aria-hidden
+            />
+          </span>
+          <span>
+            <span className="block text-sm font-semibold">{t("planTrip")}</span>
+            <span className="block text-xs text-muted-foreground">
+              {t("planTripHint")}
+            </span>
+          </span>
+        </button>
       </div>
 
       {featured ? (
@@ -258,7 +332,7 @@ function BrowsePanel({
               />
             )}
             <span className="absolute top-2 left-2 rounded-full bg-ember px-2 py-0.5 text-[10px] font-semibold text-ember-foreground">
-              New in
+              {t("newIn")}
             </span>
           </span>
           <span className="grid gap-0.5 p-3">
@@ -267,7 +341,7 @@ function BrowsePanel({
             </span>
             <span className="text-xs text-muted-foreground">
               {featured.category && `${featured.category} · `}
-              {formatPrice(featured.pricePerDay)} / day
+              {t("pricePerDay", { price: format.price(featured.pricePerDay) })}
             </span>
           </span>
         </MenuLink>
@@ -279,6 +353,8 @@ function BrowsePanel({
 }
 
 function ItemList({ items }: { items: NavItem[] }) {
+  const t = useTranslations("nav.items")
+
   return (
     <ul className="grid gap-1">
       {items.map((item) => (
@@ -291,9 +367,11 @@ function ItemList({ items }: { items: NavItem[] }) {
               <item.icon className="size-[18px]" aria-hidden />
             </span>
             <span className="grid gap-0.5">
-              <span className="text-sm font-semibold">{item.title}</span>
+              <span className="text-sm font-semibold">
+                {t(`${item.key}.title`)}
+              </span>
               <span className="text-xs text-muted-foreground">
-                {item.description}
+                {t(`${item.key}.description`)}
               </span>
             </span>
           </MenuLink>
@@ -303,53 +381,18 @@ function ItemList({ items }: { items: NavItem[] }) {
   )
 }
 
-function ProvidersPanel({ role }: { role: Role | null }) {
-  const items =
-    role === "PROVIDER"
-      ? [PROVIDER_DASHBOARD_NAV, ...PROVIDER_NAV.slice(1)]
-      : PROVIDER_NAV
-
-  return (
-    <div className="grid gap-5 md:grid-cols-[1.2fr_1fr]">
-      <div>
-        <Heading>Rent out your kit</Heading>
-        <ItemList items={items} />
-      </div>
-      <MenuLink
-        href="/#earn"
-        className="flex flex-col justify-between gap-6 bg-(image:--gradient-brand) p-5 text-primary-foreground shadow-md"
-      >
-        <span className="text-sm opacity-90">
-          Two tents, rented 8 days a month
-        </span>
-        <span>
-          <span className="block text-h2 tabular-nums">
-            {formatPrice(12800)}
-          </span>
-          <span className="text-sm opacity-90">a month, roughly</span>
-        </span>
-        <span className="inline-flex items-center gap-1 text-sm font-semibold">
-          Try the earnings calculator
-          <ArrowRight className="size-3.5" aria-hidden />
-        </span>
-      </MenuLink>
-    </div>
-  )
-}
-
 function CompanyPanel() {
+  const t = useTranslations("nav.company")
+
   return (
     <div className="grid gap-5 md:grid-cols-[1.4fr_1fr]">
       <div>
         <Heading>GearUp</Heading>
         <ItemList items={COMPANY_NAV} />
       </div>
-      <div className="rounded-xl border bg-card p-4 shadow-xs">
-        <p className="text-sm font-semibold">Talk to a person</p>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Group bookings, provider questions or problems with a rental — we
-          reply within a day.
-        </p>
+      <div className="rounded-2xl border bg-card p-4 shadow-xs">
+        <p className="text-sm font-semibold">{t("talkTitle")}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{t("talkBody")}</p>
         <ul className="mt-3 grid gap-2 text-xs">
           <li className="flex items-center gap-2">
             <Mail className="size-3.5 text-primary" aria-hidden />
@@ -357,7 +400,7 @@ function CompanyPanel() {
           </li>
           <li className="flex items-center gap-2">
             <MapPin className="size-3.5 text-primary" aria-hidden />
-            {SITE_CONTACT.location}
+            {t("location")}
           </li>
         </ul>
       </div>

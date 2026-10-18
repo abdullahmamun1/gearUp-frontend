@@ -1,5 +1,6 @@
-import Link from "next/link"
+import { Link } from "@/i18n/navigation"
 import { ArrowRight } from "lucide-react"
+import { useTranslations } from "@/i18n/translations"
 
 import { Magnetic } from "@/components/shared/motion/Magnetic"
 import { buttonVariants } from "@/components/ui/button"
@@ -7,18 +8,29 @@ import { cn } from "@/lib/utils"
 
 type CtaLink = { href: string; label: string }
 
-/** Closing gradient band: the bottom of the home page and inner pages. */
+/**
+ * Closing gradient band: the bottom of the home page and inner pages. Inner
+ * pages pass their own (translated) text; the defaults are the home page's.
+ */
 export function FinalCta({
-  title = "Your next adventure is a few taps away",
-  description = "Find the kit, pick your dates and pay securely. The provider handles the rest.",
-  primary = { href: "/gear", label: "Browse gear" },
-  secondary = { href: "/register", label: "List your gear" },
+  title,
+  description,
+  primary,
+  secondary,
 }: {
   title?: string
   description?: string
   primary?: CtaLink
   secondary?: CtaLink | null
 } = {}) {
+  const t = useTranslations("home.finalCta")
+  title ??= t("title")
+  description ??= t("description")
+  primary ??= { href: "/gear", label: t("browse") }
+  if (secondary === undefined) {
+    secondary = { href: "/register", label: t("list") }
+  }
+
   return (
     <section className="mx-auto max-w-6xl px-4 pb-20">
       <div className="reveal relative isolate overflow-hidden rounded-3xl bg-(image:--gradient-brand) px-6 py-14 text-center text-primary-foreground shadow-xl sm:px-12 sm:py-20">

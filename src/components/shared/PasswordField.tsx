@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Eye, EyeOff, Lock } from "lucide-react"
+import { useTranslations } from "@/i18n/translations"
 
 import { TextField } from "./TextField"
 
@@ -12,6 +13,7 @@ type PasswordFieldProps = Omit<
 
 /** A TextField for passwords, with a button to show or hide what's typed. */
 export function PasswordField(props: PasswordFieldProps) {
+  const t = useTranslations("common.password")
   const [visible, setVisible] = useState(false)
 
   return (
@@ -23,7 +25,7 @@ export function PasswordField(props: PasswordFieldProps) {
         <button
           type="button"
           onClick={() => setVisible((current) => !current)}
-          aria-label={visible ? "Hide password" : "Show password"}
+          aria-label={visible ? t("hide") : t("show")}
           aria-pressed={visible}
           className="grid size-8 cursor-pointer place-items-center rounded-md text-muted-foreground transition-colors outline-none hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
         >

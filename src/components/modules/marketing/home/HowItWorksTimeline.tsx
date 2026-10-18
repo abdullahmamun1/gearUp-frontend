@@ -3,6 +3,8 @@
 import { useRef } from "react"
 import { motion, useReducedMotion, useScroll, useSpring } from "motion/react"
 
+import { useFormat } from "@/i18n/useFormat"
+
 /**
  * A line draws itself across (or down, on phones) the steps as the section
  * scrolls through the viewport. With reduced motion the line is simply full.
@@ -14,6 +16,7 @@ export function HowItWorksTimeline({
   steps: { title: string; body: string; scene: React.ReactNode }[]
 }) {
   const ref = useRef<HTMLOListElement>(null)
+  const format = useFormat()
   const reduced = useReducedMotion()
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -45,7 +48,7 @@ export function HowItWorksTimeline({
           className="reveal relative pl-16 md:pl-0 md:text-center"
         >
           <span className="absolute top-0 left-0 grid size-12 place-items-center rounded-full border-4 border-background bg-primary font-heading text-lg font-bold text-primary-foreground shadow-glow-primary md:relative md:mx-auto">
-            {index + 1}
+            {format.number(index + 1)}
           </span>
           <div className="mx-auto max-w-[15rem] md:mt-6">{step.scene}</div>
           <h3 className="mt-4 text-h3">{step.title}</h3>

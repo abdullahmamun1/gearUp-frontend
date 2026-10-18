@@ -1,10 +1,11 @@
 "use client"
 
-import Link from "next/link"
+import { Link } from "@/i18n/navigation"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { MailCheck, Mail } from "lucide-react"
+import { useTranslations } from "@/i18n/translations"
 
 import { TextField } from "@/components/shared/TextField"
 import { Button } from "@/components/ui/button"
@@ -15,6 +16,7 @@ import {
 import { forgotPassword } from "@/api/auth"
 
 export function ForgotPasswordForm() {
+  const t = useTranslations("auth")
   const [sentTo, setSentTo] = useState<string | null>(null)
   const {
     register,
@@ -30,7 +32,7 @@ export function ForgotPasswordForm() {
     const res = await forgotPassword(values.email)
     if (!res.success) {
       setError("root", {
-        message: res.message || "Something went wrong. Please try again.",
+        message: res.message || t("errors.generic"),
       })
       return
     }
@@ -46,20 +48,24 @@ export function ForgotPasswordForm() {
             aria-hidden
           />
           <span>
-            If an account exists for <strong>{sentTo}</strong>, a reset link is
-            on its way. It works for 30 minutes.
+            {t.rich("forgot.sent", {
+              email: sentTo,
+              strong: (chunks) => <strong>{chunks}</strong>,
+            })}
           </span>
         </p>
         <p className="text-muted-foreground">
-          Nothing arrived? Check your spam folder, or{" "}
-          <button
-            type="button"
-            onClick={() => setSentTo(null)}
-            className="text-primary hover:underline"
-          >
-            try another email
-          </button>
-          .
+          {t.rich("forgot.nothingArrived", {
+            retry: (chunks) => (
+              <button
+                type="button"
+                onClick={() => setSentTo(null)}
+                className="text-primary hover:underline"
+              >
+                {chunks}
+              </button>
+            ),
+          })}
         </p>
       </div>
     )
@@ -77,7 +83,7 @@ export function ForgotPasswordForm() {
       )}
       <TextField
         id="email"
-        label="Email"
+        label={t("fields.email")}
         icon={Mail}
         type="email"
         autoComplete="email"
@@ -91,12 +97,12 @@ export function ForgotPasswordForm() {
         className="h-10 text-sm"
         disabled={isSubmitting}
       >
-        {isSubmitting ? "Sending…" : "Send reset link"}
+        {isSubmitting ? t("forgot.sending") : t("forgot.submit")}
       </Button>
       <p className="text-center text-xs text-muted-foreground">
-        Remembered it?{" "}
+        {t("forgot.remembered")}{" "}
         <Link href="/login" className="text-primary hover:underline">
-          Back to log in
+          {t("forgot.backToLogin")}
         </Link>
       </p>
     </form>

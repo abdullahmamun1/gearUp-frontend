@@ -7,7 +7,7 @@ export function PlatformStatsSkeleton() {
     <SectionSkeleton tone="muted">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }, (_, i) => (
-          <div key={i} className="rounded-xl border bg-card p-5 shadow-xs">
+          <div key={i} className="rounded-2xl border bg-card p-5 shadow-xs">
             <Skeleton className="size-10 rounded-full" />
             <Skeleton className="mt-4 h-9 w-20" />
             <Skeleton className="mt-1.5 h-4 w-28" />

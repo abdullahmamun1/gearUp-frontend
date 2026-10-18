@@ -1,0 +1,189 @@
+{
+  "actions": {
+    "save": "Save",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "search": "Search",
+    "retry": "Try again",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "viewAll": "View all",
+    "learnMore": "Learn more",
+    "loading": "Loading…",
+    "goHome": "Go home",
+    "clearFilters": "Clear filters",
+    "showMore": "Show more",
+    "copy": "Copy",
+    "copied": "Copied"
+  },
+  "rentalStatus": {
+    "PLACED": "Awaiting confirmation",
+    "CONFIRMED": "Confirmed · pay now",
+    "PAID": "Paid",
+    "PICKED_UP": "Picked up",
+    "RETURNED": "Returned",
+    "CANCELLED": "Cancelled"
+  },
+  "rentalStatusShort": {
+    "PLACED": "Placed",
+    "CONFIRMED": "Confirmed",
+    "PAID": "Paid",
+    "PICKED_UP": "Picked up",
+    "RETURNED": "Returned",
+    "CANCELLED": "Cancelled"
+  },
+  "paymentStatus": {
+    "PENDING": "Awaiting payment",
+    "COMPLETED": "Paid",
+    "FAILED": "Failed"
+  },
+  "depositStatus": {
+    "NONE": "Charged with payment, refunded on return",
+    "HELD": "Held until return",
+    "REFUNDED": "Refunded",
+    "PARTIALLY_REFUNDED": "Partly refunded",
+    "CLAIMED": "Damage claim under review",
+    "KEPT": "Kept to cover damage"
+  },
+  "cancelReason": {
+    "CUSTOMER": "Cancelled by the customer",
+    "PROVIDER_DECLINED": "Declined by the provider",
+    "PAYMENT_EXPIRED": "Not paid in time",
+    "NO_PROVIDER_RESPONSE": "The provider didn't respond in time",
+    "ADMIN": "Cancelled by GearUp"
+  },
+  "providerNextAction": {
+    "PLACED": "Confirm order",
+    "PAID": "Mark picked up",
+    "PICKED_UP": "Mark returned"
+  },
+  "role": {
+    "CUSTOMER": "Customer",
+    "PROVIDER": "Provider",
+    "ADMIN": "Admin"
+  },
+  "roleLong": {
+    "CUSTOMER": "Customer",
+    "PROVIDER": "Provider",
+    "ADMIN": "Administrator"
+  },
+  "userStatus": {
+    "ACTIVE": "Active",
+    "SUSPENDED": "Suspended"
+  },
+  "units": {
+    "perDay": "/ day",
+    "days": "{count, plural, one {# day} other {# days}}",
+    "items": "{count, plural, one {# item} other {# items}}",
+    "orders": "{count, plural, one {# order} other {# orders}}",
+    "reviews": "{count, plural, one {# review} other {# reviews}}",
+    "listings": "{count, plural, one {# listing} other {# listings}}"
+  },
+  "carousel": {
+    "slide": "{index, number} of {total, number}",
+    "pages": "{label} pages",
+    "goTo": "Go to slide {index, number}"
+  },
+  "dateRange": {
+    "any": "Any dates",
+    "range": "{from} → {to}",
+    "hint": "Shows only gear that's free for your whole trip.",
+    "clear": "Clear dates"
+  },
+  "errorState": {
+    "title": "Something went wrong",
+    "description": "That request didn't go through. Trying again usually sorts it out.",
+    "reference": "Reference: {digest}"
+  },
+  "gallery": {
+    "tooMany": "Up to {max} photos per listing.",
+    "needHttps": "Paste an https:// image URL.",
+    "drop": "<strong>Drop photos here</strong> or <choose>choose files</choose>",
+    "formats": "JPG, PNG, WebP or AVIF, up to 5 MB each · {count}/{max}",
+    "uploading": "Uploading {name}",
+    "urlPlaceholder": "…or paste an image URL",
+    "urlLabel": "Image URL",
+    "add": "Add",
+    "reorderHint": "Drag to reorder. The first photo is the cover.",
+    "cover": "Cover",
+    "dragHandle": "Drag to reorder",
+    "remove": "Remove photo"
+  },
+  "upload": {
+    "wrongType": "{name}: use a JPG, PNG, WebP or AVIF image.",
+    "tooLarge": "{name} is over 5 MB.",
+    "failed": "Upload failed",
+    "network": "Upload failed — check your connection"
+  },
+  "pagination": {
+    "page": "Page {page, number} of {total, number}"
+  },
+  "password": {
+    "show": "Show password",
+    "hide": "Hide password"
+  },
+  "verifyEmail": {
+    "failed": "Couldn't send the email. Try again.",
+    "sent": "Verification email sent. Check your inbox.",
+    "done": "Email sent",
+    "sending": "Sending…",
+    "resend": "Resend email"
+  },
+  "install": {
+    "done": "GearUp is installed.",
+    "label": "Install app"
+  },
+  "orderItems": {
+    "more": "+{count, number} more"
+  },
+  "stars": {
+    "label": "{rating} out of 5"
+  },
+  "theme": {
+    "toggle": "Toggle theme"
+  },
+  "toc": {
+    "title": "On this page"
+  },
+  "ui": {
+    "close": "Close",
+    "toggleSidebar": "Toggle Sidebar",
+    "sidebarTitle": "Sidebar",
+    "sidebarDescription": "Displays the mobile sidebar."
+  },
+  "api": {
+    "unreachable": "Could not reach the server. Please check your connection.",
+    "unexpected": "Unexpected response from the server.",
+    "failed": "Request failed."
+  },
+  "favorites": {
+    "updateFailed": "Couldn't update your saved gear."
+  },
+  "siteContact": {
+    "location": "Sylhet, Bangladesh"
+  },
+  "city": {
+    "bandarban": "Bandarban",
+    "barishal": "Barishal",
+    "bogura": "Bogura",
+    "chattogram": "Chattogram",
+    "coxsBazar": "Cox's Bazar",
+    "cumilla": "Cumilla",
+    "dhaka": "Dhaka",
+    "gazipur": "Gazipur",
+    "jashore": "Jashore",
+    "khulna": "Khulna",
+    "mymensingh": "Mymensingh",
+    "narayanganj": "Narayanganj",
+    "rajshahi": "Rajshahi",
+    "rangamati": "Rangamati",
+    "rangpur": "Rangpur",
+    "sreemangal": "Sreemangal",
+    "sylhet": "Sylhet"
+  }
+}

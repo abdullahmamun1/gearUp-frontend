@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Loader2, Star } from "lucide-react"
+import { useTranslations } from "@/i18n/translations"
 import { Controller, useForm } from "react-hook-form"
 import { toast } from "sonner"
 
@@ -27,16 +28,11 @@ import {
   toReviewPayload,
   type ReviewFormInput,
 } from "@/validation/review"
+import { useErrorMessage } from "@/hooks/useErrorMessage"
 import { cn } from "@/lib/utils"
 import type { OrderItem } from "@/types"
 
-const RATING_HINT: Record<number, string> = {
-  1: "Poor",
-  2: "Fair",
-  3: "Good",
-  4: "Great",
-  5: "Excellent",
-}
+const RATINGS = ["1", "2", "3", "4", "5"] as const
 
 export function ReviewDialog({
   orderId,
@@ -45,6 +41,7 @@ export function ReviewDialog({
   orderId: string
   items: OrderItem[]
 }) {
+  const t = useTranslations("dashboard.customer.review")
   const [open, setOpen] = useState(false)
 
   return (
@@ -53,17 +50,15 @@ export function ReviewDialog({
         render={
           <Button size="lg" className="mt-3 h-9 w-full text-sm">
             <Star className="size-4" aria-hidden />
-            Write a review
+            {t("write")}
           </Button>
         }
       />
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Write a review</DialogTitle>
+          <DialogTitle>{t("write")}</DialogTitle>
           <DialogDescription>
-            {items.length > 1
-              ? "You can review one item from this rental."
-              : "Tell other renters how it went."}
+            {items.length > 1 ? t("descriptionMany") : t("descriptionOne")}
           </DialogDescription>
         </DialogHeader>
 
@@ -88,6 +83,9 @@ function ReviewForm({
   items: OrderItem[]
   onDone: () => void
 }) {
+  const t = useTranslations("dashboard.customer.review")
+  const tc = useTranslations("common.actions")
+  const errorText = useErrorMessage()
   const {
     register,
     control,
@@ -110,13 +108,13 @@ function ReviewForm({
     const res = await createReview(toReviewPayload(orderId, values))
 
     if (!res.success) {
-      const message = res.message || "Couldn't submit your review."
+      const message = res.message || t("failed")
       setError("root", { message })
       toast.error(message)
       return
     }
 
-    toast.success("Thanks — your review is live.")
+    toast.success(t("success"))
     onDone()
   }
 
@@ -127,14 +125,14 @@ function ReviewForm({
           role="alert"
           className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive"
         >
-          {errors.root.message}
+          {errorText(errors.root.message)}
         </p>
       )}
 
       {items.length > 1 && (
         <div className="grid gap-2">
           <Label htmlFor="review-gear" className="text-sm">
-            Which item?
+            {t("whichItem")}
           </Label>
           <Controller
             control={control}
@@ -145,7 +143,7 @@ function ReviewForm({
                 value={field.value}
                 onValueChange={field.onChange}
                 id="review-gear"
-                placeholder="Choose an item"
+                placeholder={t("chooseItem")}
                 invalid={Boolean(errors.gearItemId)}
                 className="h-10 w-full text-sm"
               />
@@ -153,21 +151,21 @@ function ReviewForm({
           />
           {errors.gearItemId && (
             <p className="text-xs text-destructive">
-              {errors.gearItemId.message}
+              {errorText(errors.gearItemId.message)}
             </p>
           )}
         </div>
       )}
 
       <div className="grid gap-2">
-        <Label className="text-sm">Rating</Label>
+        <Label className="text-sm">{t("rating")}</Label>
         <Controller
           control={control}
           name="rating"
           render={({ field }) => (
             <div
               role="radiogroup"
-              aria-label="Rating"
+              aria-label={t("rating")}
               className="flex items-center gap-1"
             >
               {[1, 2, 3, 4, 5].map((star) => (
@@ -175,7 +173,7 @@ function ReviewForm({
                   key={star}
                   type="button"
                   role="radio"
-                  aria-label={`${star} ${star === 1 ? "star" : "stars"}`}
+                  aria-label={t("stars", { count: star })}
                   aria-checked={Number(field.value) === star}
                   onClick={() => field.onChange(String(star))}
                   className="rounded-sm p-0.5 transition-transform hover:scale-110 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
@@ -193,33 +191,40 @@ function ReviewForm({
               ))}
               {field.value && (
                 <span className="ml-2 text-sm text-muted-foreground">
-                  {RATING_HINT[Number(field.value)]}
+                  {RATINGS.includes(field.value as (typeof RATINGS)[number]) &&
+                    t(`hint.${field.value as (typeof RATINGS)[number]}`)}
                 </span>
               )}
             </div>
           )}
         />
         {errors.rating && (
-          <p className="text-xs text-destructive">{errors.rating.message}</p>
+          <p className="text-xs text-destructive">
+            {errorText(errors.rating.message)}
+          </p>
         )}
       </div>
 
       <div className="grid gap-2">
         <Label htmlFor="review-comment" className="text-sm">
-          Comment{" "}
-          <span className="font-normal text-muted-foreground">(optional)</span>
+          {t("comment")}{" "}
+          <span className="font-normal text-muted-foreground">
+            {t("optional")}
+          </span>
         </Label>
         <Textarea
           id="review-comment"
           rows={4}
           maxLength={MAX_REVIEW_COMMENT}
-          placeholder="How was the gear? Anything the next renter should know?"
+          placeholder={t("commentPlaceholder")}
           aria-invalid={errors.comment ? true : undefined}
           className="text-sm"
           {...register("comment")}
         />
         {errors.comment && (
-          <p className="text-xs text-destructive">{errors.comment.message}</p>
+          <p className="text-xs text-destructive">
+            {errorText(errors.comment.message)}
+          </p>
         )}
       </div>
 
@@ -232,7 +237,7 @@ function ReviewForm({
           disabled={isSubmitting}
           className="h-9 text-sm"
         >
-          Cancel
+          {tc("cancel")}
         </Button>
         <Button
           type="submit"
@@ -243,7 +248,7 @@ function ReviewForm({
           {isSubmitting && (
             <Loader2 className="size-3.5 animate-spin" aria-hidden />
           )}
-          {isSubmitting ? "Submitting…" : "Submit review"}
+          {isSubmitting ? t("submitting") : t("submit")}
         </Button>
       </DialogFooter>
     </form>

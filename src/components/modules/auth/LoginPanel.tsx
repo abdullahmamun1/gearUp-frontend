@@ -1,33 +1,34 @@
 "use client"
 
 import { useSearchParams } from "next/navigation"
+import { useTranslations } from "@/i18n/translations"
 
-import { LoginForm } from "./LoginForm"
-
-const ALERTS: Record<string, string> = {
-  suspended:
-    "Your account has been suspended, so you've been signed out. Please contact support if you think this is a mistake.",
-  google:
-    "We couldn't complete your Google sign-in. Please try again, or log in with your email and password.",
-  google_denied:
-    "You cancelled the Google sign-in, so nothing was changed. Try again whenever you're ready.",
-}
+const ALERTS = ["suspended", "google", "google_denied"] as const
+type Alert = (typeof ALERTS)[number]
 
 /** Good news shown above the form, e.g. after a password reset. */
-const NOTICES: Record<string, string> = {
-  reset: "Your password has been changed. Log in with your new password.",
-  verified: "Your email is verified. Log in to keep going.",
-}
+const NOTICES = ["reset", "verified"] as const
+type Notice = (typeof NOTICES)[number]
+
+const isAlert = (value: string | null): value is Alert =>
+  ALERTS.includes(value as Alert)
+const isNotice = (value: string | null): value is Notice =>
+  NOTICES.includes(value as Notice)
 
 /**
- * Reads ?redirectTo, ?reason and ?error in the browser so /login can be a
- * static page. Wrap it in <Suspense fallback={<LoginForm />}>.
+ * Alerts and notices from ?reason and ?error, read in the browser so /login
+ * stays static. Wrap it in <Suspense fallback={null}>. The form itself sits
+ * outside the boundary (it reads ?redirectTo on submit), so it's never
+ * swapped out after hydration and keeps what people typed.
  */
-export function LoginPanel() {
+export function LoginNotices() {
+  const t = useTranslations("auth.login")
   const params = useSearchParams()
-  const reason = params.get("reason") ?? ""
-  const alert = ALERTS[reason] ?? ALERTS[params.get("error") ?? ""]
-  const notice = NOTICES[reason]
+  const reason = params.get("reason")
+  const error = params.get("error")
+  const alertKey = isAlert(reason) ? reason : isAlert(error) ? error : null
+  const alert = alertKey ? t(`alerts.${alertKey}`) : null
+  const notice = isNotice(reason) ? t(`notices.${reason}`) : null
 
   return (
     <>
@@ -47,7 +48,6 @@ export function LoginPanel() {
           {notice}
         </p>
       )}
-      <LoginForm redirectTo={params.get("redirectTo") ?? undefined} />
     </>
   )
 }

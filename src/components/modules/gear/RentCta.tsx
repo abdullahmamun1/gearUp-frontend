@@ -1,6 +1,8 @@
 "use client"
 
-import Link from "next/link"
+import { useTranslations } from "@/i18n/translations"
+
+import { Link } from "@/i18n/navigation"
 
 import { RentPanel } from "./RentPanel"
 import { buttonVariants } from "@/components/ui/button"
@@ -14,11 +16,12 @@ import type { GearItem } from "@/types"
  * what to show once it knows who is signed in.
  */
 export function RentCta({ gear }: { gear: GearItem }) {
+  const t = useTranslations("gear.rent")
   const { user: session, isPending } = useSessionUser()
   const outOfStock = !gear.isAvailable || gear.stock < 1
 
   if (outOfStock) {
-    return <Notice>This gear is unavailable right now. Check back soon.</Notice>
+    return <Notice>{t("unavailable")}</Notice>
   }
 
   if (isPending) {
@@ -27,10 +30,10 @@ export function RentCta({ gear }: { gear: GearItem }) {
 
   if (!session) {
     return (
-      <div className="rounded-xl border bg-card p-4 shadow-xs">
-        <p className="font-heading text-sm font-semibold">Rent this gear</p>
+      <div className="rounded-2xl border bg-card p-4 shadow-xs">
+        <p className="font-heading text-sm font-semibold">{t("title")}</p>
         <p className="mt-1.5 text-sm text-muted-foreground">
-          Log in to pick your dates and place an order.
+          {t("loginPrompt")}
         </p>
         <Link
           href={`/login?redirectTo=${encodeURIComponent(`/gear/${gear.id}`)}`}
@@ -39,19 +42,14 @@ export function RentCta({ gear }: { gear: GearItem }) {
             "mt-4 h-11 w-full text-sm"
           )}
         >
-          Log in to rent
+          {t("loginCta")}
         </Link>
       </div>
     )
   }
 
   if (session.role !== "CUSTOMER") {
-    return (
-      <Notice>
-        You&apos;re signed in as a {session.role.toLowerCase()}. Renting is for
-        customer accounts.
-      </Notice>
-    )
+    return <Notice>{t(`wrongRole.${session.role}`)}</Notice>
   }
 
   return (

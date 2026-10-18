@@ -1,5 +1,6 @@
 import { getBrands, getFeaturedGear } from "@/api/gear"
 import { getCategories } from "@/api/categories"
+import { LocaleSwitcher } from "@/components/shared/LocaleSwitcher"
 import { ThemeToggle } from "@/components/shared/ThemeToggle"
 
 import { AccountArea } from "./AccountArea"
@@ -43,7 +44,8 @@ export async function Navbar() {
 
   return (
     <NavbarShell>
-      <div className="mx-auto flex h-20 max-w-6xl items-center gap-4 px-4 transition-[height] duration-300 group-data-[scrolled=true]/nav:h-16 lg:gap-6">
+      {/* Wider than the page (7xl): the bar carries the direct links. */}
+      <div className="mx-auto flex h-20 max-w-7xl items-center gap-4 px-4 transition-[height] duration-300 group-data-[scrolled=true]/nav:h-16 lg:gap-5">
         <Logo />
 
         <DesktopNav
@@ -53,15 +55,15 @@ export async function Navbar() {
         />
 
         <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
-          <SearchButton className="hidden lg:flex" />
-          <SearchButton compact className="lg:hidden" />
+          <SearchButton compact />
+          <LocaleSwitcher compact />
           <ThemeToggle />
           <AccountArea />
           <MobileNav categories={categories} />
         </div>
       </div>
 
-      <CommandPalette categories={categories} />
+      <CommandPalette categories={categories} askAi />
     </NavbarShell>
   )
 }

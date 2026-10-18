@@ -1,0 +1,49 @@
+{
+  "finder": {
+    "fab": "Plan my trip",
+    "title": "Trip planner",
+    "description": "AI suggestions from gear you can rent today. Check details before you book.",
+    "newChatLabel": "Start a new chat",
+    "newChatTitle": "New chat",
+    "datesHint": "Trip dates (optional) — only gear free on every day is suggested",
+    "introTitle": "Tell me about your trip and I'll put a kit together.",
+    "introBody": "Where you're going, how many people, your budget — anything helps.",
+    "suggestions": {
+      "camping": "Weekend camping for four near Sylhet",
+      "kayak": "Kayaking day trip for two",
+      "cycling": "Beginner road cycling kit",
+      "trekking": "Trekking gear under ৳{amount} a day"
+    },
+    "error": "Something went wrong. Please try again.",
+    "thinking": "Thinking…",
+    "inputLabel": "Describe your trip",
+    "placeholderFirst": "e.g. 3 days trekking in Bandarban, two people",
+    "placeholderFollowUp": "Ask a follow-up…",
+    "send": "Send",
+    "poweredBy": "Powered by Google Gemini. Don't share personal details.",
+    "seeAll": "See all matches"
+  },
+  "showcase": {
+    "badge": "New · AI trip planner",
+    "title": "Plan your trip with <accent>AI</accent>",
+    "intro": "Tell it what you're planning and get a ready-made kit from local providers in seconds.",
+    "describe": {
+      "title": "Describe it in your own words",
+      "body": "Where, how long, how many people, your budget."
+    },
+    "real": {
+      "title": "Only gear you can actually rent",
+      "body": "Add dates and it picks from what's free on every day."
+    },
+    "honest": {
+      "title": "Nothing made up",
+      "body": "Every suggestion links to a real listing with a real price."
+    },
+    "tryButton": "Try the trip planner",
+    "demoLabel": "Example conversation with the trip planner",
+    "demoTitle": "Trip planner",
+    "example": "Example",
+    "question": "Weekend camping for four near Sylhet — what do we need?",
+    "answer": "Here's a starter kit for four: shelter, sleep and a way to cook. Add dates and I'll only show what's free."
+  }
+}

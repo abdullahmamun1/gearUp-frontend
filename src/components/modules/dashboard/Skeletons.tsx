@@ -28,7 +28,7 @@ export function StatCardsSkeleton({
       )}
     >
       {Array.from({ length: count }, (_, i) => (
-        <div key={i} className="rounded-xl border bg-card p-5 shadow-xs">
+        <div key={i} className="rounded-2xl border bg-card p-5 shadow-xs">
           <div className="flex items-start justify-between">
             <Skeleton className="h-4 w-24" />
             <Skeleton className="size-9 rounded-xl" />
@@ -110,7 +110,7 @@ export function OverviewSkeleton({ charts = false }: { charts?: boolean }) {
 
 export function ChartCardSkeleton() {
   return (
-    <div className="rounded-xl border bg-card p-4 shadow-xs">
+    <div className="rounded-2xl border bg-card p-4 shadow-xs">
       <Skeleton className="h-4 w-40" />
       <Skeleton className="mt-2 h-3 w-56" />
       <Skeleton className="mt-4 h-50 w-full" />
@@ -127,7 +127,7 @@ export function FilterBarSkeleton({
   search?: boolean
 }) {
   return (
-    <div className="mb-6 flex flex-wrap items-end gap-3 rounded-xl border bg-card p-4 shadow-xs">
+    <div className="mb-6 flex flex-wrap items-end gap-3 rounded-2xl border bg-card p-4 shadow-xs">
       {search && <Skeleton className="h-14 min-w-56 flex-1" />}
       {Array.from({ length: fields }, (_, i) => (
         <Skeleton key={i} className="h-14 w-44" />

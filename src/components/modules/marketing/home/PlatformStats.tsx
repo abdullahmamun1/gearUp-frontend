@@ -2,14 +2,17 @@ import { Boxes, CalendarCheck, Star, Store } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 
 import { getPlatformStats } from "@/api/stats"
-import { AnimatedCounter } from "@/components/shared/motion/AnimatedCounter"
+import { getTranslations } from "@/i18n/getTranslations"
 
 import { Section } from "./Section"
+import { StatCounter } from "./StatCounter"
 
 export async function PlatformStats() {
   const stats = await getPlatformStats()
 
   if (!stats) return null
+  const t = await getTranslations("home.stats")
+  const plural = (count: number) => (count === 1 ? "one" : "other")
 
   const tiles: {
     icon: LucideIcon
@@ -21,27 +24,27 @@ export async function PlatformStats() {
     {
       icon: Boxes,
       value: stats.gear,
-      label: stats.gear === 1 ? "item listed" : "items listed",
-      hint: `across ${stats.categories} ${stats.categories === 1 ? "category" : "categories"}`,
+      label: t(`gearLabel.${plural(stats.gear)}`),
+      hint: t("gearHint", { count: stats.categories }),
     },
     {
       icon: CalendarCheck,
       value: stats.available,
-      label: "ready to rent today",
-      hint: "in stock and taking bookings",
+      label: t("availableLabel"),
+      hint: t("availableHint"),
     },
     {
       icon: Store,
       value: stats.providers,
-      label: stats.providers === 1 ? "provider" : "providers",
-      hint: "renting out kit they own",
+      label: t(`providersLabel.${plural(stats.providers)}`),
+      hint: t("providersHint"),
       approx: stats.sampled,
     },
     {
       icon: Star,
       value: stats.reviews,
-      label: stats.reviews === 1 ? "review" : "reviews",
-      hint: "each from a completed rental",
+      label: t(`reviewsLabel.${plural(stats.reviews)}`),
+      hint: t("reviewsHint"),
       approx: stats.sampled,
     },
   ]
@@ -49,15 +52,15 @@ export async function PlatformStats() {
   return (
     <Section
       tone="muted"
-      eyebrow="By the numbers"
-      title="What's on GearUp right now"
-      description="Counted live from the catalogue — not a marketing figure."
+      eyebrow={t("eyebrow")}
+      title={t("title")}
+      description={t("description")}
     >
       <dl className="reveal-stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {tiles.map((tile) => (
           <div
             key={tile.label}
-            className="rounded-xl border bg-card p-5 shadow-xs"
+            className="rounded-2xl border bg-card p-5 shadow-xs"
           >
             <span
               className="grid size-10 place-items-center rounded-full bg-primary/10 text-primary"
@@ -67,7 +70,7 @@ export async function PlatformStats() {
             </span>
 
             <dd className="mt-4 font-heading text-3xl font-bold tabular-nums">
-              <AnimatedCounter value={tile.value} />
+              <StatCounter value={tile.value} />
               {tile.approx && "+"}
             </dd>
             <dt className="mt-0.5 text-sm font-medium">{tile.label}</dt>

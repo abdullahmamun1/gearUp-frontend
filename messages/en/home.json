@@ -1,0 +1,193 @@
+{
+  "meta": {
+    "title": "GearUp — Rent sports & outdoor gear instantly",
+    "description": "Browse and rent tents, kayaks, bikes and more by the day from local providers."
+  },
+  "og": {
+    "headlineStart": "Rent the gear.",
+    "headlineAccent": "Skip the buying.",
+    "subtitle": "Tents, kayaks, bikes and more by the day, from local providers across Bangladesh.",
+    "chips": {
+      "tents": "Tents",
+      "kayaks": "Kayaks",
+      "bikes": "Bikes",
+      "climbing": "Climbing",
+      "surf": "Surf"
+    }
+  },
+  "hero": {
+    "readyCount": "{count, plural, one {# item ready to rent} other {# items ready to rent}}",
+    "newWeekly": "New gear added weekly",
+    "headline": "Rent <word></word><br></br>by the day, instantly",
+    "words": {
+      "tents": "tents",
+      "kayaks": "kayaks",
+      "bikes": "bikes",
+      "boards": "boards",
+      "ropes": "ropes"
+    },
+    "intro": "Tents, kayaks, bikes and more from local providers across Bangladesh. No storage, no upkeep — just pick your dates and go.",
+    "browseAll": "Browse all gear",
+    "listGear": "List your gear",
+    "trustReviews": "{count, plural, one {# verified review} other {# verified reviews}}",
+    "trustProviders": "{count, plural, one {# local provider} other {# local providers}}",
+    "trustStripe": "Secure Stripe checkout"
+  },
+  "search": {
+    "modesLabel": "How do you want to find gear?",
+    "modeSearch": "Search",
+    "modeAi": "Ask AI",
+    "whatLabel": "What do you need?",
+    "placeholder": "Tents, kayaks, bikes…",
+    "submit": "Search",
+    "tripLabel": "Describe your trip",
+    "tripPlaceholder": "e.g. 2 nights camping in Bandarban for four",
+    "planTrip": "Plan my trip"
+  },
+  "brands": {
+    "heading": "Gear from brands you know",
+    "label": "Brands on GearUp"
+  },
+  "stats": {
+    "eyebrow": "By the numbers",
+    "title": "What's on GearUp right now",
+    "description": "Counted live from the catalogue — not a marketing figure.",
+    "gearLabel": {
+      "one": "item listed",
+      "other": "items listed"
+    },
+    "gearHint": "across {count, plural, one {# category} other {# categories}}",
+    "availableLabel": "ready to rent today",
+    "availableHint": "in stock and taking bookings",
+    "providersLabel": {
+      "one": "provider",
+      "other": "providers"
+    },
+    "providersHint": "renting out kit they own",
+    "reviewsLabel": {
+      "one": "review",
+      "other": "reviews"
+    },
+    "reviewsHint": "each from a completed rental"
+  },
+  "categories": {
+    "eyebrow": "Start here",
+    "title": "Browse by adventure",
+    "description": "{count, plural, one {# kind of kit, rented by the day.} other {# kinds of kit, all rented by the day.}}"
+  },
+  "featured": {
+    "eyebrow": "Ready now",
+    "title": "Featured gear",
+    "description": "The newest kit available right now.",
+    "loadError": "Couldn't load gear. Please try again.",
+    "empty": "No gear listed yet. Check back soon — providers are adding kit all the time."
+  },
+  "adventures": {
+    "eyebrow": "Pick your adventure",
+    "title": "Kit for every kind of weekend",
+    "description": "Switch between trips to see what's ready to book.",
+    "tabsLabel": "Adventures",
+    "seeAll": "See all {name}",
+    "fallbackPitch": "Everything for {name}, by the day.",
+    "pitch": {
+      "camping": "Sleep under the stars at Sajek or Ratargul — tents, bags and stoves, cleaned after every trip.",
+      "waterSports": "Kayaks, boards and snorkel kits for Cox's Bazar, Saint Martin's and the haors.",
+      "cycling": "Mountain, road and city bikes, with helmets and racks to get them there.",
+      "hiking": "Packs, poles and boots for the Bandarban trails and beyond.",
+      "climbing": "Harnesses, ropes and crash pads, inspected after every use.",
+      "teamSports": "Match kits for football, cricket and badminton — the whole squad sorted."
+    }
+  },
+  "how": {
+    "eyebrow": "Three steps",
+    "title": "How it works",
+    "description": "From browsing to the trailhead, with nothing in between.",
+    "find": {
+      "title": "Find your gear",
+      "body": "Filter by category, brand, price and your trip dates to see only what's free."
+    },
+    "book": {
+      "title": "Book your dates",
+      "body": "The provider confirms within {hours} hours. Then pay securely — deposits come back after the trip."
+    },
+    "pickup": {
+      "title": "Pick up and go",
+      "body": "Collect the kit, enjoy the trail, bring it back. Leave a review when you're done."
+    }
+  },
+  "testimonials": {
+    "eyebrow": "From renters",
+    "title": "What renters say",
+    "description": "Left by people after they returned the gear — nothing else counts.",
+    "carouselLabel": "Renter reviews",
+    "anonymous": "A renter",
+    "rented": "Rented {gear}"
+  },
+  "provider": {
+    "eyebrow": "For providers",
+    "title": "Got gear sitting in the garage?",
+    "intro": "List it on GearUp and earn from it between your own adventures. Move the sliders to see what it could bring in.",
+    "pointPaid": "Paid by card through Stripe — no chasing cash.",
+    "pointDeposit": "Optional refundable deposit on every listing.",
+    "pointConfirm": "You confirm each booking; your calendar, your rules.",
+    "cta": "Become a provider"
+  },
+  "earnings": {
+    "price": "Price per day",
+    "days": "Days rented per month",
+    "units": "Units you own",
+    "unitsValue": "{count, plural, one {# unit} other {# units}}",
+    "earnAbout": "You could earn about",
+    "perMonth": "/ month",
+    "disclaimer": "An estimate — what you actually earn depends on your bookings."
+  },
+  "faq": {
+    "eyebrow": "Before you book",
+    "title": "Frequently asked questions",
+    "description": "Still stuck? The <link>contact page</link> has a real email and phone number.",
+    "items": {
+      "how": {
+        "q": "How does renting work?",
+        "a": "Pick your gear and your dates — the price per day and any refundable deposit are shown up front. The provider has up to {hours} hours to confirm, then you pay, collect the kit from them and return it on the end date."
+      },
+      "pay": {
+        "q": "When do I pay?",
+        "a": "Only after the provider confirms. You then have {hours} hours to pay through Stripe Checkout, or the dates are released for other renters. Orders have a ৳{minimum} minimum because Stripe rejects anything smaller."
+      },
+      "cancel": {
+        "q": "Can I cancel a booking?",
+        "a": "Yes. It's free until you've paid. After paying you get a full refund if you cancel at least {hours} hours before the start day."
+      },
+      "deposit": {
+        "q": "What is the refundable deposit?",
+        "a": "Some providers ask for a deposit on pricier kit. It's charged with the rental and refunded to your card when the gear comes back in good condition. If something is damaged, GearUp reviews the provider's claim before any of it is kept."
+      },
+      "card": {
+        "q": "Is my card information safe?",
+        "a": "Your card never touches GearUp. Payment happens on Stripe's own checkout page, and we only ever receive a confirmation that it succeeded — no card number is seen or stored on our side."
+      },
+      "list": {
+        "q": "Can I list my own gear?",
+        "a": "Register as a provider, verify your email and you get a dashboard to add listings with photos, prices and deposits, and to confirm, hand over and check back in every booking."
+      },
+      "review": {
+        "q": "Who can leave a review?",
+        "a": "Only someone who actually rented the gear, and only once the order is marked returned — one review per order. That's why every review on this site is from a completed rental."
+      }
+    }
+  },
+  "newsletter": {
+    "eyebrow": "Stay in the loop",
+    "title": "New gear, straight to your inbox",
+    "intro": "A short note when providers list something worth knowing about. No more than that.",
+    "emailLabel": "Email address",
+    "subscribing": "Subscribing…",
+    "subscribe": "Subscribe"
+  },
+  "finalCta": {
+    "title": "Your next adventure is a few taps away",
+    "description": "Find the kit, pick your dates and pay securely. The provider handles the rest.",
+    "browse": "Browse gear",
+    "list": "List your gear"
+  }
+}

@@ -1,8 +1,9 @@
 "use client"
 
-import { useRouter } from "next/navigation"
+import { useRouter } from "@/i18n/navigation"
 import { useEffect, useState, useTransition } from "react"
 import { X } from "lucide-react"
+import { useTranslations } from "@/i18n/translations"
 
 import { FilterField } from "@/components/shared/FilterField"
 import { SearchInput } from "@/components/shared/SearchInput"
@@ -37,6 +38,8 @@ export function TableFilters({
   specs?: FilterSpec[]
   search?: SearchSpec
 }) {
+  const t = useTranslations("dashboard.filters")
+  const tc = useTranslations("common.actions")
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [term, setTerm] = useState(search?.value ?? "")
@@ -89,12 +92,12 @@ export function TableFilters({
       : null
 
   if (chips) {
-    const options = [{ value: ALL, label: "All" }, ...chips.options]
+    const options = [{ value: ALL, label: t("all") }, ...chips.options]
     const active = chips.value ?? ALL
     return (
       <div
         role="group"
-        aria-label={`Filter by ${chips.label.toLowerCase()}`}
+        aria-label={t("filterBy", { label: chips.label.toLowerCase() })}
         className={cn(
           "mb-5 flex flex-wrap gap-2 transition-opacity",
           isPending && "opacity-70"
@@ -140,7 +143,10 @@ export function TableFilters({
         <FilterField key={spec.name} label={spec.label}>
           <SelectField
             options={[
-              { value: ALL, label: `All ${spec.label.toLowerCase()}` },
+              {
+                value: ALL,
+                label: t("allOf", { label: spec.label.toLowerCase() }),
+              },
               ...spec.options,
             ]}
             value={spec.value ?? ALL}
@@ -162,7 +168,7 @@ export function TableFilters({
           className="h-9 gap-1.5 text-xs text-muted-foreground"
         >
           <X className="size-3.5" aria-hidden />
-          Clear filters
+          {tc("clearFilters")}
         </Button>
       )}
     </div>

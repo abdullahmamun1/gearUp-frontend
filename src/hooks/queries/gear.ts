@@ -38,7 +38,9 @@ export function useGearList(
     queryKey: gearListKeys.list(filters),
     queryFn: () =>
       queryFetch<Paginated<GearItem>>(
-        `/api/gear?${toQueryString(toGearQuery(filters))}`
+        // `view` isn't a backend filter, but the route handler needs it to
+        // fetch a whole map's worth of results instead of one page.
+        `/api/gear?${toQueryString({ ...toGearQuery(filters), view: filters.view })}`
       ),
     initialData,
     placeholderData: keepPreviousData,

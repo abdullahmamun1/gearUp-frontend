@@ -1,5 +1,7 @@
 "use client"
 
+import { useTranslations } from "@/i18n/translations"
+
 import { DataTable } from "@/components/shared/DataTable"
 import { EmptyState } from "@/components/shared/EmptyState"
 import { OrderItemsSummary } from "@/components/shared/OrderItemsSummary"
@@ -11,20 +13,10 @@ import {
   ADMIN_RENTALS_PATH,
   type AdminRentalsFilters,
 } from "@/utils/filters/admin"
-import { formatDate, formatPrice } from "@/utils/format"
+import { useFormat } from "@/i18n/useFormat"
 import { useAdminRentals } from "@/hooks/queries/adminTables"
 import { buildHref } from "@/utils/searchParams"
 import type { Paginated, RentalOrder } from "@/types"
-
-const HEADINGS = [
-  "Order",
-  "Customer",
-  "Gear",
-  "Dates",
-  "Status",
-  "Payment",
-  { label: "Total", align: "right" },
-] as const
 
 export function AdminRentalsList({
   filters,
@@ -34,9 +26,20 @@ export function AdminRentalsList({
   initialData: Paginated<RentalOrder>
 }) {
   const { data, error, isFetching } = useAdminRentals(filters, initialData)
+  const t = useTranslations("admin.rentals")
+  const format = useFormat()
+  const headings = [
+    t("headingOrder"),
+    t("headingCustomer"),
+    t("headingGear"),
+    t("headingDates"),
+    t("headingStatus"),
+    t("headingPayment"),
+    { label: t("headingTotal"), align: "right" },
+  ] as const
 
   if (error) {
-    return <EmptyState>{error.message || "Couldn't load rentals."}</EmptyState>
+    return <EmptyState>{error.message || t("loadError")}</EmptyState>
   }
 
   const orders = data?.data ?? []
@@ -44,22 +47,18 @@ export function AdminRentalsList({
 
   if (orders.length === 0) {
     return (
-      <EmptyState>
-        {filters.status
-          ? "No orders have that status."
-          : "No one has booked anything yet."}
-      </EmptyState>
+      <EmptyState>{filters.status ? t("noStatus") : t("noneYet")}</EmptyState>
     )
   }
 
   return (
     <>
       <DataTable
-        headings={HEADINGS}
+        headings={headings}
         count={{
           total: meta?.total ?? orders.length,
-          one: "order",
-          many: "orders",
+          one: t("countOne"),
+          many: t("countMany"),
         }}
         isFetching={isFetching}
       >
@@ -71,7 +70,7 @@ export function AdminRentalsList({
               <TableCell>
                 <span className="font-medium">{order.id.slice(0, 8)}</span>
                 <p className="text-xs text-muted-foreground">
-                  {formatDate(order.createdAt)}
+                  {format.date(order.createdAt)}
                 </p>
               </TableCell>
               <TableCell>
@@ -84,7 +83,7 @@ export function AdminRentalsList({
                 <OrderItemsSummary items={order.items ?? []} />
               </TableCell>
               <TableCell className="whitespace-nowrap">
-                {formatDate(order.startDate)} → {formatDate(order.endDate)}
+                {format.date(order.startDate)} → {format.date(order.endDate)}
               </TableCell>
               <TableCell>
                 <RentalStatusBadge status={order.status} />
@@ -94,12 +93,12 @@ export function AdminRentalsList({
                   <PaymentStatusBadge status={payment.status} />
                 ) : (
                   <span className="text-xs text-muted-foreground">
-                    Not started
+                    {t("notStarted")}
                   </span>
                 )}
               </TableCell>
               <TableCell className="text-right tabular-nums">
-                {formatPrice(order.totalAmount)}
+                {format.price(order.totalAmount)}
               </TableCell>
             </TableRow>
           )
@@ -110,7 +109,7 @@ export function AdminRentalsList({
         page={filters.page}
         totalPages={meta?.totalPages ?? 1}
         hrefFor={(page) => buildHref(ADMIN_RENTALS_PATH, { ...filters, page })}
-        label="Rentals pagination"
+        label={t("pagination")}
       />
     </>
   )

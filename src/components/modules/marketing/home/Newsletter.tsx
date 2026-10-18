@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { CheckCircle2 } from "lucide-react"
+import { useTranslations } from "@/i18n/translations"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 
@@ -10,6 +11,7 @@ import { subscribeNewsletter } from "@/api/newsletter"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useErrorMessage } from "@/hooks/useErrorMessage"
 import {
   emptyNewsletterForm,
   newsletterSchema,
@@ -17,6 +19,8 @@ import {
 } from "@/validation/newsletter"
 
 export function Newsletter() {
+  const t = useTranslations("home.newsletter")
+  const errorText = useErrorMessage()
   const [subscribed, setSubscribed] = useState<string | null>(null)
 
   const {
@@ -48,14 +52,13 @@ export function Newsletter() {
     <section className="mx-auto max-w-6xl px-4 py-16 sm:py-20">
       <div className="reveal rounded-2xl border bg-primary/5 px-6 py-12 text-center">
         <p className="text-xs font-semibold tracking-wider text-primary uppercase">
-          Stay in the loop
+          {t("eyebrow")}
         </p>
         <h2 className="mt-1.5 font-heading text-2xl font-bold sm:text-3xl">
-          New gear, straight to your inbox
+          {t("title")}
         </h2>
         <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-          A short note when providers list something worth knowing about. No
-          more than that.
+          {t("intro")}
         </p>
 
         {subscribed ? (
@@ -72,7 +75,7 @@ export function Newsletter() {
             <div className="flex items-start gap-2">
               <div className="flex-1 text-left">
                 <Label htmlFor="newsletter-email" className="sr-only">
-                  Email address
+                  {t("emailLabel")}
                 </Label>
                 <Input
                   id="newsletter-email"
@@ -93,7 +96,7 @@ export function Newsletter() {
                 disabled={isSubmitting}
                 className="h-11 px-5 text-sm"
               >
-                {isSubmitting ? "Subscribing…" : "Subscribe"}
+                {isSubmitting ? t("subscribing") : t("subscribe")}
               </Button>
             </div>
 
@@ -102,7 +105,7 @@ export function Newsletter() {
                 id="newsletter-email-error"
                 className="mt-2 text-left text-xs text-destructive"
               >
-                {errors.email.message}
+                {errorText(errors.email.message)}
               </p>
             )}
           </form>

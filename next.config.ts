@@ -1,6 +1,9 @@
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 import type { NextConfig } from "next"
+import createNextIntlPlugin from "next-intl/plugin"
+
+const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts")
 
 const nextConfig: NextConfig = {
   // Pin the project root: a stray package-lock.json higher up the tree
@@ -16,6 +19,26 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "static.vecteezy.com" },
       { protocol: "https", hostname: "upload.wikimedia.org" },
     ],
+  },
+  // The service worker must never be served stale, or fixes to it would
+  // take a day to reach people.
+  async headers() {
+    return [
+      {
+        source: "/sw.js",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-cache, no-store, must-revalidate",
+          },
+          {
+            key: "Content-Type",
+            value: "application/javascript; charset=utf-8",
+          },
+          { key: "Service-Worker-Allowed", value: "/" },
+        ],
+      },
+    ]
   },
   // Dashboards moved from /<role>-dashboard to /dashboard/<role>. Keeps old
   // bookmarks and links in emails sent before the move working.
@@ -35,4 +58,4 @@ const nextConfig: NextConfig = {
   },
 }
 
-export default nextConfig
+export default withNextIntl(nextConfig)

@@ -1,12 +1,14 @@
 "use client"
 
 import { useState, useTransition } from "react"
+import { useTranslations } from "@/i18n/translations"
 import { toast } from "sonner"
 
 import { Switch } from "@/components/ui/switch"
 import { updateEmailPreferences } from "@/api/auth"
 
 export function EmailPreferences({ marketing }: { marketing: boolean }) {
+  const t = useTranslations("dashboard.emailPrefs")
   const [checked, setChecked] = useState(marketing)
   const [isPending, startTransition] = useTransition()
 
@@ -16,23 +18,21 @@ export function EmailPreferences({ marketing }: { marketing: boolean }) {
       const res = await updateEmailPreferences(next)
       if (!res.success) {
         setChecked(!next)
-        toast.error(res.message || "Couldn't save your preference.")
+        toast.error(res.message || t("saveFailed"))
         return
       }
-      toast.success(
-        next ? "You'll get GearUp news and offers." : "No more news emails."
-      )
+      toast.success(next ? t("subscribed") : t("unsubscribed"))
     })
   }
 
   return (
     <section className="rounded-2xl border bg-card p-5 shadow-xs">
-      <h2 className="font-heading font-semibold">Email preferences</h2>
+      <h2 className="font-heading font-semibold">{t("title")}</h2>
       <div className="mt-3 flex items-start justify-between gap-4">
         <label htmlFor="marketing-emails" className="text-sm">
-          News and offers
+          {t("newsLabel")}
           <span className="block text-xs text-muted-foreground">
-            New gear, trip ideas and the occasional deal.
+            {t("newsHint")}
           </span>
         </label>
         <Switch
@@ -42,10 +42,7 @@ export function EmailPreferences({ marketing }: { marketing: boolean }) {
           disabled={isPending}
         />
       </div>
-      <p className="mt-3 text-xs text-muted-foreground">
-        Emails about your bookings, payments and account security are always
-        sent.
-      </p>
+      <p className="mt-3 text-xs text-muted-foreground">{t("note")}</p>
     </section>
   )
 }

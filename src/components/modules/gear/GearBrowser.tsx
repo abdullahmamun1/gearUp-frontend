@@ -11,9 +11,11 @@ import {
 } from "@/utils/filters/gear"
 import type { Category, GearItem, Paginated } from "@/types"
 
+import { AiSearchSuggestions } from "./AiSearchSuggestions"
 import { CategoryChips } from "./CategoryChips"
 import { GearFilterBar } from "./GearFilterBar"
 import { GearResults } from "./GearResults"
+import { LocationBar } from "./LocationBar"
 
 type Shared = {
   categories: Category[]
@@ -40,6 +42,8 @@ export function GearBrowser({ categories, brands, firstPage }: Shared) {
     <>
       <CategoryChips categories={categories} filters={filters} />
       <GearFilterBar filters={filters} brands={brands} />
+      <AiSearchSuggestions filters={filters} />
+      <LocationBar filters={filters} />
       <GearResults
         filters={filters}
         data={query.data}
@@ -56,6 +60,7 @@ export function GearBrowserFallback({ categories, brands, firstPage }: Shared) {
     <>
       <CategoryChips categories={categories} filters={DEFAULT_GEAR_FILTERS} />
       <GearFilterBar filters={DEFAULT_GEAR_FILTERS} brands={brands} />
+      <LocationBar filters={DEFAULT_GEAR_FILTERS} />
       <GearResults filters={DEFAULT_GEAR_FILTERS} data={firstPage} />
     </>
   )

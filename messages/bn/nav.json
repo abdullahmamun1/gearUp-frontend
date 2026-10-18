@@ -1,0 +1,159 @@
+{
+  "menus": {
+    "browse": "ব্রাউজ",
+    "company": "কোম্পানি"
+  },
+  "items": {
+    "about": {
+      "title": "GearUp সম্পর্কে",
+      "description": "বাংলাদেশের জন্য কেন আমরা একটি ভাড়ার মার্কেটপ্লেস বানিয়েছি।"
+    },
+    "howItWorks": {
+      "title": "কীভাবে কাজ করে",
+      "description": "ব্রাউজ করা থেকে ট্রেইলে পৌঁছানো, মাত্র তিন ধাপে।"
+    },
+    "faq": {
+      "title": "সাধারণ প্রশ্ন",
+      "description": "জামানত, বাতিল, পিকআপ এবং আরও অনেক কিছু।"
+    },
+    "contact": {
+      "title": "যোগাযোগ",
+      "description": "প্রশ্ন, গ্রুপ বুকিং বা মতামত।"
+    }
+  },
+  "quickFilters": {
+    "availableToday": "আজ পাওয়া যাচ্ছে",
+    "underPrice": "দিনপ্রতি {price}-এর কমে"
+  },
+  "browse": {
+    "categories": "ক্যাটাগরি",
+    "browseAll": "সব গিয়ার দেখুন",
+    "popularBrands": "জনপ্রিয় ব্র্যান্ড",
+    "quickFilters": "দ্রুত ফিল্টার",
+    "planTrip": "AI দিয়ে ট্রিপ প্ল্যান করুন",
+    "planTripHint": "ট্রিপের কথা বলুন, তৈরি কিট পেয়ে যান",
+    "newIn": "নতুন",
+    "pricePerDay": "{price} / দিন"
+  },
+  "company": {
+    "talkTitle": "সরাসরি কথা বলুন",
+    "talkBody": "গ্রুপ বুকিং, প্রোভাইডার নিয়ে প্রশ্ন বা ভাড়ায় কোনো সমস্যা — আমরা এক দিনের মধ্যে উত্তর দিই।",
+    "location": "সিলেট, বাংলাদেশ"
+  },
+  "search": {
+    "label": "খুঁজুন",
+    "button": "গিয়ার খুঁজুন…",
+    "mobile": "গিয়ার, ক্যাটাগরি খুঁজুন…"
+  },
+  "account": {
+    "logIn": "লগ ইন",
+    "signUp": "সাইন আপ",
+    "dashboard": "ড্যাশবোর্ড",
+    "profile": "প্রোফাইল",
+    "backToSite": "সাইটে ফিরে যান",
+    "logOut": "লগ আউট",
+    "loggingOut": "লগ আউট হচ্ছে…",
+    "menu": "অ্যাকাউন্ট মেনু",
+    "saved": "সংরক্ষিত গিয়ার",
+    "messages": "মেসেজ",
+    "counter": "{label} ({count})"
+  },
+  "mobile": {
+    "openMenu": "মেনু খুলুন",
+    "appearance": "চেহারা"
+  },
+  "logo": {
+    "home": "GearUp হোম"
+  },
+  "footer": {
+    "tagline": "স্থানীয় প্রোভাইডারদের কাছ থেকে খেলাধুলা ও আউটডোর গিয়ার দিনভিত্তিতে এখনই ভাড়া নিন।",
+    "social": "{network}-এ GearUp",
+    "explore": "ঘুরে দেখুন",
+    "company": "কোম্পানি",
+    "contact": "যোগাযোগ",
+    "browseGear": "গিয়ার দেখুন",
+    "howItWorks": "কীভাবে কাজ করে",
+    "becomeProvider": "প্রোভাইডার হোন",
+    "logIn": "লগ ইন",
+    "about": "আমাদের সম্পর্কে",
+    "contactLink": "যোগাযোগ",
+    "privacy": "গোপনীয়তা ও শর্তাবলি",
+    "copyright": "© {year} GearUp। তৈরি করেছেন Abdullah Mamun।",
+    "help": "সহায়তা"
+  },
+  "palette": {
+    "title": "GearUp-এ খুঁজুন",
+    "placeholder": "গিয়ার, ক্যাটাগরি, পেজ খুঁজুন…",
+    "searching": "খোঁজা হচ্ছে…",
+    "empty": "কিছু পাওয়া যায়নি। অন্য কোনো শব্দ দিয়ে চেষ্টা করুন।",
+    "groups": {
+      "gear": "গিয়ার",
+      "ai": "AI",
+      "categories": "ক্যাটাগরি",
+      "dashboard": "আপনার ড্যাশবোর্ড",
+      "pages": "পেজ",
+      "actions": "অ্যাকশন"
+    },
+    "perDay": "/দিন",
+    "seeAll": "“{term}”-এর সব ফলাফল দেখুন",
+    "askPlanner": "ট্রিপ প্ল্যানারকে জিজ্ঞেস করুন: “{query}”",
+    "planTrip": "AI দিয়ে ট্রিপ প্ল্যান করুন",
+    "browseAll": "সব গিয়ার দেখুন",
+    "switchToLight": "লাইট মোডে যান",
+    "switchToDark": "ডার্ক মোডে যান",
+    "logOut": "লগ আউট",
+    "logIn": "লগ ইন",
+    "createAccount": "অ্যাকাউন্ট খুলুন",
+    "toMove": "সরাতে",
+    "toOpen": "খুলতে"
+  },
+  "sidebar": {
+    "menu": "মেনু",
+    "items": {
+      "overview": "সারসংক্ষেপ",
+      "myRentals": "আমার ভাড়া",
+      "saved": "সংরক্ষিত",
+      "payments": "পেমেন্ট",
+      "profile": "প্রোফাইল",
+      "myGear": "আমার গিয়ার",
+      "orders": "অর্ডার",
+      "analytics": "অ্যানালিটিক্স",
+      "users": "ইউজার",
+      "gear": "গিয়ার",
+      "rentals": "ভাড়া",
+      "damageClaims": "ক্ষতির দাবি",
+      "reviews": "রিভিউ",
+      "inbox": "ইনবক্স",
+      "subscribers": "সাবস্ক্রাইবার",
+      "categories": "ক্যাটাগরি"
+    },
+    "badges": {
+      "messages": "{count}টি অপঠিত মেসেজ",
+      "claims": "{count}টি খোলা ক্ষতির দাবি",
+      "inbox": "{count}টি অপঠিত যোগাযোগ মেসেজ"
+    }
+  },
+  "errors": {
+    "publicDescription": "পেজটি লোড করা যায়নি। আবার চেষ্টা করলে সাধারণত ঠিক হয়ে যায়।",
+    "dashboardDescription": "আপনার ড্যাশবোর্ডের এই অংশটি লোড করা যায়নি। আবার চেষ্টা করলে সাধারণত ঠিক হয়ে যায়।",
+    "browseGear": "গিয়ার দেখুন",
+    "backToSite": "সাইটে ফিরে যান"
+  },
+  "notFound": {
+    "eyebrow": "ত্রুটি {code}",
+    "title": "মনে হচ্ছে আপনি পথ হারিয়েছেন",
+    "description": "এই পেজটি নেই, অথবা এটি দেখার অনুমতি আপনার নেই। চলুন, আপনাকে আসল জায়গায় ফিরিয়ে নিই।",
+    "browseGear": "গিয়ার দেখুন",
+    "goHome": "হোমে যান"
+  },
+  "links": {
+    "about": "পরিচিতি",
+    "help": "সহায়তা",
+    "contact": "যোগাযোগ",
+    "dashboard": "ড্যাশবোর্ড",
+    "myRentals": "আমার ভাড়া",
+    "orders": "অর্ডার",
+    "analytics": "অ্যানালিটিক্স",
+    "more": "আরও"
+  }
+}

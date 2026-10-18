@@ -3,7 +3,13 @@
 import { updateTag } from "next/cache"
 
 import { apiFetch } from "@/lib/apiClient"
-import type { RentalOrder, Paginated, RentalStatus } from "@/types"
+import type {
+  CustomerStats,
+  Paginated,
+  ProviderStats,
+  RentalOrder,
+  RentalStatus,
+} from "@/types"
 import {
   toDashboardQuery,
   type RentalTableFilters,
@@ -52,6 +58,16 @@ export async function getMyRentals(filters: RentalTableFilters = { page: 1 }) {
   return apiFetch<Paginated<RentalOrder>>(
     `/api/rentals?${toDashboardQuery(filters)}`
   )
+}
+
+/** Spending per month and orders by status, for the customer overview. */
+export async function getMyRentalStats() {
+  return apiFetch<CustomerStats>("/api/rentals/stats")
+}
+
+/** Earnings per month, orders by status and top gear (provider overview). */
+export async function getProviderStats() {
+  return apiFetch<ProviderStats>("/api/provider/stats")
 }
 
 export async function getMyRentalCounts() {

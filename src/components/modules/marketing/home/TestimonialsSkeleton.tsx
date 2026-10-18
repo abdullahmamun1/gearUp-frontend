@@ -9,7 +9,7 @@ export function TestimonialsSkeleton() {
         {Array.from({ length: 3 }, (_, i) => (
           <div
             key={i}
-            className="w-[min(20rem,80vw)] shrink-0 rounded-xl border bg-card p-5 shadow-xs sm:w-[calc((100%-1.25rem)/2)] lg:w-[calc((100%-2.5rem)/3)]"
+            className="w-[min(20rem,80vw)] shrink-0 rounded-2xl border bg-card p-5 shadow-xs sm:w-[calc((100%-1.25rem)/2)] lg:w-[calc((100%-2.5rem)/3)]"
           >
             <Skeleton className="size-5" />
             <Skeleton className="mt-3 h-4 w-full" />

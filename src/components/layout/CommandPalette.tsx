@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { useRouter } from "next/navigation"
+import { useRouter } from "@/i18n/navigation"
 import { useEffect, useState, useTransition } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { Command, defaultFilter } from "cmdk"
@@ -14,19 +14,24 @@ import {
   LogOut,
   Moon,
   Search,
+  Sparkles,
   Sun,
   UserPlus,
 } from "lucide-react"
+import { useTranslations } from "@/i18n/translations"
 import { useTheme } from "next-themes"
 
 import { getGearList } from "@/api/gear"
+import { openGearFinder } from "@/components/modules/ai/GearFinder"
 import { useLogout, useSessionUser } from "@/hooks/useSessionUser"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { categoryIcon } from "@/constants/categoryIcons"
 import { COMPANY_NAV, QUICK_FILTERS } from "@/constants/navigation"
 import { SIDEBAR_ITEMS } from "@/constants/sidebar"
-import { formatPrice } from "@/utils/format"
+import { useFormat } from "@/i18n/useFormat"
 import type { Role } from "@/types"
+
+import { useQuickFilterLabel } from "./useQuickFilterLabel"
 
 const OPEN_EVENT = "gearup:command-palette"
 
@@ -38,6 +43,9 @@ const OPEN_EVENT = "gearup:command-palette"
 function paletteFilter(value: string, search: string, keywords?: string[]) {
   if (value.startsWith("gear:")) return 1
   if (value.startsWith("all:")) return 0.99
+  // "Ask AI" always applies (it takes whatever was typed as the question),
+  // but ranks below real matches so Enter still opens the best gear result.
+  if (value.startsWith("ai:")) return 0.2
   return defaultFilter(value, search, keywords) * 0.98
 }
 
@@ -56,11 +64,17 @@ export type PaletteCategory = { id: string; name: string; count: number }
 export function CommandPalette({
   categories,
   role: roleProp,
+  askAi = false,
 }: {
   categories: PaletteCategory[]
+  /** Offer "Ask the trip planner" (only where GearFinder is mounted). */
+  askAi?: boolean
   /** Known on server-rendered pages (dashboards); otherwise read client-side. */
   role?: Role | null
 }) {
+  const t = useTranslations("nav")
+  const format = useFormat()
+  const quickFilterLabel = useQuickFilterLabel()
   const { user } = useSessionUser()
   const role = roleProp !== undefined ? roleProp : (user?.role ?? null)
   const logout = useLogout()
@@ -143,8 +157,8 @@ export function CommandPalette({
         showCloseButton={false}
         className="top-[12vh] max-w-[calc(100%-2rem)] translate-y-0 gap-0 overflow-hidden p-0 sm:max-w-xl"
       >
-        <DialogTitle className="sr-only">Search GearUp</DialogTitle>
-        <Command label="Search GearUp" loop filter={paletteFilter}>
+        <DialogTitle className="sr-only">{t("palette.title")}</DialogTitle>
+        <Command label={t("palette.title")} loop filter={paletteFilter}>
           <div className="flex items-center gap-3 border-b px-4">
             <Search
               className="size-5 shrink-0 text-muted-foreground"
@@ -153,7 +167,7 @@ export function CommandPalette({
             <Command.Input
               value={query}
               onValueChange={setQuery}
-              placeholder="Search gear, categories, pages…"
+              placeholder={t("palette.placeholder")}
               className="h-14 w-full bg-transparent text-base outline-none placeholder:text-muted-foreground"
             />
             {search.isFetching && (
@@ -170,12 +184,15 @@ export function CommandPalette({
           <Command.List className="max-h-[min(60vh,28rem)] overflow-y-auto overscroll-contain py-1">
             <Command.Empty className="px-4 py-10 text-center text-sm text-muted-foreground">
               {term.length >= 2 && search.isFetching
-                ? "Searching…"
-                : "Nothing found. Try a different word."}
+                ? t("palette.searching")
+                : t("palette.empty")}
             </Command.Empty>
 
             {results.length > 0 && (
-              <Command.Group heading="Gear" className={groupClass}>
+              <Command.Group
+                heading={t("palette.groups.gear")}
+                className={groupClass}
+              >
                 {results.map((gear) => (
                   <Command.Item
                     key={gear.id}
@@ -210,8 +227,10 @@ export function CommandPalette({
                       </span>
                     </span>
                     <span className="text-xs font-medium tabular-nums">
-                      {formatPrice(gear.pricePerDay)}
-                      <span className="text-muted-foreground">/day</span>
+                      {format.price(gear.pricePerDay)}
+                      <span className="text-muted-foreground">
+                        {t("palette.perDay")}
+                      </span>
                     </span>
                   </Command.Item>
                 ))}
@@ -227,26 +246,63 @@ export function CommandPalette({
                       className="size-4 text-muted-foreground"
                       aria-hidden
                     />
-                    See all results for “{term}”
+                    {t("palette.seeAll", { term })}
                   </Command.Item>
                 )}
               </Command.Group>
             )}
 
-            <Command.Group heading="Categories" className={groupClass}>
+            {/* Shown once the live search has settled: cmdk keeps whatever
+                is selected, so appearing earlier would steal the selection
+                from the gear results that arrive a moment later. */}
+            {askAi && term === query.trim() && !search.isFetching && (
+              <Command.Group
+                heading={t("palette.groups.ai")}
+                className={groupClass}
+              >
+                <Command.Item
+                  value={`ai:${query}`}
+                  keywords={[
+                    "ai",
+                    "plan",
+                    "trip",
+                    "assistant",
+                    "help",
+                    t("palette.planTrip"),
+                  ]}
+                  onSelect={() =>
+                    run(() => openGearFinder(query.trim() || undefined))
+                  }
+                  className={itemClass}
+                >
+                  <span className="grid size-7 place-items-center rounded-md bg-(image:--gradient-brand) text-primary-foreground">
+                    <Sparkles className="size-3.5" aria-hidden />
+                  </span>
+                  {query.trim()
+                    ? t("palette.askPlanner", { query: query.trim() })
+                    : t("palette.planTrip")}
+                </Command.Item>
+              </Command.Group>
+            )}
+
+            <Command.Group
+              heading={t("palette.groups.categories")}
+              className={groupClass}
+            >
               {categories.map((category) => {
                 const Icon = categoryIcon(category.name)
                 return (
                   <Command.Item
                     key={category.id}
                     value={`category ${category.name}`}
+                    keywords={[t("palette.groups.categories")]}
                     onSelect={() => go(`/gear?category=${category.id}`)}
                     className={itemClass}
                   >
                     <Icon className="size-4 text-primary" aria-hidden />
                     <span className="flex-1">{category.name}</span>
                     <span className="text-xs text-muted-foreground tabular-nums">
-                      {category.count}
+                      {format.number(category.count)}
                     </span>
                   </Command.Item>
                 )
@@ -254,22 +310,27 @@ export function CommandPalette({
               {QUICK_FILTERS.map((filter) => (
                 <Command.Item
                   key={filter.href}
-                  value={`filter ${filter.label}`}
+                  value={`filter ${filter.key}`}
+                  keywords={[quickFilterLabel(filter)]}
                   onSelect={() => go(filter.href)}
                   className={itemClass}
                 >
                   <filter.icon className="size-4 text-lagoon" aria-hidden />
-                  {filter.label}
+                  {quickFilterLabel(filter)}
                 </Command.Item>
               ))}
             </Command.Group>
 
             {role && (
-              <Command.Group heading="Your dashboard" className={groupClass}>
+              <Command.Group
+                heading={t("palette.groups.dashboard")}
+                className={groupClass}
+              >
                 {SIDEBAR_ITEMS[role].map((item) => (
                   <Command.Item
                     key={item.href}
                     value={`dashboard ${item.label}`}
+                    keywords={[t(`sidebar.items.${item.label}`)]}
                     onSelect={() => go(item.href)}
                     className={itemClass}
                   >
@@ -277,15 +338,19 @@ export function CommandPalette({
                       className="size-4 text-muted-foreground"
                       aria-hidden
                     />
-                    {item.label}
+                    {t(`sidebar.items.${item.label}`)}
                   </Command.Item>
                 ))}
               </Command.Group>
             )}
 
-            <Command.Group heading="Pages" className={groupClass}>
+            <Command.Group
+              heading={t("palette.groups.pages")}
+              className={groupClass}
+            >
               <Command.Item
                 value="page browse all gear"
+                keywords={[t("palette.browseAll")]}
                 onSelect={() => go("/gear")}
                 className={itemClass}
               >
@@ -293,12 +358,13 @@ export function CommandPalette({
                   className="size-4 text-muted-foreground"
                   aria-hidden
                 />
-                Browse all gear
+                {t("palette.browseAll")}
               </Command.Item>
               {COMPANY_NAV.map((item) => (
                 <Command.Item
                   key={item.href}
-                  value={`page ${item.title}`}
+                  value={`page ${item.key}`}
+                  keywords={[t(`items.${item.key}.title`)]}
                   onSelect={() => go(item.href)}
                   className={itemClass}
                 >
@@ -306,14 +372,21 @@ export function CommandPalette({
                     className="size-4 text-muted-foreground"
                     aria-hidden
                   />
-                  {item.title}
+                  {t(`items.${item.key}.title`)}
                 </Command.Item>
               ))}
             </Command.Group>
 
-            <Command.Group heading="Actions" className={groupClass}>
+            <Command.Group
+              heading={t("palette.groups.actions")}
+              className={groupClass}
+            >
               <Command.Item
                 value="action toggle theme dark light mode"
+                keywords={[
+                  t("palette.switchToDark"),
+                  t("palette.switchToLight"),
+                ]}
                 onSelect={() =>
                   run(() =>
                     setTheme(resolvedTheme === "dark" ? "light" : "dark")
@@ -326,11 +399,14 @@ export function CommandPalette({
                 ) : (
                   <Moon className="size-4 text-muted-foreground" aria-hidden />
                 )}
-                Switch to {resolvedTheme === "dark" ? "light" : "dark"} mode
+                {resolvedTheme === "dark"
+                  ? t("palette.switchToLight")
+                  : t("palette.switchToDark")}
               </Command.Item>
               {role ? (
                 <Command.Item
                   value="action log out sign out"
+                  keywords={[t("palette.logOut")]}
                   onSelect={() => run(() => startTransition(() => logout()))}
                   className={itemClass}
                 >
@@ -338,12 +414,13 @@ export function CommandPalette({
                     className="size-4 text-muted-foreground"
                     aria-hidden
                   />
-                  Log out
+                  {t("palette.logOut")}
                 </Command.Item>
               ) : (
                 <>
                   <Command.Item
                     value="action log in sign in"
+                    keywords={[t("palette.logIn")]}
                     onSelect={() => go("/login")}
                     className={itemClass}
                   >
@@ -351,10 +428,11 @@ export function CommandPalette({
                       className="size-4 text-muted-foreground"
                       aria-hidden
                     />
-                    Log in
+                    {t("palette.logIn")}
                   </Command.Item>
                   <Command.Item
                     value="action sign up register create account"
+                    keywords={[t("palette.createAccount")]}
                     onSelect={() => go("/register")}
                     className={itemClass}
                   >
@@ -362,7 +440,7 @@ export function CommandPalette({
                       className="size-4 text-muted-foreground"
                       aria-hidden
                     />
-                    Create an account
+                    {t("palette.createAccount")}
                   </Command.Item>
                 </>
               )}
@@ -373,13 +451,13 @@ export function CommandPalette({
             <span className="inline-flex items-center gap-1.5">
               <kbd className="rounded border bg-muted px-1 font-mono">↑</kbd>
               <kbd className="rounded border bg-muted px-1 font-mono">↓</kbd>
-              to move
+              {t("palette.toMove")}
             </span>
             <span className="inline-flex items-center gap-1.5">
               <kbd className="inline-flex items-center rounded border bg-muted px-1 font-mono">
                 <CornerDownLeft className="size-3" aria-hidden />
               </kbd>
-              to open
+              {t("palette.toOpen")}
             </span>
           </div>
         </Command>

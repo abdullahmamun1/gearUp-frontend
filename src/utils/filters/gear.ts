@@ -13,11 +13,12 @@ export type { RawSearchParams }
 
 export const GEAR_PAGE_SIZE = 12
 
+/** `labelKey` is a message key in the `gear` namespace. */
 export const SORT_OPTIONS = [
-  { value: "createdAt:desc", label: "Newest first" },
-  { value: "pricePerDay:asc", label: "Price: low to high" },
-  { value: "pricePerDay:desc", label: "Price: high to low" },
-  { value: "name:asc", label: "Name: A to Z" },
+  { value: "createdAt:desc", labelKey: "sort.newest" },
+  { value: "pricePerDay:asc", labelKey: "sort.priceAsc" },
+  { value: "pricePerDay:desc", labelKey: "sort.priceDesc" },
+  { value: "name:asc", labelKey: "sort.nameAsc" },
 ] as const
 
 export type SortValue = (typeof SORT_OPTIONS)[number]["value"]
@@ -36,9 +37,23 @@ export type GearFilters = {
   availableOnly: boolean
   sort: SortValue
   page: number
+  /** Providers in this city (one of BD_CITIES). */
+  city?: string
+  /** "lat,lng" (5 decimals): gear within `radius` km, nearest first. */
+  near?: string
+  radius?: string
+  /** List (default) or the map of pickup spots. */
+  view?: "map"
 }
 
+/** Search radius options for "near me", in km. */
+export const RADIUS_OPTIONS = ["5", "10", "25", "50"] as const
+export const DEFAULT_RADIUS = "25"
+/** The map shows every match on one screen, not a page of them. */
+export const MAP_PAGE_SIZE = 100
+
 const DECIMAL = /^\d+(\.\d+)?$/
+const LAT_LNG = /^-?\d{1,2}\.\d{1,6},-?\d{1,3}\.\d{1,6}$/
 const DATE_KEY = /^\d{4}-\d{2}-\d{2}$/
 
 export function parseGearFilters(raw: RawSearchParams): GearFilters {
@@ -63,6 +78,10 @@ export function parseGearFilters(raw: RawSearchParams): GearFilters {
       ? (sort as SortValue)
       : DEFAULT_SORT,
     page: page ? Number(page) : 1,
+    city: first(raw.city)?.slice(0, 60) || undefined,
+    near: matching(first(raw.near), LAT_LNG),
+    radius: RADIUS_OPTIONS.find((option) => option === first(raw.radius)),
+    view: first(raw.view) === "map" ? "map" : undefined,
   }
 }
 
@@ -80,8 +99,11 @@ export function toGearQuery(filters: GearFilters): GearQuery {
     isAvailable: filters.availableOnly ? "true" : undefined,
     sortBy,
     sortOrder: sortOrder as "asc" | "desc",
-    page: String(filters.page),
-    limit: String(GEAR_PAGE_SIZE),
+    city: filters.city,
+    near: filters.near,
+    radius: filters.near ? (filters.radius ?? DEFAULT_RADIUS) : undefined,
+    page: filters.view === "map" ? "1" : String(filters.page),
+    limit: String(filters.view === "map" ? MAP_PAGE_SIZE : GEAR_PAGE_SIZE),
   }
 }
 
@@ -96,6 +118,10 @@ export function buildGearHref(filters: GearFilters) {
     to: filters.to,
     isAvailable: filters.availableOnly ? "true" : undefined,
     sort: filters.sort === DEFAULT_SORT ? undefined : filters.sort,
+    city: filters.city,
+    near: filters.near,
+    radius: filters.near ? filters.radius : undefined,
+    view: filters.view,
     page: filters.page,
   })
 }
@@ -109,6 +135,8 @@ export function hasActiveFilters(filters: GearFilters) {
     filters.maxPrice ||
     filters.from ||
     filters.availableOnly ||
+    filters.city ||
+    filters.near ||
     filters.sort !== DEFAULT_SORT
   )
 }

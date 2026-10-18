@@ -1,0 +1,189 @@
+{
+  "actions": {
+    "save": "সংরক্ষণ করুন",
+    "saving": "সংরক্ষণ হচ্ছে…",
+    "cancel": "বাতিল",
+    "close": "বন্ধ করুন",
+    "back": "ফিরে যান",
+    "next": "পরবর্তী",
+    "previous": "আগের",
+    "search": "খুঁজুন",
+    "retry": "আবার চেষ্টা করুন",
+    "edit": "সম্পাদনা",
+    "delete": "মুছে ফেলুন",
+    "confirm": "নিশ্চিত করুন",
+    "viewAll": "সব দেখুন",
+    "learnMore": "আরও জানুন",
+    "loading": "লোড হচ্ছে…",
+    "goHome": "হোমে যান",
+    "clearFilters": "ফিল্টার মুছুন",
+    "showMore": "আরও দেখুন",
+    "copy": "কপি করুন",
+    "copied": "কপি হয়েছে"
+  },
+  "rentalStatus": {
+    "PLACED": "নিশ্চিতকরণের অপেক্ষায়",
+    "CONFIRMED": "নিশ্চিত · এখন পেমেন্ট করুন",
+    "PAID": "পেমেন্ট সম্পন্ন",
+    "PICKED_UP": "নেওয়া হয়েছে",
+    "RETURNED": "ফেরত দেওয়া হয়েছে",
+    "CANCELLED": "বাতিল"
+  },
+  "rentalStatusShort": {
+    "PLACED": "অনুরোধ",
+    "CONFIRMED": "নিশ্চিত",
+    "PAID": "পরিশোধিত",
+    "PICKED_UP": "নেওয়া হয়েছে",
+    "RETURNED": "ফেরত",
+    "CANCELLED": "বাতিল"
+  },
+  "paymentStatus": {
+    "PENDING": "পেমেন্টের অপেক্ষায়",
+    "COMPLETED": "পরিশোধিত",
+    "FAILED": "ব্যর্থ"
+  },
+  "depositStatus": {
+    "NONE": "পেমেন্টের সাথে নেওয়া হয়, ফেরতের সময় ফিরিয়ে দেওয়া হয়",
+    "HELD": "ফেরত পর্যন্ত জমা আছে",
+    "REFUNDED": "ফেরত দেওয়া হয়েছে",
+    "PARTIALLY_REFUNDED": "আংশিক ফেরত দেওয়া হয়েছে",
+    "CLAIMED": "ক্ষতির দাবি পর্যালোচনাধীন",
+    "KEPT": "ক্ষতিপূরণ হিসেবে রাখা হয়েছে"
+  },
+  "cancelReason": {
+    "CUSTOMER": "গ্রাহক বাতিল করেছেন",
+    "PROVIDER_DECLINED": "প্রোভাইডার প্রত্যাখ্যান করেছেন",
+    "PAYMENT_EXPIRED": "সময়মতো পেমেন্ট হয়নি",
+    "NO_PROVIDER_RESPONSE": "প্রোভাইডার সময়মতো সাড়া দেননি",
+    "ADMIN": "GearUp বাতিল করেছে"
+  },
+  "providerNextAction": {
+    "PLACED": "অর্ডার নিশ্চিত করুন",
+    "PAID": "নেওয়া হয়েছে চিহ্নিত করুন",
+    "PICKED_UP": "ফেরত পাওয়া গেছে চিহ্নিত করুন"
+  },
+  "role": {
+    "CUSTOMER": "গ্রাহক",
+    "PROVIDER": "প্রোভাইডার",
+    "ADMIN": "অ্যাডমিন"
+  },
+  "roleLong": {
+    "CUSTOMER": "গ্রাহক",
+    "PROVIDER": "প্রোভাইডার",
+    "ADMIN": "অ্যাডমিনিস্ট্রেটর"
+  },
+  "userStatus": {
+    "ACTIVE": "সক্রিয়",
+    "SUSPENDED": "স্থগিত"
+  },
+  "units": {
+    "perDay": "/ দিন",
+    "days": "{count, plural, one {# দিন} other {# দিন}}",
+    "items": "{count, plural, one {#টি আইটেম} other {#টি আইটেম}}",
+    "orders": "{count, plural, one {#টি অর্ডার} other {#টি অর্ডার}}",
+    "reviews": "{count, plural, one {#টি রিভিউ} other {#টি রিভিউ}}",
+    "listings": "{count, plural, one {#টি লিস্টিং} other {#টি লিস্টিং}}"
+  },
+  "carousel": {
+    "slide": "{total, number}টির মধ্যে {index, number}",
+    "pages": "{label}: পাতা",
+    "goTo": "{index, number} নম্বর স্লাইডে যান"
+  },
+  "dateRange": {
+    "any": "যেকোনো তারিখ",
+    "range": "{from} → {to}",
+    "hint": "শুধু সেই গিয়ারগুলো দেখায়, যা আপনার পুরো ট্রিপে খালি আছে।",
+    "clear": "তারিখ মুছুন"
+  },
+  "errorState": {
+    "title": "কিছু একটা সমস্যা হয়েছে",
+    "description": "অনুরোধটি সম্পন্ন হয়নি। আবার চেষ্টা করলে সাধারণত ঠিক হয়ে যায়।",
+    "reference": "রেফারেন্স: {digest}"
+  },
+  "gallery": {
+    "tooMany": "প্রতি লিস্টিংয়ে সর্বোচ্চ {max}টি ছবি।",
+    "needHttps": "একটি https:// ছবির URL পেস্ট করুন।",
+    "drop": "<strong>এখানে ছবি ছেড়ে দিন</strong> অথবা <choose>ফাইল বেছে নিন</choose>",
+    "formats": "JPG, PNG, WebP বা AVIF, প্রতিটি সর্বোচ্চ ৫ MB · {count}/{max}",
+    "uploading": "{name} আপলোড হচ্ছে",
+    "urlPlaceholder": "…অথবা ছবির URL পেস্ট করুন",
+    "urlLabel": "ছবির URL",
+    "add": "যোগ করুন",
+    "reorderHint": "ক্রম বদলাতে টেনে সরান। প্রথম ছবিটি কভার।",
+    "cover": "কভার",
+    "dragHandle": "ক্রম বদলাতে টেনে সরান",
+    "remove": "ছবি সরান"
+  },
+  "upload": {
+    "wrongType": "{name}: JPG, PNG, WebP বা AVIF ছবি ব্যবহার করুন।",
+    "tooLarge": "{name} ৫ MB-এর বেশি।",
+    "failed": "আপলোড ব্যর্থ হয়েছে",
+    "network": "আপলোড ব্যর্থ হয়েছে — আপনার ইন্টারনেট সংযোগ দেখুন"
+  },
+  "pagination": {
+    "page": "{total, number} পাতার মধ্যে {page, number} নম্বর পাতা"
+  },
+  "password": {
+    "show": "পাসওয়ার্ড দেখান",
+    "hide": "পাসওয়ার্ড লুকান"
+  },
+  "verifyEmail": {
+    "failed": "ইমেইল পাঠানো যায়নি। আবার চেষ্টা করুন।",
+    "sent": "যাচাইয়ের ইমেইল পাঠানো হয়েছে। আপনার ইনবক্স দেখুন।",
+    "done": "ইমেইল পাঠানো হয়েছে",
+    "sending": "পাঠানো হচ্ছে…",
+    "resend": "আবার ইমেইল পাঠান"
+  },
+  "install": {
+    "done": "GearUp ইনস্টল হয়েছে।",
+    "label": "অ্যাপ ইনস্টল করুন"
+  },
+  "orderItems": {
+    "more": "+আরও {count, number}টি"
+  },
+  "stars": {
+    "label": "৫-এর মধ্যে {rating}"
+  },
+  "theme": {
+    "toggle": "থিম বদলান"
+  },
+  "toc": {
+    "title": "এই পাতায়"
+  },
+  "ui": {
+    "close": "বন্ধ করুন",
+    "toggleSidebar": "সাইডবার খুলুন/বন্ধ করুন",
+    "sidebarTitle": "সাইডবার",
+    "sidebarDescription": "মোবাইলের সাইডবার দেখায়।"
+  },
+  "api": {
+    "unreachable": "সার্ভারে পৌঁছানো যায়নি। আপনার ইন্টারনেট সংযোগ দেখুন।",
+    "unexpected": "সার্ভার থেকে অপ্রত্যাশিত উত্তর এসেছে।",
+    "failed": "অনুরোধ ব্যর্থ হয়েছে।"
+  },
+  "favorites": {
+    "updateFailed": "আপনার সংরক্ষিত গিয়ার আপডেট করা যায়নি।"
+  },
+  "siteContact": {
+    "location": "সিলেট, বাংলাদেশ"
+  },
+  "city": {
+    "bandarban": "বান্দরবান",
+    "barishal": "বরিশাল",
+    "bogura": "বগুড়া",
+    "chattogram": "চট্টগ্রাম",
+    "coxsBazar": "কক্সবাজার",
+    "cumilla": "কুমিল্লা",
+    "dhaka": "ঢাকা",
+    "gazipur": "গাজীপুর",
+    "jashore": "যশোর",
+    "khulna": "খুলনা",
+    "mymensingh": "ময়মনসিংহ",
+    "narayanganj": "নারায়ণগঞ্জ",
+    "rajshahi": "রাজশাহী",
+    "rangamati": "রাঙ্গামাটি",
+    "rangpur": "রংপুর",
+    "sreemangal": "শ্রীমঙ্গল",
+    "sylhet": "সিলেট"
+  }
+}

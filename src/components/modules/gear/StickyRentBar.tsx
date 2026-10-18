@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
+import { useTranslations } from "@/i18n/translations"
 
 import { Button } from "@/components/ui/button"
 import { DURATION, EASE } from "@/constants/motion"
-import { formatPrice } from "@/utils/format"
+import { useFormat } from "@/i18n/useFormat"
 
 /**
  * Phones only: once the rent panel scrolls out of view, a bar with the price
@@ -19,6 +20,9 @@ export function StickyRentBar({
   targetId: string
   pricePerDay: string
 }) {
+  const t = useTranslations("gear.rent")
+  const tCommon = useTranslations("common")
+  const format = useFormat()
   const [visible, setVisible] = useState(false)
   const reduced = useReducedMotion()
 
@@ -45,10 +49,10 @@ export function StickyRentBar({
         >
           <div className="mx-auto flex max-w-md items-center justify-between gap-4">
             <p className="text-lg font-semibold">
-              {formatPrice(pricePerDay)}
+              {format.price(pricePerDay)}
               <span className="text-sm font-normal text-muted-foreground">
                 {" "}
-                / day
+                {tCommon("units.perDay")}
               </span>
             </p>
             <Button
@@ -63,7 +67,7 @@ export function StickyRentBar({
                 })
               }
             >
-              Rent now
+              {t("rentNow")}
             </Button>
           </div>
         </motion.div>

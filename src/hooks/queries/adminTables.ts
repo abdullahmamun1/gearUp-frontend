@@ -10,7 +10,7 @@ import {
 import { queryFetch } from "@/hooks/queries/fetcher"
 import type { Category, GearItem, Paginated, RentalOrder } from "@/types"
 
-const adminGearKeys = {
+export const adminGearKeys = {
   all: ["admin-gear"] as const,
   list: (filters: AdminGearFilters) => [...adminGearKeys.all, filters] as const,
 }

@@ -4,80 +4,85 @@ import {
   CircleHelp,
   Compass,
   Info,
-  LayoutDashboard,
   Mail,
-  PackagePlus,
   type LucideIcon,
 } from "lucide-react"
 
+import type { Role } from "@/types"
+
+/**
+ * Menu content. Titles and descriptions are translated where they're
+ * rendered: `t(\`items.${item.key}.title\`)` in the `nav` namespace.
+ */
+export type NavItemKey = "about" | "howItWorks" | "faq" | "contact"
+
 export type NavItem = {
-  title: string
-  description: string
+  key: NavItemKey
   href: string
   icon: LucideIcon
 }
 
-/** "For providers" menu. The dashboard link is added for providers only. */
-export const PROVIDER_NAV: NavItem[] = [
-  {
-    title: "List your gear",
-    description: "Create a free provider account and publish a listing.",
-    href: "/register?role=PROVIDER",
-    icon: PackagePlus,
-  },
-  {
-    title: "How earning works",
-    description: "Set your price, confirm bookings, get paid by card.",
-    href: "/#earn",
-    icon: BadgeDollarSign,
-  },
+/** "Company" links (mobile menu and the "More" menu). */
+export const COMPANY_NAV: NavItem[] = [
+  { key: "about", href: "/about", icon: Info },
+  { key: "howItWorks", href: "/#how-it-works", icon: Compass },
+  { key: "faq", href: "/help", icon: CircleHelp },
+  { key: "contact", href: "/contact", icon: Mail },
 ]
 
-export const PROVIDER_DASHBOARD_NAV: NavItem = {
-  title: "Provider dashboard",
-  description: "Your listings, bookings and returns.",
-  href: "/dashboard/provider",
-  icon: LayoutDashboard,
+/**
+ * Direct links in the navbar, labels in `nav.links`. Public pages for
+ * everyone; each role adds its dashboard and main page. Below `lg` the
+ * public links fold into the "More" menu.
+ */
+export type NavLinkKey =
+  | "about"
+  | "help"
+  | "contact"
+  | "dashboard"
+  | "myRentals"
+  | "orders"
+  | "analytics"
+
+export type NavLink = { key: NavLinkKey; href: string }
+
+export const PUBLIC_LINKS: NavLink[] = [
+  { key: "about", href: "/about" },
+  { key: "help", href: "/help" },
+  { key: "contact", href: "/contact" },
+]
+
+export const ROLE_LINKS: Record<Role, NavLink[]> = {
+  CUSTOMER: [
+    { key: "dashboard", href: "/dashboard/customer" },
+    { key: "myRentals", href: "/dashboard/customer/orders" },
+  ],
+  PROVIDER: [
+    { key: "dashboard", href: "/dashboard/provider" },
+    { key: "orders", href: "/dashboard/provider/orders" },
+  ],
+  ADMIN: [
+    { key: "dashboard", href: "/dashboard/admin" },
+    { key: "analytics", href: "/dashboard/admin/analytics" },
+  ],
 }
 
-/** "Company" menu. */
-export const COMPANY_NAV: NavItem[] = [
-  {
-    title: "About GearUp",
-    description: "Why we built a rental marketplace for Bangladesh.",
-    href: "/about",
-    icon: Info,
-  },
-  {
-    title: "How it works",
-    description: "From browsing to the trailhead in three steps.",
-    href: "/#how-it-works",
-    icon: Compass,
-  },
-  {
-    title: "FAQ",
-    description: "Deposits, cancellations, pickups and more.",
-    href: "/#faq",
-    icon: CircleHelp,
-  },
-  {
-    title: "Contact",
-    description: "Questions, group bookings or feedback.",
-    href: "/contact",
-    icon: Mail,
-  },
-]
-
-/** Quick filters in the "Browse" menu and the command palette. */
+/**
+ * Quick filters in the "Browse" menu and the command palette. The label is
+ * `t(\`quickFilters.${filter.key}\`, { price })` (see useQuickFilterLabel).
+ */
 export const QUICK_FILTERS = [
   {
-    label: "Available today",
+    key: "availableToday",
     href: "/gear?isAvailable=true",
     icon: CalendarCheck,
   },
   {
-    label: "Under ৳500 / day",
+    key: "underPrice",
+    price: 500,
     href: "/gear?maxPrice=500",
     icon: BadgeDollarSign,
   },
 ] as const
+
+export type QuickFilter = (typeof QUICK_FILTERS)[number]

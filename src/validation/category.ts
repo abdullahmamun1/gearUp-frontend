@@ -6,12 +6,12 @@ export const categoryFormSchema = z.object({
   name: z
     .string()
     .trim()
-    .min(2, "Name must be at least 2 characters.")
-    .max(60, "Name must be at most 60 characters."),
+    .min(2, "admin.validation.nameMin")
+    .max(60, "admin.validation.nameMax"),
   description: z
     .string()
     .trim()
-    .max(500, "Description must be at most 500 characters.")
+    .max(500, "admin.validation.descriptionMax")
     .optional(),
 })
 

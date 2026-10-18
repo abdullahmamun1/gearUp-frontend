@@ -1,8 +1,9 @@
 "use client"
 
-import Link from "next/link"
+import { Link } from "@/i18n/navigation"
 import { useSearchParams } from "next/navigation"
 import { LinkIcon } from "lucide-react"
+import { useTranslations } from "@/i18n/translations"
 
 import { CenteredCard } from "@/components/shared/CenteredCard"
 import { KeyScene } from "@/components/shared/illustrations/scenes"
@@ -12,6 +13,7 @@ import { cn } from "@/lib/utils"
 import { ResetPasswordForm } from "./ResetPasswordForm"
 
 export function ResetPasswordView() {
+  const t = useTranslations("auth.reset")
   const token = useSearchParams().get("token")
 
   if (!token) {
@@ -19,14 +21,14 @@ export function ResetPasswordView() {
       <CenteredCard
         icon={LinkIcon}
         tone="error"
-        title="This link is incomplete"
-        description="Open the link from your email again, or request a new one."
+        title={t("incompleteTitle")}
+        description={t("incompleteDescription")}
       >
         <Link
           href="/forgot-password"
           className={cn(buttonVariants({ size: "lg" }), "h-10 w-full text-sm")}
         >
-          Request a new link
+          {t("requestNew")}
         </Link>
       </CenteredCard>
     )
@@ -35,8 +37,8 @@ export function ResetPasswordView() {
   return (
     <CenteredCard
       illustration={<KeyScene />}
-      title="Choose a new password"
-      description="Pick something you don't use anywhere else."
+      title={t("title")}
+      description={t("description")}
     >
       <ResetPasswordForm token={token} />
     </CenteredCard>

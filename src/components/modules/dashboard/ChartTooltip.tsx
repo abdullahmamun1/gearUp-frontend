@@ -2,6 +2,8 @@
 
 import type { TooltipContentProps } from "recharts"
 
+import { FormattedNumber } from "./Formatted"
+
 export function ChartTooltip({
   active,
   payload,
@@ -14,7 +16,13 @@ export function ChartTooltip({
     <div className="rounded-md border bg-popover px-2.5 py-1.5 text-xs shadow-md">
       <p className="font-medium">{point.payload.label}</p>
       <p className="text-muted-foreground">
-        <span className="text-foreground tabular-nums">{point.value}</span>{" "}
+        <span className="text-foreground tabular-nums">
+          {typeof point.value === "number" ? (
+            <FormattedNumber value={point.value} />
+          ) : (
+            point.value
+          )}
+        </span>{" "}
         {measure}
       </p>
     </div>

@@ -153,8 +153,11 @@
 }
 
 @theme inline {
-  --font-sans: var(--font-sans);
-  --font-heading: var(--font-heading);
+  /* --font-bangla only exists on /bn pages (Hind Siliguri). The Latin fonts
+     have no Bengali glyphs, so Bengali text falls through to it while brand
+     words, prices and numbers keep the Latin fonts. */
+  --font-sans: var(--font-sans), var(--font-bangla, sans-serif);
+  --font-heading: var(--font-heading), var(--font-bangla, sans-serif);
   --font-mono: var(--font-mono);
 
   --color-sidebar-ring: var(--sidebar-ring);
@@ -279,7 +282,8 @@
 /* Raised card: the default for interactive tiles. */
 @utility card-elevated {
   border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
+  /* Same radius as every other card and panel (rounded-2xl). */
+  border-radius: var(--radius-2xl);
   background-color: var(--card);
   color: var(--card-foreground);
   box-shadow: var(--elevation-sm);
@@ -430,6 +434,35 @@
    public pages keep the default. The header carries the marker. */
 :root:has([data-dashboard-shell]) {
   font-size: 106.25%;
+}
+
+/* Leaflet paths take colours from here: SVG attributes can't read CSS
+   variables, but CSS rules can, so the maps follow the theme. */
+.map-area {
+  stroke: var(--primary);
+  fill: var(--primary);
+  fill-opacity: 0.15;
+}
+
+.map-you {
+  stroke: var(--lagoon);
+  fill: var(--lagoon);
+  fill-opacity: 0.45;
+}
+
+.leaflet-container {
+  font-family: var(--font-sans);
+  background: var(--muted);
+}
+
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: var(--popover);
+  color: var(--popover-foreground);
+}
+
+.leaflet-popup-content a {
+  color: var(--primary);
 }
 
 /* ----------------------------------------------------------- motion */
@@ -696,4 +729,19 @@
   ::selection {
     background-color: color-mix(in oklch, var(--primary) 22%, transparent);
   }
+}
+
+/* ------------------------------------------------------------- Bangla */
+
+/* Bengali conjuncts and vowel signs sit above and below the line: give them
+   room, and drop the tight negative tracking used for Latin headings. */
+:lang(bn) body {
+  line-height: 1.7;
+}
+:lang(bn) :is(.text-display, .text-h1, .text-h2, .text-h3, h1, h2, h3, h4) {
+  line-height: 1.3;
+  letter-spacing: 0;
+}
+:lang(bn) .text-eyebrow {
+  letter-spacing: 0.02em;
 }

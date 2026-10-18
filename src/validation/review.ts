@@ -5,17 +5,17 @@ export const MAX_REVIEW_COMMENT = 1000
 export const reviewFormSchema = z.object({
   rating: z
     .string()
-    .min(1, "Pick a rating.")
-    .refine((value) => /^[1-5]$/.test(value), "Pick a rating between 1 and 5."),
+    .min(1, "dashboard.validation.ratingRequired")
+    .refine(
+      (value) => /^[1-5]$/.test(value),
+      "dashboard.validation.ratingRange"
+    ),
   comment: z
     .string()
     .trim()
-    .max(
-      MAX_REVIEW_COMMENT,
-      `Comment must be at most ${MAX_REVIEW_COMMENT} characters.`
-    )
+    .max(MAX_REVIEW_COMMENT, "dashboard.validation.commentTooLong")
     .optional(),
-  gearItemId: z.uuid("Choose which item you're reviewing."),
+  gearItemId: z.uuid("dashboard.validation.gearRequired"),
 })
 
 export type ReviewFormInput = z.infer<typeof reviewFormSchema>

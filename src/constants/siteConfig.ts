@@ -2,6 +2,7 @@ export const SITE_CONTACT = {
   email: "hello.abdullahmamun1@gmail.com",
   phone: "+8801323874084",
   phoneLabel: "+880 1323 874084",
+  /** English; display `common.siteContact.location` instead. */
   location: "Sylhet, Bangladesh",
 }
 

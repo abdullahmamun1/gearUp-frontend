@@ -1,10 +1,14 @@
 import Image from "next/image"
-import Link from "next/link"
+import { Link } from "@/i18n/navigation"
 import { ViewTransition } from "react"
-import { ArrowUpRight, Backpack, Star, Store } from "lucide-react"
+import { ArrowUpRight, Backpack, MapPin, Star, Store } from "lucide-react"
+import { useLocale } from "next-intl"
+import { useTranslations } from "@/i18n/translations"
 
-import { formatPrice } from "@/utils/format"
-import { isRentable } from "@/utils/gearAvailability"
+import { FavoriteButton } from "@/components/shared/FavoriteButton"
+import { cityKey } from "@/constants/cities"
+import { createFormat } from "@/i18n/format"
+import { formatRating, isRentable } from "@/utils/gearAvailability"
 import { cn } from "@/lib/utils"
 import { gearImageTransition } from "@/utils/viewTransitions"
 import type { GearItem } from "@/types"
@@ -17,6 +21,7 @@ import type { GearItem } from "@/types"
 export function GearCard({
   gear,
   morph = true,
+  eager = false,
 }: {
   gear: GearItem
   /**
@@ -24,7 +29,15 @@ export function GearCard({
    * can appear twice on one page: view-transition names must be unique.
    */
   morph?: boolean
+  /** Load the photo right away: set it on cards in the first visible row. */
+  eager?: boolean
 }) {
+  // Rendered by both server and client components, so no useFormat().
+  const locale = useLocale()
+  const format = createFormat(locale)
+  const t = useTranslations("gear")
+  const tCommon = useTranslations("common")
+  const providerCity = cityKey(gear.provider?.city)
   const unavailable = !isRentable(gear)
   const rating = gear.rating
   const rated = rating && rating.count > 0 && rating.average !== null
@@ -42,6 +55,8 @@ export function GearCard({
               src={gear.imageUrl}
               alt=""
               fill
+              loading={eager ? "eager" : "lazy"}
+              fetchPriority={eager ? "high" : "auto"}
               sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
               className={cn(
                 "object-cover transition-transform duration-500 ease-out group-hover:scale-105",
@@ -57,19 +72,27 @@ export function GearCard({
             className="absolute inset-0 bg-linear-to-b from-black/25 via-transparent to-black/30"
           />
 
-          <div className="absolute inset-x-3 top-3 flex items-start justify-between gap-2">
+          <div className="absolute inset-x-3 top-3 flex items-start gap-1.5">
             {gear.category && <Chip>{gear.category.name}</Chip>}
             {rated && (
-              <Chip className="ml-auto">
+              <Chip>
                 <Star
                   className="size-3 fill-current text-amber-400"
                   aria-hidden
                 />
-                {rating.average!.toFixed(1)}
-                <span className="opacity-70">({rating.count})</span>
+                {formatRating(locale, rating.average!)}
+                <span className="opacity-70">
+                  ({format.number(rating.count)})
+                </span>
               </Chip>
             )}
           </div>
+
+          <FavoriteButton
+            gearId={gear.id}
+            gearName={gear.name}
+            className="absolute top-2.5 right-2.5"
+          />
 
           <span
             className={cn(
@@ -85,7 +108,9 @@ export function GearCard({
               )}
               aria-hidden
             />
-            {unavailable ? "Unavailable" : "Available"}
+            {unavailable
+              ? t("availability.unavailable")
+              : t("availability.available")}
           </span>
         </div>
       </ViewTransition>
@@ -105,12 +130,31 @@ export function GearCard({
           {gear.brand && <span className="truncate">{gear.brand}</span>}
           {gear.brand && gear.provider && <span aria-hidden>·</span>}
           {gear.provider && (
-            <span className="inline-flex min-w-0 items-center gap-1">
+            // Above the card's stretched link, so it goes to the profile.
+            <Link
+              href={`/providers/${gear.provider.id}`}
+              className="relative z-10 inline-flex min-w-0 items-center gap-1 transition-colors hover:text-primary"
+            >
               <Store className="size-3 shrink-0" aria-hidden />
               <span className="truncate">{gear.provider.name}</span>
-            </span>
+            </Link>
           )}
         </p>
+        {(gear.distanceKm !== undefined || gear.provider?.city) && (
+          <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+            <MapPin className="size-3 shrink-0" aria-hidden />
+            {gear.distanceKm !== undefined
+              ? t("card.kmAway", { km: gear.distanceKm })
+              : [
+                  gear.provider?.area,
+                  providerCity
+                    ? tCommon(`city.${providerCity}`)
+                    : gear.provider?.city,
+                ]
+                  .filter(Boolean)
+                  .join(", ")}
+          </p>
+        )}
 
         {gear.description && (
           <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
@@ -119,17 +163,22 @@ export function GearCard({
         )}
 
         <div aria-hidden className="min-h-4 flex-1" />
-        <div className="flex items-center justify-between gap-3 border-t border-dashed pt-3.5">
-          <p className="whitespace-nowrap">
+        <div className="grid gap-3 border-t border-dashed pt-3.5">
+          <p className="truncate">
             <span className="font-heading text-xl font-bold tracking-tight">
-              {formatPrice(gear.pricePerDay)}
+              {format.price(gear.pricePerDay)}
             </span>
-            <span className="text-xs text-muted-foreground"> / day</span>
+            <span className="text-xs text-muted-foreground">
+              {" "}
+              {tCommon("units.perDay")}
+            </span>
           </p>
+          {/* Looks like a button; the whole card is the (single) link. */}
           <span
             aria-hidden
-            className="grid size-9 shrink-0 place-items-center rounded-full border bg-background text-foreground transition-colors duration-300 group-hover:border-primary group-hover:bg-primary group-hover:text-primary-foreground"
+            className="flex h-9 w-full items-center justify-center gap-1.5 rounded-full border bg-background px-3.5 text-sm font-medium text-foreground transition-colors duration-300 group-hover:border-primary group-hover:bg-primary group-hover:text-primary-foreground"
           >
+            {t("card.viewDetails")}
             <ArrowUpRight className="size-4 transition-transform duration-300 group-hover:rotate-45" />
           </span>
         </div>

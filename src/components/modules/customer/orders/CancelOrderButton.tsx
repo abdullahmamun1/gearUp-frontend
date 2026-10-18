@@ -1,14 +1,15 @@
 "use client"
 
-import { useRouter } from "next/navigation"
+import { useRouter } from "@/i18n/navigation"
 import { useState, useTransition } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
+import { useTranslations } from "@/i18n/translations"
 
 import { cancelRental } from "@/api/rentals"
 import { Button } from "@/components/ui/button"
-import { formatPrice } from "@/utils/format"
+import { useFormat } from "@/i18n/useFormat"
 import { myRentalsKeys } from "@/hooks/queries/customer"
 import {
   Dialog,
@@ -29,6 +30,8 @@ export function CancelOrderButton({
   /** Set for paid orders: what goes back to the card. */
   refundAmount?: number
 }) {
+  const t = useTranslations("dashboard.customer.cancel")
+  const format = useFormat()
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [open, setOpen] = useState(false)
@@ -39,7 +42,7 @@ export function CancelOrderButton({
       const res = await cancelRental(orderId)
 
       if (!res.success) {
-        toast.error(res.message || "Couldn't cancel this order.")
+        toast.error(res.message || t("failed"))
         return
       }
 
@@ -47,8 +50,8 @@ export function CancelOrderButton({
       setOpen(false)
       toast.success(
         refundAmount > 0
-          ? `Order cancelled. ${formatPrice(refundAmount)} is on its way back to your card.`
-          : "Order cancelled."
+          ? t("cancelledRefund", { amount: format.price(refundAmount) })
+          : t("cancelled")
       )
       router.refresh()
     })
@@ -63,26 +66,29 @@ export function CancelOrderButton({
             size="lg"
             className="h-9 text-sm hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive"
           >
-            Cancel order
+            {t("trigger")}
           </Button>
         }
       />
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Cancel this order?</DialogTitle>
+          <DialogTitle>{t("title")}</DialogTitle>
           <DialogDescription>
             {refundAmount > 0
-              ? `You'll get a full refund of ${formatPrice(refundAmount)} to your card. Refunds usually arrive within 5–10 business days.`
-              : "Your dates are released for other renters."}{" "}
-            This can&apos;t be undone — you&apos;d need to place a new order to
-            rent it again.
+              ? t("refundBody", {
+                  amount: format.price(refundAmount),
+                  min: format.number(5),
+                  max: format.number(10),
+                })
+              : t("releasedBody")}{" "}
+            {t("undone")}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <DialogClose
             render={
               <Button variant="outline" size="lg" className="h-9 text-sm">
-                Keep it
+                {t("keep")}
               </Button>
             }
           />
@@ -96,7 +102,7 @@ export function CancelOrderButton({
             {isPending && (
               <Loader2 className="size-4 animate-spin" aria-hidden />
             )}
-            {isPending ? "Cancelling…" : "Cancel order"}
+            {isPending ? t("cancelling") : t("trigger")}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -1,4 +1,6 @@
-import Link from "next/link"
+import { useTranslations } from "@/i18n/translations"
+
+import { Link } from "@/i18n/navigation"
 
 import { categoryIcon } from "@/constants/categoryIcons"
 import { cn } from "@/lib/utils"
@@ -13,11 +15,12 @@ export function CategoryChips({
   categories: Category[]
   filters: GearFilters
 }) {
-  const chips = [{ id: undefined, name: "All gear" }, ...categories]
+  const t = useTranslations("gear.filters")
+  const chips = [{ id: undefined, name: t("allGear") }, ...categories]
 
   return (
     <nav
-      aria-label="Categories"
+      aria-label={t("categories")}
       className="-mx-4 mt-6 [scrollbar-width:none] overflow-x-auto [mask-image:linear-gradient(to_right,transparent,#000_16px,#000_calc(100%-16px),transparent)] px-4"
     >
       <ul className="flex w-max snap-x gap-2 py-1">

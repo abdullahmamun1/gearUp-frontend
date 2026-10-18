@@ -1,18 +1,18 @@
 import { z } from "zod"
 
 export const contactSchema = z.object({
-  name: z.string().trim().min(2, "Enter your name."),
-  email: z.email("Enter a valid email address."),
+  name: z.string().trim().min(2, "pages.validation.nameRequired"),
+  email: z.email("pages.validation.emailInvalid"),
   subject: z
     .string()
     .trim()
-    .min(3, "Add a short subject.")
-    .max(120, "Subject must be at most 120 characters."),
+    .min(3, "pages.validation.subjectMin")
+    .max(120, "pages.validation.subjectMax"),
   message: z
     .string()
     .trim()
-    .min(20, "Tell us a bit more — at least 20 characters.")
-    .max(2000, "Message must be at most 2000 characters."),
+    .min(20, "pages.validation.messageMin")
+    .max(2000, "pages.validation.messageMax"),
 })
 
 export type ContactInput = z.infer<typeof contactSchema>

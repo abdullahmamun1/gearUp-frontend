@@ -1,5 +1,6 @@
-import Link from "next/link"
+import { Link } from "@/i18n/navigation"
 import { ArrowRight } from "lucide-react"
+import { getTranslations } from "@/i18n/getTranslations"
 
 import { getFeaturedGear } from "@/api/gear"
 import { Carousel } from "@/components/shared/Carousel"
@@ -10,35 +11,36 @@ import { Section } from "./Section"
 export async function FeaturedGear() {
   const res = await getFeaturedGear(8)
   const items = res.data?.data ?? []
+  const [t, tActions] = await Promise.all([
+    getTranslations("home.featured"),
+    getTranslations("common.actions"),
+  ])
 
   return (
     <Section
       tone="muted"
-      eyebrow="Ready now"
-      title="Featured gear"
-      description="The newest kit available right now."
+      eyebrow={t("eyebrow")}
+      title={t("title")}
+      description={t("description")}
       action={
         <Link
           href="/gear"
           className="inline-flex shrink-0 items-center gap-1 text-sm text-primary hover:underline"
         >
-          View all
+          {tActions("viewAll")}
           <ArrowRight className="size-3.5" aria-hidden />
         </Link>
       }
     >
       {!res.success ? (
         <p className="text-sm text-muted-foreground">
-          {res.message || "Couldn't load gear. Please try again."}
+          {res.message || t("loadError")}
         </p>
       ) : items.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          No gear listed yet. Check back soon — providers are adding kit all the
-          time.
-        </p>
+        <p className="text-sm text-muted-foreground">{t("empty")}</p>
       ) : (
         <Carousel
-          label="Featured gear"
+          label={t("title")}
           options={{ dragFree: true }}
           slideClassName="basis-[78%] sm:basis-1/2 lg:basis-1/4"
         >

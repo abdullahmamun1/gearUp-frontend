@@ -1,11 +1,15 @@
 import { MailWarning } from "lucide-react"
+import { getTranslations } from "@/i18n/getTranslations"
 
 import { ResendVerificationButton } from "@/components/shared/ResendVerificationButton"
 import { getMe } from "@/api/auth"
 
 /** Shown until the user clicks their verification link. */
 export async function VerifyEmailBanner() {
-  const res = await getMe()
+  const [res, t] = await Promise.all([
+    getMe(),
+    getTranslations("dashboard.verifyBanner"),
+  ])
   const user = res.data
   if (!res.success || !user || user.emailVerifiedAt) return null
 
@@ -19,11 +23,9 @@ export async function VerifyEmailBanner() {
         aria-hidden
       />
       <p className="min-w-0 flex-1">
-        <span className="font-medium">Verify your email.</span> We sent a link
-        to {user.email}.{" "}
-        {user.role === "PROVIDER"
-          ? "You can publish listings once it's confirmed."
-          : "You can pay for rentals once it's confirmed."}
+        <span className="font-medium">{t("title")}</span>{" "}
+        {t("sent", { email: user.email })}{" "}
+        {user.role === "PROVIDER" ? t("provider") : t("customer")}
       </p>
       <ResendVerificationButton />
     </div>

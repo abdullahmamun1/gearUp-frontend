@@ -1,3 +1,5 @@
+import { getTranslations } from "@/i18n/getTranslations"
+
 import { getAdminGear } from "@/api/admin"
 import { EmptyState } from "@/components/shared/EmptyState"
 import type { AdminGearFilters } from "@/utils/filters/admin"
@@ -12,11 +14,8 @@ export async function AdminGearTable({
   const res = await getAdminGear(filters)
 
   if (!res.success || !res.data) {
-    return (
-      <EmptyState>
-        {res.message || "Couldn't load listings. Please try again."}
-      </EmptyState>
-    )
+    const t = await getTranslations("admin.gear")
+    return <EmptyState>{res.message || t("loadErrorRetry")}</EmptyState>
   }
 
   return <AdminGearList filters={filters} initialData={res.data} />

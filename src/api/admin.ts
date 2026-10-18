@@ -1,12 +1,18 @@
 "use server"
 
-import { refresh } from "next/cache"
+import { refresh, revalidateTag } from "next/cache"
+import { getTranslations } from "@/i18n/getTranslations"
 
 import { apiFetch } from "@/lib/apiClient"
 import type {
+  AdminAttention,
+  ClaimList,
   GearItem,
+  InboxList,
   Paginated,
   RentalOrder,
+  Review,
+  SubscriberList,
   User,
   UserStatus,
 } from "@/types"
@@ -16,9 +22,10 @@ import {
   toAdminQuery,
   type AdminGearFilters,
   type AdminRentalsFilters,
+  type AdminReviewsFilters,
+  type AdminSubscribersFilters,
   type AdminUsersFilters,
 } from "@/utils/filters/admin"
-import { RENTAL_STATUS_SHORT_LABEL } from "@/utils/rental"
 
 export async function getAdminCounts() {
   const [users, gear, rentals] = await Promise.all([
@@ -39,6 +46,7 @@ export type ChartDatum = { label: string; value: number }
 export type ChartSeries = { data: ChartDatum[]; failed: boolean }
 
 export async function getRentalsByStatus(): Promise<ChartSeries> {
+  const t = await getTranslations("common.rentalStatusShort")
   const results = await Promise.all(
     RENTAL_STATUSES.map((status) =>
       apiFetch<Paginated<RentalOrder>>(
@@ -49,7 +57,7 @@ export async function getRentalsByStatus(): Promise<ChartSeries> {
 
   return {
     data: results.map((res, i) => ({
-      label: RENTAL_STATUS_SHORT_LABEL[RENTAL_STATUSES[i]],
+      label: t(RENTAL_STATUSES[i]),
       value: res.data?.meta?.total ?? 0,
     })),
     failed: results.some((res) => !res.success),
@@ -99,4 +107,59 @@ export async function updateUserStatus(userId: string, status: UserStatus) {
   if (res.success) refresh()
 
   return res
+}
+
+/** `GET /api/admin/reviews` — every review, hidden ones included. */
+export async function getAdminReviews(filters: AdminReviewsFilters) {
+  return apiFetch<Paginated<Review>>(
+    `/api/admin/reviews?${toAdminQuery({ ...filters })}`
+  )
+}
+
+/** Hide or restore a review. Public ratings and the gear page follow. */
+export async function moderateReview(review: Review, isHidden: boolean) {
+  const res = await apiFetch<Review>(`/api/admin/reviews/${review.id}`, {
+    method: "PATCH",
+    body: { isHidden },
+  })
+
+  if (res.success) {
+    revalidateTag("gear", { expire: 0 })
+    if (review.gearItemId) {
+      revalidateTag(`gear:${review.gearItemId}`, { expire: 0 })
+    }
+  }
+
+  return res
+}
+
+/** Featured gear leads the home page and the navbar's mega menu. */
+export async function setGearFeatured(gearId: string, isFeatured: boolean) {
+  const res = await apiFetch<Pick<GearItem, "id" | "name" | "isFeatured">>(
+    `/api/admin/gear/${gearId}`,
+    { method: "PATCH", body: { isFeatured } }
+  )
+
+  if (res.success) revalidateTag("gear", { expire: 0 })
+
+  return res
+}
+
+/** `GET /api/admin/subscribers` — newsletter sign-ups with status counts. */
+export async function getSubscribers(filters: AdminSubscribersFilters) {
+  return apiFetch<SubscriberList>(
+    `/api/admin/subscribers?${toAdminQuery({ ...filters })}`
+  )
+}
+
+/** Counts for the sidebar badges: open damage claims and unread mail. */
+export async function getAdminAttention(): Promise<AdminAttention> {
+  const [claims, inbox] = await Promise.all([
+    apiFetch<ClaimList>("/api/admin/claims?limit=1"),
+    apiFetch<InboxList>("/api/admin/inbox?limit=1"),
+  ])
+  return {
+    openClaims: claims.data?.openCount ?? 0,
+    unreadMessages: inbox.data?.unread ?? 0,
+  }
 }

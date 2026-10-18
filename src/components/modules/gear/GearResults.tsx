@@ -1,9 +1,12 @@
 "use client"
 
-import Link from "next/link"
+import { useTranslations } from "@/i18n/translations"
+
+import { Link } from "@/i18n/navigation"
 
 import { GearCard } from "@/components/shared/GearCard"
 import { CompassScene } from "@/components/shared/illustrations/scenes"
+import { GearMap, MapFrame } from "@/components/shared/map/maps"
 import { buttonVariants } from "@/components/ui/button"
 import { GearGridSkeleton } from "@/components/shared/GearCardSkeleton"
 import { Pagination } from "@/components/shared/Pagination"
@@ -14,7 +17,15 @@ import {
   type GearFilters,
 } from "@/utils/filters/gear"
 import { cn } from "@/lib/utils"
-import type { GearItem, Paginated } from "@/types"
+import type { GearItem, LatLng, Paginated } from "@/types"
+
+function parseLatLng(value?: string): LatLng | null {
+  if (!value) return null
+  const [latitude, longitude] = value.split(",").map(Number)
+  return Number.isFinite(latitude) && Number.isFinite(longitude)
+    ? { latitude: latitude!, longitude: longitude! }
+    : null
+}
 
 /** Presentational: renders whatever results it is given. */
 export function GearResults({
@@ -28,12 +39,10 @@ export function GearResults({
   error?: string | null
   isFetching?: boolean
 }) {
+  const t = useTranslations("gear.results")
+
   if (error) {
-    return (
-      <Message title="Couldn't load gear">
-        {error || "Please try again in a moment."}
-      </Message>
-    )
+    return <Message title={t("errorTitle")}>{error || t("errorBody")}</Message>
   }
 
   if (!data) {
@@ -52,9 +61,7 @@ export function GearResults({
     return (
       <Message
         title={
-          hasActiveFilters(filters)
-            ? "Nothing matches yet"
-            : "No gear listed yet"
+          hasActiveFilters(filters) ? t("noMatchesTitle") : t("emptyTitle")
         }
         action={
           hasActiveFilters(filters) && (
@@ -65,14 +72,12 @@ export function GearResults({
                 "mt-5 h-10 px-5 text-sm"
               )}
             >
-              Clear all filters
+              {t("clearAll")}
             </Link>
           )
         }
       >
-        {hasActiveFilters(filters)
-          ? "Try other dates, widen your price range or clear a filter."
-          : "Check back soon — providers are adding kit all the time."}
+        {hasActiveFilters(filters) ? t("noMatchesBody") : t("emptyBody")}
       </Message>
     )
   }
@@ -83,22 +88,42 @@ export function GearResults({
       aria-busy={isFetching}
     >
       <p className="mt-6 text-sm text-muted-foreground" aria-live="polite">
-        <span className="font-semibold text-foreground">{total}</span>{" "}
-        {total === 1 ? "item" : "items"} available
+        {t.rich("count", {
+          count: total,
+          strong: (chunks) => (
+            <span className="font-semibold text-foreground">{chunks}</span>
+          ),
+        })}
       </p>
 
-      <div className="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {items.map((gear) => (
-          <GearCard key={gear.id} gear={gear} />
-        ))}
-      </div>
+      {filters.view === "map" ? (
+        <>
+          <MapFrame className="mt-4 h-[min(70vh,36rem)]">
+            <GearMap gear={items} you={parseLatLng(filters.near)} />
+          </MapFrame>
+          {items.some((gear) => !gear.provider?.location) && (
+            <p className="mt-2 text-xs text-muted-foreground">
+              {t("mapMissing")}
+            </p>
+          )}
+        </>
+      ) : (
+        <div className="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {items.map((gear, index) => (
+            // The first row is above the fold, and the first photo is the LCP.
+            <GearCard key={gear.id} gear={gear} eager={index < 4} />
+          ))}
+        </div>
+      )}
 
-      <Pagination
-        page={filters.page}
-        totalPages={meta?.totalPages ?? 1}
-        hrefFor={(page) => buildGearHref({ ...filters, page })}
-        label="Gear pagination"
-      />
+      {filters.view !== "map" && (
+        <Pagination
+          page={filters.page}
+          totalPages={meta?.totalPages ?? 1}
+          hrefFor={(page) => buildGearHref({ ...filters, page })}
+          label={t("pagination")}
+        />
+      )}
     </div>
   )
 }

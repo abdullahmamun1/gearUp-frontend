@@ -2,11 +2,12 @@
 
 import { useState, useTransition } from "react"
 import { Loader2, UserRound } from "lucide-react"
+import { useTranslations } from "@/i18n/translations"
 
 import { Stars } from "@/components/shared/Stars"
 import { Button } from "@/components/ui/button"
 import { queryFetch } from "@/hooks/queries/fetcher"
-import { formatDate } from "@/utils/format"
+import { useFormat } from "@/i18n/useFormat"
 import type { Review, ReviewList } from "@/types"
 
 /** Review list with "Show more", so the gear page needs no query string. */
@@ -19,6 +20,7 @@ export function ReviewsList({
   initial: Review[]
   totalPages: number
 }) {
+  const t = useTranslations("gear.reviews")
   const [reviews, setReviews] = useState(initial)
   const [page, setPage] = useState(1)
   const [error, setError] = useState<string | null>(null)
@@ -34,9 +36,7 @@ export function ReviewsList({
         setPage(page + 1)
         setError(null)
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Couldn't load more reviews."
-        )
+        setError(err instanceof Error ? err.message : t("loadMoreFailed"))
       }
     })
   }
@@ -59,7 +59,7 @@ export function ReviewsList({
           className="mt-6 h-10 px-5 text-sm"
         >
           {isPending && <Loader2 className="size-4 animate-spin" aria-hidden />}
-          {isPending ? "Loading…" : "Show more reviews"}
+          {isPending ? t("loading") : t("showMore")}
         </Button>
       )}
       {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
@@ -68,6 +68,8 @@ export function ReviewsList({
 }
 
 function ReviewRow({ review }: { review: Review }) {
+  const t = useTranslations("gear.reviews")
+  const format = useFormat()
   return (
     <li className="border-b pb-5 last:border-b-0 last:pb-0">
       <div className="flex items-center gap-3">
@@ -79,11 +81,11 @@ function ReviewRow({ review }: { review: Review }) {
         </span>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-medium">
-            {review.customer?.name ?? "A renter"}
+            {review.customer?.name ?? t("anonymous")}
           </p>
           {review.createdAt && (
             <p className="text-xs text-muted-foreground">
-              {formatDate(review.createdAt)}
+              {format.date(review.createdAt)}
             </p>
           )}
         </div>

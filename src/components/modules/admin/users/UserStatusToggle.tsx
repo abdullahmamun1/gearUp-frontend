@@ -1,6 +1,7 @@
 "use client"
 
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useTranslations } from "@/i18n/translations"
 import { toast } from "sonner"
 
 import { updateUserStatus } from "@/api/admin"
@@ -23,6 +24,8 @@ export function UserStatusToggle({
   const isSelf = user.id === session?.id
   const queryClient = useQueryClient()
   const queryKey = adminUsersKeys.list(filters)
+  const t = useTranslations("admin.users")
+  const tc = useTranslations("common.userStatus")
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (status: UserStatus) => {
@@ -53,14 +56,14 @@ export function UserStatusToggle({
       if (context?.previous) {
         queryClient.setQueryData(queryKey, context.previous)
       }
-      toast.error(error.message || "Couldn't change this account's status.")
+      toast.error(error.message || t("changeFailed"))
     },
 
     onSuccess: (_data, status) => {
       toast.success(
         status === "ACTIVE"
-          ? `${user.name} can sign in again.`
-          : `${user.name} is suspended and can no longer sign in.`
+          ? t("reactivated", { name: user.name })
+          : t("suspended", { name: user.name })
       )
     },
 
@@ -73,7 +76,9 @@ export function UserStatusToggle({
     return (
       <div className="flex items-center gap-2">
         <UserStatusBadge status={user.status} />
-        <span className="text-xs text-muted-foreground">your account</span>
+        <span className="text-xs text-muted-foreground">
+          {t("yourAccount")}
+        </span>
       </div>
     )
   }
@@ -85,7 +90,11 @@ export function UserStatusToggle({
         onCheckedChange={(next) => mutate(next ? "ACTIVE" : "SUSPENDED")}
         disabled={isPending}
         tone="status"
-        aria-label={active ? `Suspend ${user.name}` : `Reactivate ${user.name}`}
+        aria-label={
+          active
+            ? t("suspendAria", { name: user.name })
+            : t("reactivateAria", { name: user.name })
+        }
       />
       <span
         className={cn(
@@ -93,7 +102,7 @@ export function UserStatusToggle({
           active ? "text-foreground" : "text-muted-foreground"
         )}
       >
-        {active ? "Active" : "Suspended"}
+        {active ? tc("ACTIVE") : tc("SUSPENDED")}
       </span>
     </div>
   )

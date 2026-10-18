@@ -1,6 +1,9 @@
 "use client"
 
-import Link from "next/link"
+import { useTranslations } from "@/i18n/translations"
+
+import { Link } from "@/i18n/navigation"
+import { useFormat } from "@/i18n/useFormat"
 
 import { DataTable } from "@/components/shared/DataTable"
 import { EmptyState } from "@/components/shared/EmptyState"
@@ -18,13 +21,6 @@ import type { Category } from "@/types"
 import { CategoryFormDialog } from "./CategoryFormDialog"
 import { DeleteCategoryDialog } from "./DeleteCategoryDialog"
 
-const HEADINGS = [
-  "Name",
-  "Description",
-  { label: "Listings", align: "right" },
-  { label: "Actions", align: "right" },
-] as const
-
 export function CategoriesList({
   filters,
   initialData,
@@ -33,22 +29,23 @@ export function CategoriesList({
   initialData: Category[]
 }) {
   const { data, error, isFetching } = useCategories(initialData)
+  const t = useTranslations("admin.categories")
+  const format = useFormat()
+  const headings = [
+    t("headingName"),
+    t("headingDescription"),
+    { label: t("headingListings"), align: "right" },
+    { label: t("headingActions"), align: "right" },
+  ] as const
 
   if (error) {
-    return (
-      <EmptyState>{error.message || "Couldn't load categories."}</EmptyState>
-    )
+    return <EmptyState>{error.message || t("loadError")}</EmptyState>
   }
 
   const all = data ?? []
 
   if (all.length === 0) {
-    return (
-      <EmptyState>
-        No categories yet. Providers can&apos;t list gear until there is at
-        least one.
-      </EmptyState>
-    )
+    return <EmptyState>{t("empty")}</EmptyState>
   }
 
   const term = filters.searchTerm?.toLowerCase()
@@ -66,17 +63,17 @@ export function CategoriesList({
   const categories = matches.slice(start, start + ADMIN_PAGE_SIZE)
 
   if (categories.length === 0) {
-    return <EmptyState>No categories match that search.</EmptyState>
+    return <EmptyState>{t("noMatch")}</EmptyState>
   }
 
   return (
     <>
       <DataTable
-        headings={HEADINGS}
+        headings={headings}
         count={{
           total: matches.length,
-          one: "category",
-          many: "categories",
+          one: t("countOne"),
+          many: t("countMany"),
         }}
         isFetching={isFetching}
       >
@@ -95,10 +92,12 @@ export function CategoriesList({
                     href={`/gear?category=${category.id}`}
                     className="transition-colors hover:text-primary"
                   >
-                    {listings}
+                    {format.number(listings)}
                   </Link>
                 ) : (
-                  <span className="text-muted-foreground">0</span>
+                  <span className="text-muted-foreground">
+                    {format.number(0)}
+                  </span>
                 )}
               </TableCell>
               <TableCell>
@@ -118,7 +117,7 @@ export function CategoriesList({
         hrefFor={(next) =>
           buildHref(ADMIN_CATEGORIES_PATH, { ...filters, page: next })
         }
-        label="Categories pagination"
+        label={t("pagination")}
       />
     </>
   )

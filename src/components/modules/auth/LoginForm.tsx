@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import Link from "next/link"
+import { Link } from "@/i18n/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   ArrowRight,
@@ -14,6 +14,7 @@ import {
   Store,
   type LucideIcon,
 } from "lucide-react"
+import { useTranslations } from "@/i18n/translations"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 
@@ -28,13 +29,14 @@ import { loginUser } from "@/api/auth"
 import { FormError } from "./FormError"
 import { AuthDivider, GoogleButton } from "./GoogleButton"
 
-const DEMO_ICONS: Record<string, LucideIcon> = {
-  Customer: Backpack,
-  Provider: Store,
-  Admin: ShieldCheck,
+const DEMO_ICONS: Record<DemoAccount["label"], LucideIcon> = {
+  customer: Backpack,
+  provider: Store,
+  admin: ShieldCheck,
 }
 
 export function LoginForm({ redirectTo }: { redirectTo?: string }) {
+  const t = useTranslations("auth")
   const [demo, setDemo] = useState<string | null>(null)
   const {
     register,
@@ -49,7 +51,13 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
   })
 
   async function onSubmit(values: LoginInput) {
-    const res = await loginUser(values, redirectTo)
+    // Read now, not via useSearchParams: the form renders outside Suspense
+    // so what people type before hydration is kept.
+    const target =
+      redirectTo ??
+      new URLSearchParams(window.location.search).get("redirectTo") ??
+      undefined
+    const res = await loginUser(values, target)
 
     setError("root", { message: res.message })
     toast.error(res.message)
@@ -69,7 +77,7 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
     <>
       <div className="mt-7 grid gap-5">
         <GoogleButton redirectTo={redirectTo} disabled={isSubmitting} />
-        <AuthDivider label="or log in with email" />
+        <AuthDivider label={t("login.divider")} />
       </div>
 
       <form
@@ -79,10 +87,10 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
       >
         <FormError message={errors.root?.message} />
 
-        <fieldset className="rounded-xl border border-dashed border-foreground/20 bg-card/50 p-3">
+        <fieldset className="rounded-2xl border border-dashed border-foreground/20 bg-card/50 p-3">
           <legend className="flex items-center gap-1.5 px-1 text-xs font-medium text-muted-foreground">
             <Sparkles className="size-3.5 text-ember-strong" aria-hidden />
-            Try a demo account
+            {t("login.demoLegend")}
           </legend>
           <div className="grid grid-cols-3 gap-2">
             {DEMO_ACCOUNTS.map((account) => {
@@ -101,7 +109,7 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
                   )}
                 >
                   <Icon className="size-4" aria-hidden />
-                  {account.label}
+                  {t(`login.demo.${account.label}`)}
                   {selected && (
                     <Check
                       className="absolute top-1 right-1 size-3"
@@ -116,7 +124,7 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
 
         <TextField
           id="email"
-          label="Email"
+          label={t("fields.email")}
           icon={Mail}
           type="email"
           autoComplete="email"
@@ -132,7 +140,7 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
         <div className="grid gap-2">
           <PasswordField
             id="password"
-            label="Password"
+            label={t("fields.password")}
             autoComplete="current-password"
             placeholder="••••••••"
             error={errors.password?.message}
@@ -146,7 +154,7 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
             href="/forgot-password"
             className="justify-self-end text-xs font-medium text-primary underline-offset-4 hover:underline"
           >
-            Forgot password?
+            {t("login.forgot")}
           </Link>
         </div>
 
@@ -160,11 +168,11 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
           {isSubmitting ? (
             <>
               <Loader2 className="size-4 animate-spin" aria-hidden />
-              Logging in…
+              {t("login.submitting")}
             </>
           ) : (
             <>
-              Log in
+              {t("login.submit")}
               <ArrowRight
                 className="size-4 transition-transform group-hover:translate-x-0.5"
                 aria-hidden

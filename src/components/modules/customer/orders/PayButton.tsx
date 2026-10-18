@@ -3,10 +3,11 @@
 import { useTransition } from "react"
 import { toast } from "sonner"
 import { CreditCard, Loader2 } from "lucide-react"
+import { useTranslations } from "@/i18n/translations"
 
 import { createPayment } from "@/api/payments"
 import { Button } from "@/components/ui/button"
-import { formatPrice } from "@/utils/format"
+import { useFormat } from "@/i18n/useFormat"
 
 export function PayButton({
   orderId,
@@ -17,6 +18,8 @@ export function PayButton({
   amount: string
   resume?: boolean
 }) {
+  const t = useTranslations("dashboard.customer.pay")
+  const format = useFormat()
   const [isPending, startTransition] = useTransition()
 
   function pay() {
@@ -24,7 +27,7 @@ export function PayButton({
       const res = await createPayment(orderId)
 
       if (!res.success || !res.data?.paymentUrl) {
-        toast.error(res.message || "Couldn't start checkout. Please try again.")
+        toast.error(res.message || t("failed"))
         return
       }
 
@@ -47,10 +50,10 @@ export function PayButton({
         <CreditCard className="size-4" aria-hidden />
       )}
       {isPending
-        ? "Opening checkout…"
+        ? t("opening")
         : resume
-          ? "Resume payment"
-          : `Pay ${formatPrice(amount)}`}
+          ? t("resume")
+          : t("pay", { amount: format.price(amount) })}
     </Button>
   )
 }

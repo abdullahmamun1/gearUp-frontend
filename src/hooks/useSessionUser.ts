@@ -6,6 +6,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query"
 
 import { logout } from "@/api/auth"
 import { queryFetch } from "@/hooks/queries/fetcher"
+import { useHydrated } from "@/hooks/useHydrated"
 import type { JwtUser } from "@/types"
 
 export const sessionKey = ["session"] as const
@@ -29,7 +30,14 @@ export function useSessionUser() {
     queryClient.invalidateQueries({ queryKey: sessionKey })
   }, [pathname, queryClient])
 
-  return { user: query.data ?? null, isPending: query.isPending }
+  // Until hydration finishes, report "still loading" (what the server
+  // rendered): Suspense sections can hydrate after this query resolves, and
+  // drawing user-specific UI then would not match the server HTML (#418).
+  const hydrated = useHydrated()
+  return {
+    user: hydrated ? (query.data ?? null) : null,
+    isPending: hydrated ? query.isPending : true,
+  }
 }
 
 /** Logs out and clears the cached session so the UI flips at once. */
