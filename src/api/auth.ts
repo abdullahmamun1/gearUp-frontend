@@ -90,6 +90,13 @@ export async function loginUser(
   await setAuthCookies(res.data)
 
   const user = verifyAccessToken(res.data.accessToken)
+  if (!user) {
+    // The proxy will reject this token on every request too, so the visitor
+    // lands signed out. Almost always a secret that differs from the backend.
+    console.error(
+      "Login: the API's access token failed verification. Check that JWT_ACCESS_SECRET (and JWT_REFRESH_SECRET) match the backend exactly."
+    )
+  }
   const home = user ? DASHBOARD_HOME[user.role] : "/"
   const locale = await loginLocale(res.data)
   await setLocaleCookie(locale)
