@@ -290,7 +290,7 @@ The login page has one-click buttons for the first three. Every password is `Pas
 | Provider | provider2@gearup.com |
 | Admin | admin@gearup.com |
 | More providers | provider1@gearup.com … provider4@gearup.com |
-| More customers | customer1@gearup.com … customer5@gearup.com |
+| More customers | customer1@gearup.com … customer12@gearup.com |
 
 ## Scripts
 
