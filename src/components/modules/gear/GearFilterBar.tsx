@@ -16,6 +16,7 @@ import {
   buildGearHref,
   DEFAULT_SORT,
   hasActiveFilters,
+  normalizePrice,
   SORT_OPTIONS,
   type GearFilters,
 } from "@/utils/filters/gear"
@@ -50,42 +51,63 @@ export function GearFilterBar({
     ...brandNames.map((brand) => ({ value: brand, label: brand })),
   ]
 
-  function hrefWith(overrides: Partial<GearFilters> = {}): string {
-    return buildGearHref({
-      ...filters,
+  /** What's typed in the text inputs, as URL values. */
+  function typed() {
+    return {
       searchTerm: searchTerm.trim() || undefined,
-      minPrice: minPrice.trim() || undefined,
-      maxPrice: maxPrice.trim() || undefined,
-      ...overrides,
-      page: 1,
-    })
+      minPrice: normalizePrice(minPrice),
+      maxPrice: normalizePrice(maxPrice),
+    }
+  }
+
+  function hrefWith(overrides: Partial<GearFilters> = {}): string {
+    const values = typed()
+    // Apply swaps a reversed range instead of showing nothing.
+    if (
+      values.minPrice &&
+      values.maxPrice &&
+      Number(values.minPrice) > Number(values.maxPrice)
+    ) {
+      ;[values.minPrice, values.maxPrice] = [values.maxPrice, values.minPrice]
+    }
+    return buildGearHref({ ...filters, ...values, ...overrides, page: 1 })
   }
 
   function apply(overrides: Partial<GearFilters> = {}) {
     startTransition(() => router.push(hrefWith(overrides)))
   }
 
-  const activeSearch = filters.searchTerm ?? ""
+  // Search and prices apply on their own once typing pauses. A range that's
+  // reversed mid-typing (max "1" on the way to "1000") waits for Apply.
   useEffect(() => {
-    const typed = searchTerm.trim()
-    if (typed === activeSearch) return
+    const values = {
+      searchTerm: searchTerm.trim() || undefined,
+      minPrice: normalizePrice(minPrice),
+      maxPrice: normalizePrice(maxPrice),
+    }
+    if (
+      values.searchTerm === filters.searchTerm &&
+      values.minPrice === filters.minPrice &&
+      values.maxPrice === filters.maxPrice
+    ) {
+      return
+    }
+    if (
+      values.minPrice &&
+      values.maxPrice &&
+      Number(values.minPrice) > Number(values.maxPrice)
+    ) {
+      return
+    }
 
     const timer = setTimeout(() => {
       startTransition(() =>
-        router.replace(
-          buildGearHref({
-            ...filters,
-            searchTerm: typed || undefined,
-            minPrice: minPrice.trim() || undefined,
-            maxPrice: maxPrice.trim() || undefined,
-            page: 1,
-          })
-        )
+        router.replace(buildGearHref({ ...filters, ...values, page: 1 }))
       )
     }, SEARCH_DEBOUNCE_MS)
 
     return () => clearTimeout(timer)
-  }, [searchTerm, activeSearch, minPrice, maxPrice, filters, router])
+  }, [searchTerm, minPrice, maxPrice, filters, router])
 
   function clearAll() {
     setSearchTerm("")

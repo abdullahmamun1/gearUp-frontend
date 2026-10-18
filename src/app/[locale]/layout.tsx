@@ -47,7 +47,8 @@ export async function generateMetadata({
     twitter: { card: "summary_large_image" },
     appleWebApp: { capable: true, title: SITE_NAME, statusBarStyle: "default" },
     formatDetection: { telephone: false },
-    icons: { apple: "/icons/apple-touch-icon.png" },
+    // Icons come from the file conventions in src/app: favicon.ico, icon.svg
+    // and apple-icon.png. Setting `icons` here would replace them.
   }
 }
 

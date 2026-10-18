@@ -83,8 +83,9 @@ export function toProviderGearQuery(filters: ProviderGearFilters) {
   }
 }
 
-export function buildProviderGearHref(filters: ProviderGearFilters) {
-  return buildHref(PROVIDER_GEAR_PATH, {
+/** The URL params; `app/api/provider/gear` parses the same ones. */
+function providerGearParams(filters: ProviderGearFilters) {
+  return {
     searchTerm: filters.searchTerm,
     category: filters.category,
     isAvailable:
@@ -92,7 +93,16 @@ export function buildProviderGearHref(filters: ProviderGearFilters) {
     sort:
       filters.sort === DEFAULT_PROVIDER_GEAR_SORT ? undefined : filters.sort,
     page: filters.page,
-  })
+  }
+}
+
+export function buildProviderGearHref(filters: ProviderGearFilters) {
+  return buildHref(PROVIDER_GEAR_PATH, providerGearParams(filters))
+}
+
+/** For TanStack: the route handler re-parses these, so no `sortBy` here. */
+export function providerGearApiHref(filters: ProviderGearFilters) {
+  return buildHref("/api/provider/gear", providerGearParams(filters))
 }
 
 export function hasActiveProviderGearFilters(filters: ProviderGearFilters) {

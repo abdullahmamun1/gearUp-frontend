@@ -85,6 +85,21 @@ export function parseGearFilters(raw: RawSearchParams): GearFilters {
   }
 }
 
+const BENGALI_DIGITS = "০১২৩৪৫৬৭৮৯"
+
+/**
+ * A typed price as the URL wants it: Bengali digits become Latin, and
+ * thousands separators, spaces and "৳"/"BDT" are dropped ("৳১,০০০" → "1000").
+ * Anything that still isn't a number gives undefined.
+ */
+export function normalizePrice(value: string): string | undefined {
+  const latin = value.replace(/[০-৯]/g, (digit) =>
+    String(BENGALI_DIGITS.indexOf(digit))
+  )
+  const cleaned = latin.replace(/[^\d.]/g, "")
+  return DECIMAL.test(cleaned) ? cleaned : undefined
+}
+
 export function toGearQuery(filters: GearFilters): GearQuery {
   const [sortBy, sortOrder] = filters.sort.split(":")
 

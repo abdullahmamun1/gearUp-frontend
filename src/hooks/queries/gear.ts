@@ -3,8 +3,7 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query"
 
 import { queryFetch } from "@/hooks/queries/fetcher"
-import { toGearQuery, type GearFilters } from "@/utils/filters/gear"
-import { toQueryString } from "@/utils/searchParams"
+import { buildGearHref, type GearFilters } from "@/utils/filters/gear"
 import type { GearAvailability, GearItem, Paginated } from "@/types"
 
 export const gearAvailabilityKeys = {
@@ -36,12 +35,11 @@ export function useGearList(
 ) {
   return useQuery({
     queryKey: gearListKeys.list(filters),
+    // The route handler parses the same URL params as the page (`sort`,
+    // `view`, …), so send those rather than the backend's `sortBy`/`sortOrder`,
+    // which its whitelist would drop.
     queryFn: () =>
-      queryFetch<Paginated<GearItem>>(
-        // `view` isn't a backend filter, but the route handler needs it to
-        // fetch a whole map's worth of results instead of one page.
-        `/api/gear?${toQueryString({ ...toGearQuery(filters), view: filters.view })}`
-      ),
+      queryFetch<Paginated<GearItem>>(`/api${buildGearHref(filters)}`),
     initialData,
     placeholderData: keepPreviousData,
     staleTime: 60 * 1000,
