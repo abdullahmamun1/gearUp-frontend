@@ -8,7 +8,9 @@ import {
 import { LocalNumber } from "@/components/shared/LocalNumber"
 import { cn } from "@/lib/utils"
 
-export type Heading = string | { label: string; align: "right" }
+/** `className` hides or sizes a column (e.g. "hidden md:table-cell"). */
+export type Heading =
+  string | { label: string; align?: "right"; className?: string }
 
 export function DataTable({
   headings,
@@ -47,7 +49,12 @@ export function DataTable({
                   <TableHead
                     key={label}
                     className={
-                      typeof heading === "string" ? undefined : "text-right"
+                      typeof heading === "string"
+                        ? undefined
+                        : cn(
+                            heading.align === "right" && "text-right",
+                            heading.className
+                          )
                     }
                   >
                     {label}

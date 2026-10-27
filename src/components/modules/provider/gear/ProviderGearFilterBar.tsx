@@ -101,10 +101,10 @@ export function ProviderGearFilterBar({
       className="mb-6 rounded-2xl border bg-card p-4 shadow-xs"
     >
       {/* One row: search debounces and the selects apply at once. */}
-      <div className="grid items-end gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_12rem_11rem_12rem]">
+      <div className="grid items-end gap-3 sm:grid-cols-3 xl:grid-cols-[1fr_12rem_11rem_12rem]">
         <FilterField
           label={t("search")}
-          className="sm:col-span-2 lg:col-span-1"
+          className="sm:col-span-3 xl:col-span-1"
         >
           <SearchInput
             value={searchTerm}

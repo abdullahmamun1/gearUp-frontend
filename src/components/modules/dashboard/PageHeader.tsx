@@ -61,7 +61,9 @@ export function StatCard({
   const body = (
     <>
       <div className="flex items-start justify-between gap-3">
-        <p className="text-sm font-medium text-muted-foreground">{label}</p>
+        <p className="min-w-0 text-sm font-medium text-muted-foreground">
+          {label}
+        </p>
         {Icon && (
           <span
             className={cn(
@@ -73,7 +75,7 @@ export function StatCard({
           </span>
         )}
       </div>
-      <p className="mt-2 font-heading text-2xl font-bold tracking-tight sm:text-3xl">
+      <p className="mt-2 font-heading text-2xl font-bold tracking-tight [overflow-wrap:anywhere] sm:text-3xl">
         {typeof value === "number" ? <FormattedNumber value={value} /> : value}
       </p>
       {hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}

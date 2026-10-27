@@ -91,8 +91,13 @@ export function MyRentalsList({
             <TableCell>
               <OrderItemsSummary items={order.items ?? []} />
             </TableCell>
-            <TableCell className="whitespace-nowrap">
-              {format.date(order.startDate)} → {format.date(order.endDate)}
+            <TableCell className="min-w-28">
+              <span className="whitespace-nowrap">
+                {format.date(order.startDate)} →
+              </span>{" "}
+              <span className="whitespace-nowrap">
+                {format.date(order.endDate)}
+              </span>
             </TableCell>
             <TableCell>
               <RentalStatusBadge status={order.status} />

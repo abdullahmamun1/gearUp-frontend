@@ -33,6 +33,7 @@ export function PaymentRedirectCard() {
     <CenteredCard
       icon={Loader2}
       busy
+      fullScreen
       title={t("title")}
       description={t("description")}
     />

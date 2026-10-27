@@ -39,9 +39,11 @@ export function RangeBar({
 
   return (
     <div className="mb-6 flex flex-wrap items-center gap-3">
+      {/* One line that scrolls sideways on narrow screens: wrapping split
+          the pill in two. */}
       <nav
         aria-label={t("range.label")}
-        className="inline-flex flex-wrap rounded-full border bg-card p-1 shadow-xs"
+        className="inline-flex max-w-full [scrollbar-width:none] overflow-x-auto rounded-full border bg-card p-1 shadow-xs"
       >
         {presets.map((preset) => {
           const active = same(preset.range, range)
@@ -58,7 +60,7 @@ export function RangeBar({
               aria-current={active ? "page" : undefined}
               scroll={false}
               className={cn(
-                "inline-flex h-8 items-center rounded-full px-3.5 text-sm font-medium transition-colors",
+                "inline-flex h-8 shrink-0 items-center rounded-full px-3.5 text-sm font-medium whitespace-nowrap transition-colors",
                 active
                   ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:text-foreground"
@@ -72,7 +74,8 @@ export function RangeBar({
 
       <form
         className={cn(
-          "flex flex-wrap items-center gap-2 rounded-full border bg-card py-1 pr-1 pl-3 shadow-xs",
+          // A box while the fields may wrap (beside the sidebar too); a pill from xl.
+          "flex w-full flex-wrap items-center gap-2 rounded-2xl border bg-card p-2 shadow-xs xl:w-auto xl:flex-nowrap xl:rounded-full xl:py-1 xl:pr-1 xl:pl-3",
           custom && "border-primary/40"
         )}
         onSubmit={(event) => {
@@ -98,7 +101,7 @@ export function RangeBar({
           value={from}
           max={to || undefined}
           onChange={(event) => setFrom(event.target.value)}
-          className="h-8 w-38 rounded-full"
+          className="h-8 min-w-0 flex-1 rounded-full sm:w-38 sm:flex-none"
         />
         <label className="text-sm text-muted-foreground" htmlFor="range-to">
           {t("range.to")}
@@ -109,7 +112,7 @@ export function RangeBar({
           value={to}
           min={from || undefined}
           onChange={(event) => setTo(event.target.value)}
-          className="h-8 w-38 rounded-full"
+          className="h-8 min-w-0 flex-1 rounded-full sm:w-38 sm:flex-none"
           aria-invalid={invalid || undefined}
         />
         <Button

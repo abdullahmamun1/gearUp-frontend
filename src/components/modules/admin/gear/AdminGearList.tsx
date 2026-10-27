@@ -73,7 +73,10 @@ export function AdminGearList({
             <TableCell>
               {item.provider?.name ?? "—"}
               {item.provider?.email && (
-                <p className="text-xs text-muted-foreground">
+                <p
+                  className="max-w-44 truncate text-xs text-muted-foreground"
+                  title={item.provider.email}
+                >
                   {item.provider.email}
                 </p>
               )}

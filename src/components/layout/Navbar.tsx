@@ -56,8 +56,11 @@ export async function Navbar() {
 
         <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
           <SearchButton compact />
-          <LocaleSwitcher compact />
-          <ThemeToggle />
+          {/* In the mobile menu sheet below sm, so the header fits. */}
+          <div className="hidden items-center gap-2 sm:flex">
+            <LocaleSwitcher compact />
+            <ThemeToggle />
+          </div>
           <AccountArea />
           <MobileNav categories={categories} />
         </div>

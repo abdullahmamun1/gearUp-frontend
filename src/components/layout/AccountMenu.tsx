@@ -5,7 +5,7 @@ import { useTransition } from "react"
 import { Home, LayoutDashboard, LogOut, UserRound } from "lucide-react"
 import { useTranslations } from "@/i18n/translations"
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { UserAvatar } from "@/components/shared/UserAvatar"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -47,16 +47,16 @@ export function AccountMenu({
         render={
           <Button
             variant="ghost"
-            className="h-11 gap-2 rounded-full pr-3 pl-1"
+            className="h-11 gap-2 rounded-full px-1 2xl:pr-3"
             aria-label={t("menu")}
           />
         }
       >
-        <Avatar className="size-8 ring-2 ring-primary/25">
-          <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
-            {initials(user.name)}
-          </AvatarFallback>
-        </Avatar>
+        <UserAvatar
+          name={user.name}
+          avatarUrl={user.avatarUrl}
+          className="size-8 ring-2 ring-primary/25"
+        />
         <span className="hidden text-sm 2xl:inline">{user.name}</span>
       </DropdownMenuTrigger>
 
@@ -103,12 +103,4 @@ export function AccountMenu({
       </DropdownMenuContent>
     </DropdownMenu>
   )
-}
-
-function initials(name: string) {
-  return name
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? "")
-    .join("")
 }

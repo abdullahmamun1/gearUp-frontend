@@ -246,6 +246,8 @@ export async function updatePublicProfile(
     body: payload,
   })
   if (res.success && res.data) {
+    // The avatar is in the access token (navbar and sidebar menus).
+    if (payload.avatarUrl !== undefined) await renewAccessToken()
     revalidateTag("gear", { expire: 0 })
     revalidateTag(`provider:${res.data.id}`, { expire: 0 })
     refresh()

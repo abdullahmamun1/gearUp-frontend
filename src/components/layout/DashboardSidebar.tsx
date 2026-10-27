@@ -6,7 +6,7 @@ import { useTransition } from "react"
 import { ChevronsUpDown, Home, LogOut, Mountain, UserRound } from "lucide-react"
 import { useTranslations } from "@/i18n/translations"
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { UserAvatar } from "@/components/shared/UserAvatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,6 +35,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  useSidebar,
 } from "@/components/ui/sidebar"
 
 import { SIDEBAR_ITEMS } from "@/constants/sidebar"
@@ -47,6 +48,7 @@ export function DashboardSidebar() {
   const pathname = usePathname()
   const { role } = useRequiredSession()
   const items = SIDEBAR_ITEMS[role]
+  const closeOnMobile = useCloseOnMobile()
   const unread = useUnreadMessages()
   const attention = useAdminAttention()
   const badgeFor = (badge: SidebarItem["badge"]) =>
@@ -66,7 +68,7 @@ export function DashboardSidebar() {
             <SidebarMenuButton
               size="lg"
               tooltip="GearUp"
-              render={<Link href="/" />}
+              render={<Link href="/" onClick={closeOnMobile} />}
             >
               <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-(image:--gradient-brand) shadow-glow-primary">
                 <Mountain
@@ -98,7 +100,7 @@ export function DashboardSidebar() {
                     <SidebarMenuButton
                       isActive={isActive(pathname, item.href, items)}
                       tooltip={label}
-                      render={<Link href={item.href} />}
+                      render={<Link href={item.href} onClick={closeOnMobile} />}
                     >
                       <item.icon aria-hidden />
                       <span>{label}</span>
@@ -132,17 +134,24 @@ export function DashboardSidebar() {
   )
 }
 
+/**
+ * On phones the sidebar is a sheet over the page: close it when a link is
+ * followed, or it stays open over the page it just opened.
+ */
+function useCloseOnMobile() {
+  const { isMobile, setOpenMobile } = useSidebar()
+  return () => {
+    if (isMobile) setOpenMobile(false)
+  }
+}
+
 /** The signed-in account, pinned to the bottom of the sidebar. */
 function SidebarAccount() {
   const t = useTranslations("nav.account")
   const user = useRequiredSession()
   const logout = useLogout()
+  const closeOnMobile = useCloseOnMobile()
   const [isPending, startTransition] = useTransition()
-  const initials = user.name
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? "")
-    .join("")
 
   return (
     <SidebarMenu>
@@ -158,11 +167,12 @@ function SidebarAccount() {
               />
             }
           >
-            <Avatar className="size-9 rounded-xl ring-2 ring-primary/20">
-              <AvatarFallback className="rounded-xl bg-primary/10 text-xs font-semibold text-primary">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
+            <UserAvatar
+              name={user.name}
+              avatarUrl={user.avatarUrl}
+              className="size-9 rounded-xl ring-2 ring-primary/20"
+              fallbackClassName="rounded-xl"
+            />
             <span className="grid min-w-0 flex-1 text-left leading-tight">
               <span className="truncate font-semibold">{user.name}</span>
               <span className="truncate text-xs text-muted-foreground">
@@ -180,7 +190,11 @@ function SidebarAccount() {
               </span>
             </div>
             <DropdownMenuSeparator />
-            <DropdownMenuItem render={<Link href={PROFILE_HOME[user.role]} />}>
+            <DropdownMenuItem
+              render={
+                <Link href={PROFILE_HOME[user.role]} onClick={closeOnMobile} />
+              }
+            >
               <UserRound aria-hidden />
               {t("profile")}
             </DropdownMenuItem>

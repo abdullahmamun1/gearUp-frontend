@@ -21,12 +21,14 @@ const TONES = {
  * A single centred card on the brand backdrop: auth and email-link pages.
  * With `illustration`, the card opens with a tinted band showing it;
  * otherwise `icon` sits in a ringed chip. `busy` spins the icon.
+ * `fullScreen` is for pages without the navbar (payment redirects).
  */
 export function CenteredCard({
   icon: Icon,
   illustration,
   tone = "default",
   busy = false,
+  fullScreen = false,
   title,
   description,
   children,
@@ -35,6 +37,7 @@ export function CenteredCard({
   illustration?: React.ReactNode
   tone?: keyof typeof TONES
   busy?: boolean
+  fullScreen?: boolean
   title: string
   description?: React.ReactNode
   children?: React.ReactNode
@@ -54,7 +57,12 @@ export function CenteredCard({
         className="absolute right-1/2 bottom-10 -z-10 size-64 translate-x-[130%] rounded-full bg-ember/15 blur-3xl"
       />
 
-      <div className="mx-auto flex min-h-[calc(100svh-5rem)] max-w-md flex-col justify-center px-4 py-14 sm:py-20">
+      <div
+        className={cn(
+          "mx-auto flex max-w-md flex-col justify-center px-4 py-14 sm:py-20",
+          fullScreen ? "min-h-svh" : "min-h-[calc(100svh-5rem)]"
+        )}
+      >
         <div className="animate-in overflow-hidden rounded-2xl border bg-card/95 shadow-xl backdrop-blur-sm duration-500 fill-mode-backwards fade-in slide-in-from-bottom-4 motion-reduce:animate-none">
           {illustration && (
             <div className={cn("border-b px-10 pt-6", colours.band)}>

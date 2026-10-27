@@ -75,7 +75,7 @@ export function AdminReviewsList({
               review.isHidden && "bg-muted/40"
             )}
           >
-            <TableCell className="max-w-md min-w-64 whitespace-normal">
+            <TableCell className="max-w-md min-w-52 whitespace-normal">
               <Stars rating={review.rating} />
               <p
                 className={cn(
@@ -96,7 +96,10 @@ export function AdminReviewsList({
             <TableCell>
               {review.customer?.name ?? "—"}
               {review.customer?.email && (
-                <p className="text-xs text-muted-foreground">
+                <p
+                  className="max-w-44 truncate text-xs text-muted-foreground"
+                  title={review.customer.email}
+                >
                   {review.customer.email}
                 </p>
               )}

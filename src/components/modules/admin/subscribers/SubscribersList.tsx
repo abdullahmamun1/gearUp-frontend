@@ -45,7 +45,7 @@ export function SubscribersList({
   return (
     <>
       {counts && (
-        <div className="mb-6 grid gap-3 sm:grid-cols-3 sm:gap-4">
+        <div className="mb-6 grid gap-3 sm:gap-4 lg:grid-cols-3">
           <StatCard
             label={t("confirmed")}
             value={format.number(counts.confirmed)}

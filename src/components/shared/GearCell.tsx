@@ -6,9 +6,9 @@ import type { GearItem } from "@/types"
 
 export function GearCell({ item }: { item: GearItem }) {
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex min-w-48 items-center gap-3">
       <GearThumbnail item={item} />
-      <div className="min-w-0">
+      <div className="min-w-0 whitespace-normal">
         <Link
           href={`/gear/${item.id}`}
           className="font-medium transition-colors hover:text-primary"

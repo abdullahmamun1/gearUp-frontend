@@ -42,8 +42,9 @@ export async function AiInsights({ range }: { range: AnalyticsRange }) {
         </span>
       </div>
       <p className="mt-3 text-[15px] text-pretty">{headline}</p>
+      {/* One per row: side by side they came out uneven and cramped. */}
       {insights.length > 0 && (
-        <ul className="mt-4 grid gap-3 md:grid-cols-2">
+        <ul className="mt-4 grid gap-3">
           {insights.map((insight) => {
             const tone = TONE[insight.tone]
             return (
@@ -84,7 +85,7 @@ export function AiInsightsSkeleton() {
         <Skeleton className="h-5 w-32" />
       </div>
       <Skeleton className="mt-4 h-4 w-3/4" />
-      <div className="mt-4 grid gap-3 md:grid-cols-2">
+      <div className="mt-4 grid gap-3">
         <Skeleton className="h-16 rounded-xl" />
         <Skeleton className="h-16 rounded-xl" />
       </div>

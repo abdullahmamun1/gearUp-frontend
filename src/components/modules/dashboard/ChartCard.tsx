@@ -47,10 +47,13 @@ export function ChartCard({
               <caption className="sr-only">{title}</caption>
               <thead>
                 <tr className="border-b text-muted-foreground">
-                  <th scope="col" className="py-1.5 text-left font-medium">
+                  <th scope="col" className="py-1.5 pr-3 text-left font-medium">
                     {columns[0]}
                   </th>
-                  <th scope="col" className="py-1.5 text-right font-medium">
+                  <th
+                    scope="col"
+                    className="py-1.5 text-right font-medium whitespace-nowrap"
+                  >
                     {columns[1]}
                   </th>
                 </tr>

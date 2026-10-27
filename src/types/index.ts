@@ -71,6 +71,8 @@ export interface JwtUser {
   name: string
   email: string
   role: Role
+  /** Tokens issued before avatars joined the payload don't carry it. */
+  avatarUrl?: string | null
   iat: number
   exp: number
 }

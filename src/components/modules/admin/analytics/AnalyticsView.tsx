@@ -7,19 +7,26 @@ import { Banknote, PackageCheck, Receipt, UserPlus } from "lucide-react"
 import { BarChartPanel } from "@/components/modules/dashboard/BarChartPanel"
 import { ChartCard } from "@/components/modules/dashboard/ChartCard"
 import { StatCard } from "@/components/modules/dashboard/PageHeader"
+import { cityKey } from "@/constants/cities"
 import type { AdminAnalytics } from "@/types"
 import type { Format } from "@/i18n/format"
 
 import { RevenueChart } from "./RevenueChart"
 
 export async function AnalyticsView({ data }: { data: AdminAnalytics }) {
-  const [t, tCharts, tStatus, tUnits, format] = await Promise.all([
+  const [t, tCharts, tStatus, tUnits, tCity, format] = await Promise.all([
     getTranslations("admin.analytics"),
     getTranslations("admin.charts"),
     getTranslations("common.rentalStatusShort"),
     getTranslations("common.units"),
+    getTranslations("common.city"),
     getDashboardFormat(),
   ])
+  // Stored city names are English; known ones have a translated label.
+  const byCity = data.rentalsByCity.map((row) => {
+    const key = cityKey(row.city)
+    return { label: key ? tCity(key) : row.city, value: row.count }
+  })
   const { totals } = data
   const byStatus = data.ordersByStatus.map((row) => ({
     label: tStatus(row.status),
@@ -75,7 +82,7 @@ export async function AnalyticsView({ data }: { data: AdminAnalytics }) {
           columns={[tCharts("month"), tCharts("net")]}
           series={{
             data: data.revenueByMonth.map((row) => ({
-              label: row.month,
+              label: format.month(row.month),
               value: row.net,
             })),
             failed: false,
@@ -103,25 +110,15 @@ export async function AnalyticsView({ data }: { data: AdminAnalytics }) {
           title={t("byCityTitle")}
           description={t("byCityDescription")}
           columns={[tCharts("city"), tCharts("orders")]}
-          series={{
-            data: data.rentalsByCity.map((row) => ({
-              label: row.city,
-              value: row.count,
-            })),
-            failed: false,
-          }}
+          series={{ data: byCity, failed: false }}
         >
-          <BarChartPanel
-            data={data.rentalsByCity.map((row) => ({
-              label: row.city,
-              value: row.count,
-            }))}
-            measure={tCharts("measureOrders")}
-          />
+          <BarChartPanel data={byCity} measure={tCharts("measureOrders")} />
         </ChartCard>
       </div>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-2">
+      {/* Side by side only from xl: beside the sidebar at lg the prices
+          ran out of the cards. */}
+      <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
         <Leaderboard
           title={t("topCategories")}
           description={t("byRevenue")}
@@ -227,10 +224,10 @@ function Leaderboard({
                     {row.name}
                   </span>
                 )}
-                <span className="text-xs text-muted-foreground tabular-nums">
+                <span className="shrink-0 text-xs whitespace-nowrap text-muted-foreground tabular-nums">
                   {ordersLabel(row.orders)}
                 </span>
-                <span className="w-24 text-right font-medium tabular-nums">
+                <span className="min-w-24 shrink-0 text-right font-medium whitespace-nowrap tabular-nums">
                   {format.price(row.revenue)}
                 </span>
               </div>

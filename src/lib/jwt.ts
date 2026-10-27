@@ -26,7 +26,7 @@ export function verifyAccessToken(token: string): JwtUser | null {
   const result = jwtUtils.verifyToken(token, secret)
   if (!result.success) return null
 
-  const { id, name, email, role, iat, exp } = result.data
+  const { id, name, email, role, avatarUrl, iat, exp } = result.data
   if (
     typeof id !== "string" ||
     typeof name !== "string" ||
@@ -36,5 +36,13 @@ export function verifyAccessToken(token: string): JwtUser | null {
     return null
   }
 
-  return { id, name, email, role: role as Role, iat: iat ?? 0, exp: exp ?? 0 }
+  return {
+    id,
+    name,
+    email,
+    role: role as Role,
+    avatarUrl: typeof avatarUrl === "string" ? avatarUrl : null,
+    iat: iat ?? 0,
+    exp: exp ?? 0,
+  }
 }

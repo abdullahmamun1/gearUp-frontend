@@ -33,7 +33,8 @@ export function CategoriesList({
   const format = useFormat()
   const headings = [
     t("headingName"),
-    t("headingDescription"),
+    // On phones the description moves under the name, so the row fits.
+    { label: t("headingDescription"), className: "hidden md:table-cell" },
     { label: t("headingListings"), align: "right" },
     { label: t("headingActions"), align: "right" },
   ] as const
@@ -82,8 +83,16 @@ export function CategoriesList({
 
           return (
             <TableRow key={category.id} className="hover:bg-transparent">
-              <TableCell className="font-medium">{category.name}</TableCell>
-              <TableCell className="max-w-md text-muted-foreground">
+              <TableCell className="font-medium whitespace-normal">
+                {category.name}
+                {category.description && (
+                  <span className="mt-0.5 block text-xs font-normal text-muted-foreground md:hidden">
+                    {category.description}
+                  </span>
+                )}
+              </TableCell>
+              {/* Wraps instead of pushing Listings and Actions off the table. */}
+              <TableCell className="hidden w-full min-w-56 whitespace-normal text-muted-foreground md:table-cell">
                 {category.description || "—"}
               </TableCell>
               <TableCell className="text-right tabular-nums">

@@ -96,11 +96,14 @@ export function ProviderOrdersList({
               </TableCell>
               <TableCell>
                 {order.customer?.name ?? "—"}
-                <p className="text-xs text-muted-foreground">
+                <p
+                  className="max-w-44 truncate text-xs text-muted-foreground"
+                  title={order.customer?.email}
+                >
                   {order.customer?.email}
                 </p>
               </TableCell>
-              <TableCell>
+              <TableCell className="min-w-40 whitespace-normal">
                 {first}
                 {extra > 0 && (
                   <span className="text-muted-foreground">
@@ -108,8 +111,13 @@ export function ProviderOrdersList({
                     {t("more", { count: format.number(extra) })}
                   </span>
                 )}
-                <p className="text-xs whitespace-nowrap text-muted-foreground">
-                  {format.date(order.startDate)} → {format.date(order.endDate)}
+                <p className="text-xs text-muted-foreground">
+                  <span className="whitespace-nowrap">
+                    {format.date(order.startDate)} →
+                  </span>{" "}
+                  <span className="whitespace-nowrap">
+                    {format.date(order.endDate)}
+                  </span>
                 </p>
               </TableCell>
               <TableCell>

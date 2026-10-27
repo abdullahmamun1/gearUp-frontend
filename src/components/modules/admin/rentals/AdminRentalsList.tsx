@@ -75,15 +75,23 @@ export function AdminRentalsList({
               </TableCell>
               <TableCell>
                 {order.customer?.name ?? "—"}
-                <p className="text-xs text-muted-foreground">
+                <p
+                  className="max-w-44 truncate text-xs text-muted-foreground"
+                  title={order.customer?.email}
+                >
                   {order.customer?.email}
                 </p>
               </TableCell>
               <TableCell>
                 <OrderItemsSummary items={order.items ?? []} />
               </TableCell>
-              <TableCell className="whitespace-nowrap">
-                {format.date(order.startDate)} → {format.date(order.endDate)}
+              <TableCell className="min-w-28">
+                <span className="whitespace-nowrap">
+                  {format.date(order.startDate)} →
+                </span>{" "}
+                <span className="whitespace-nowrap">
+                  {format.date(order.endDate)}
+                </span>
               </TableCell>
               <TableCell>
                 <RentalStatusBadge status={order.status} />
